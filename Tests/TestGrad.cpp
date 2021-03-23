@@ -2,7 +2,7 @@
 #include <catch.hpp>
 #include <sstream>
 
-#include "HamEvol.hpp"
+#include "Operators/operators.hpp"
 #include "Circuit.hpp"
 #include "Variable.hpp"
 
@@ -12,7 +12,7 @@
 #include "EDP/ConstructSparseMat.hpp"
 
 template<typename RandomEngine>
-void test_commuting(const uint32_t N, const int depth, 
+void test_commuting(const uint32_t N, const uint32_t depth, 
 		Eigen::SparseMatrix<double> op, RandomEngine& re)
 {
 	using namespace qunn;
@@ -21,7 +21,7 @@ void test_commuting(const uint32_t N, const int depth,
 	std::uniform_real_distribution<> urd(-M_PI, M_PI);
 	std::vector<int> indices;
 
-	for(int n = 0; n < N; n++)
+	for(uint32_t n = 0; n < N; n++)
 	{
 		indices.push_back(n);
 	}
@@ -109,8 +109,8 @@ std::pair<uint32_t, uint32_t> random_connection(const int N, RandomEngine& re)
 
 TEST_CASE("Test grad for two-qubit paulis", "[two-qubit-pauli]") {
 	using namespace qunn;
-	const int N = 8;
-	const int depth = 20;
+	const uint32_t N = 8;
+	const uint32_t depth = 20;
 
 	std::random_device rd;
 	std::default_random_engine re{0};
@@ -184,7 +184,7 @@ TEST_CASE("Test grad for two-qubit paulis", "[two-qubit-pauli]") {
 }
 
 std::pair<qunn::Circuit, std::vector<qunn::Variable>>
-qaoa_shared_var(const uint32_t N, const int depth)
+qaoa_shared_var(const uint32_t N, const uint32_t depth)
 {
 	using namespace qunn;
 	Circuit circ{N};

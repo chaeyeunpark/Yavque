@@ -6,7 +6,7 @@
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
-#include "HamEvol.hpp"
+#include "Operators/operators.hpp"
 
 #include "common.hpp"
 
@@ -31,9 +31,9 @@ TEST_CASE("Test single qubit Hamiltonian", "[one-site]") {
 
 	{
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
-		for(int i = 0; i < N; i++)
+		for(uint32_t i = 0; i < N; i++)
 		{
-			ham_ct.addOneSiteTerm(i, pauli_x());
+			ham_ct.addOneSiteTerm(i, qunn::pauli_x());
 		}
 
 		auto ham = qunn::Hamiltonian(
@@ -48,7 +48,8 @@ TEST_CASE("Test single qubit Hamiltonian", "[one-site]") {
 			var = t;
 			VectorXcd out_test = hamEvol*ini;
 
-			VectorXcd p = (cos(t)*MatrixXcd::Identity(2,2) - I*sin(t)*pauli_x())*VectorXcd::Ones(2);
+			VectorXcd p = (cos(t)*MatrixXcd::Identity(2,2) 
+					- I*sin(t)*qunn::pauli_x())*VectorXcd::Ones(2);
 			p /= sqrt(2);
 
 			VectorXcd out = product_state(N,p);
@@ -58,9 +59,9 @@ TEST_CASE("Test single qubit Hamiltonian", "[one-site]") {
 	}
 	{
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
-		for(int i = 0; i < N; i++)
+		for(uint32_t i = 0; i < N; i++)
 		{
-			ham_ct.addOneSiteTerm(i, pauli_z());
+			ham_ct.addOneSiteTerm(i, qunn::pauli_z());
 		}
 
 		auto ham = qunn::Hamiltonian(edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct));
@@ -73,7 +74,8 @@ TEST_CASE("Test single qubit Hamiltonian", "[one-site]") {
 			var = t;
 			VectorXcd out_test = hamEvol*ini;
 
-			VectorXcd p = (cos(t)*MatrixXcd::Identity(2,2) - I*sin(t)*pauli_z())*VectorXcd::Ones(2);
+			VectorXcd p = (cos(t)*MatrixXcd::Identity(2,2) 
+					- I*sin(t)*qunn::pauli_z())*VectorXcd::Ones(2);
 			p /= sqrt(2);
 
 			VectorXcd out = product_state(N,p);
@@ -103,9 +105,9 @@ TEST_CASE("Test basic operations", "[basic]") {
 	constexpr qunn::cx_double I(0.,1.);
 
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
-	for(int i = 0; i < N; i++)
+	for(uint32_t i = 0; i < N; i++)
 	{
-		ham_ct.addOneSiteTerm(i, pauli_x());
+		ham_ct.addOneSiteTerm(i, qunn::pauli_x());
 	}
 
 	auto ham = qunn::Hamiltonian(

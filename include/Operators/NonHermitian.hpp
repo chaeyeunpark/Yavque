@@ -1,7 +1,7 @@
 #pragma once
 #include <Eigen/Sparse>
 
-#include "Operator.hpp"
+#include "Operators/Operator.hpp"
 
 namespace qunn
 {

@@ -1,8 +1,10 @@
-#pragma once
+#include "Operators/utils.hpp"
+
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
-#include <unsupported/Eigen/KroneckerProduct>
 
+namespace qunn
+{
 Eigen::SparseMatrix<double> pauli_x()
 {
 	std::vector<Eigen::Triplet<double>> t{{1, 0, 1.0}, {0, 1, 1.0}};
@@ -62,14 +64,4 @@ Eigen::SparseMatrix<double> pauli_zz()
 	res.makeCompressed();
 	return res;
 }
-
-Eigen::VectorXcd product_state(uint32_t n, const Eigen::VectorXcd& s)
-{
-	Eigen::VectorXcd res(1);
-	res(0) = 1.0;
-	for(uint32_t i = 0; i < n ; i++)
-	{
-		res = Eigen::kroneckerProduct(res,s).eval();
-	}
-	return res;
-}
+}// namespace qunn

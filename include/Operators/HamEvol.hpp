@@ -4,12 +4,13 @@
 #include <Eigen/Sparse>
 #include <Eigen/Eigenvalues> 
 
-#include "Operator.hpp"
 #include "Variable.hpp"
 #include "utility.hpp"
 #include "Univerate.hpp"
-#include "Hamiltonian.hpp"
-#include "NonHermitian.hpp"
+
+#include "Operators/Operator.hpp"
+#include "Operators/Hamiltonian.hpp"
+#include "Operators/NonHermitian.hpp"
 
 namespace qunn
 {

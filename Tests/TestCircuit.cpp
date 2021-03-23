@@ -2,7 +2,7 @@
 #include <catch.hpp>
 
 #include "common.hpp"
-#include "HamEvol.hpp"
+#include "Operators/operators.hpp"
 #include "Circuit.hpp"
 
 #include "EDP/LocalHamiltonian.hpp"
@@ -138,17 +138,17 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]") {
 		for(uint32_t j = i+1; j < N; j++)
 		{
 			ham_ct.clearTerms();
-			ham_ct.addTwoSiteTerm({i, j}, pauli_xx());
+			ham_ct.addTwoSiteTerm({i, j}, qunn::pauli_xx());
 			hams.emplace_back(qunn::Hamiltonian(
 						edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct)));
 
 			ham_ct.clearTerms();
-			ham_ct.addTwoSiteTerm({i, j}, pauli_yy());
+			ham_ct.addTwoSiteTerm({i, j}, qunn::pauli_yy());
 			hams.emplace_back(qunn::Hamiltonian(
 						edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct)));
 
 			ham_ct.clearTerms();
-			ham_ct.addTwoSiteTerm({i, j}, pauli_zz());
+			ham_ct.addTwoSiteTerm({i, j}, qunn::pauli_zz());
 			hams.emplace_back(qunn::Hamiltonian(
 						edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct)));
 		}
@@ -190,24 +190,24 @@ TEST_CASE("Test QAOA XX layers", "[qaoa-layer]") {
 
 
 	SECTION( "test XX even layer" ) {
-		test_twoqubit(N, re, pauli_xx(), false);
+		test_twoqubit(N, re, qunn::pauli_xx(), false);
 	}
 	SECTION( "test XX odd layer" ) {
-		test_twoqubit(N, re, pauli_xx(), true);
+		test_twoqubit(N, re, qunn::pauli_xx(), true);
 	}
 
 	SECTION( "test YY even layer" ) {
-		test_twoqubit(N, re, pauli_yy(), false);
+		test_twoqubit(N, re, qunn::pauli_yy(), false);
 	}
 	SECTION( "test YY odd layer" ) {
-		test_twoqubit(N, re, pauli_yy(), true);
+		test_twoqubit(N, re, qunn::pauli_yy(), true);
 	}
 
 	SECTION( "test ZZ even layer" ) {
-		test_twoqubit(N, re, pauli_zz(), false);
+		test_twoqubit(N, re, qunn::pauli_zz(), false);
 	}
 	SECTION( "test ZZ odd layer" ) {
-		test_twoqubit(N, re, pauli_zz(), true);
+		test_twoqubit(N, re, qunn::pauli_zz(), true);
 	}
 }
 
@@ -218,13 +218,13 @@ TEST_CASE("Test QAOA XX+YY layers", "[qaoa-layer]") {
 	std::default_random_engine re{rd()};
 	std::normal_distribution<> nd;
 
-
+	SparseMatrix<double> m = qunn::pauli_xx() + qunn::pauli_yy();
 	SECTION( "test XX+YY even layer" ) {
-		test_twoqubit(N, re, pauli_xx_yy(), false);
+		test_twoqubit(N, re, m, false);
 	}
 
-	SECTION( "test XX+YY even layer" ) {
-		test_twoqubit(N, re, pauli_xx_yy(), true);
+	SECTION( "test XX+YY odd layer" ) {
+		test_twoqubit(N, re, m, true);
 	}
 }
 

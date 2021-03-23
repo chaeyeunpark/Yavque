@@ -1,5 +1,5 @@
 #include "Circuit.hpp"
-#include "Operator.hpp"
+#include "Operators/operators.hpp"
 #include "Variable.hpp"
 #include "Univerate.hpp"
 
