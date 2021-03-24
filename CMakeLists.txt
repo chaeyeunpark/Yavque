@@ -35,16 +35,17 @@ endif()
 ## Setup MKL
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	include_directories("$ENV{MKLROOT}/include")
-	link_libraries(mkl_intel_lp64 mkl_gnu_thread mkl_core gomp pthread m dl)
+	link_libraries(mkl_intel_lp64 mkl_tbb_thread mkl_core tbb pthread m dl)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	include_directories("$ENV{MKLROOT}/include")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-local-typedefs")
-	link_libraries(mkl_intel_lp64 mkl_gnu_thread mkl_core gomp pthread m dl)
+	link_libraries(mkl_intel_lp64 mkl_tbb_thread mkl_core tbb pthread m dl)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mkl=parallel")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mkl=parallel -tbb")
 	include_directories("$ENV{MKLROOT}/include")
-	link_libraries(iomp5 pthread m dl)
+	link_libraries(tbb stdc++ pthread m dl)
 endif()
+
 
 add_library(qunn STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" "src/utility.cpp" "src/Operators/utils.cpp")
 target_link_libraries(qunn Eigen3::Eigen)
@@ -76,5 +77,8 @@ add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
 	DEPENDS TestHamEvol TestCircuit TestGrad)
 
 
-add_executable(TFI "examples/TFI.cpp")
-target_link_libraries(TFI qunn Eigen3::Eigen)
+add_executable(qaoa_tfi "examples/qaoa_tfi.cpp")
+target_link_libraries(qaoa_tfi qunn Eigen3::Eigen)
+
+add_executable(ti_tfi "examples/ti_tfi.cpp")
+target_link_libraries(ti_tfi qunn Eigen3::Eigen)

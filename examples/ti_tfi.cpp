@@ -2,78 +2,80 @@
 #include <iostream>
 #include <cmath>
 
+#include <stdlib.h>
+
+
+#include <tbb/global_control.h>
+
+
+#include "Basis/TIBasis.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 #include "EDP/LocalHamiltonian.hpp"
+
+#include "Hamiltonians/TITFIsing.hpp"
 
 #include "Circuit.hpp"
 
 #include "Operators/operators.hpp"
 #include "Optimizers/OptimizerFactory.hpp"
 
-Eigen::SparseMatrix<double> zz_even(const uint32_t N)
+template<typename Basis>
+Eigen::SparseMatrix<double> ti_zz(const uint32_t N, Basis&& basis)
 {
-    edp::LocalHamiltonian<double> ham_ct(N, 2);
-    for(uint32_t k = 0; k < N; k += 2)
-    {
-        ham_ct.addTwoSiteTerm(std::make_pair(k, (k+1) % N), qunn::pauli_zz());
-    }
-    return edp::constructSparseMat<double>(1 << N, ham_ct);
+	TITFIsing<uint32_t> tfi(basis, -1.0, 0.0);
+    return edp::constructSparseMat<double>(basis.getDim(), [&tfi](uint32_t n){ return tfi.getCol(n); });
 }
 
-Eigen::SparseMatrix<double> zz_odd(const uint32_t N)
+template<typename Basis>
+Eigen::SparseMatrix<double> ti_x_all(const uint32_t N, Basis&& basis)
 {
-    edp::LocalHamiltonian<double> ham_ct(N, 2);
-    for(uint32_t k = 1; k < N; k += 2)
-    {
-        ham_ct.addTwoSiteTerm(std::make_pair(k, (k+1) % N), qunn::pauli_zz());
-    }
-    return edp::constructSparseMat<double>(1 << N, ham_ct);
+	TITFIsing<uint32_t> tfi(basis, 0.0, -1.0);
+    return edp::constructSparseMat<double>(basis.getDim(), [&tfi](uint32_t n){ return tfi.getCol(n); });
 }
 
-Eigen::SparseMatrix<double> x_all(const uint32_t N)
+template<typename Basis>
+Eigen::SparseMatrix<double> tfi_ham(const uint32_t N, double h, Basis&& basis)
 {
-    edp::LocalHamiltonian<double> ham_ct(N, 2);
-    for(uint32_t k = 0; k < N; ++k)
-    {
-        ham_ct.addOneSiteTerm(k, qunn::pauli_x());
-    }
-    return edp::constructSparseMat<double>(1 << N, ham_ct);
+	TITFIsing<uint32_t> tfi(basis, 1.0, h);
+    return edp::constructSparseMat<double>(basis.getDim(), [&tfi](uint32_t n){ return tfi.getCol(n); });
 }
 
-Eigen::SparseMatrix<double> tfi_ham(const uint32_t N, double h)
+int get_num_threads()
 {
-    edp::LocalHamiltonian<double> ham_ct(N, 2);
-    for(uint32_t k = 0; k < N; ++k)
-    {
-        ham_ct.addTwoSiteTerm(std::make_pair(k, (k+1) % N), qunn::pauli_zz());
-        ham_ct.addOneSiteTerm(k, h*qunn::pauli_x());
-    }
-    return -edp::constructSparseMat<double>(1 << N, ham_ct);
+	const char* p = getenv("TBB_NUM_THREADS");
+	if(!p)
+		return tbb::this_task_arena::max_concurrency();
+	return atoi(p);
 }
 
 int main()
 {
     using namespace qunn;
     using std::sqrt;
-    const uint32_t N = 8;
+    const uint32_t N = 14;
     const uint32_t depth = 6;
     const double sigma = 1.0e-2;
 	const double learning_rate = 1.0e-2;
 
+	const int num_threads = get_num_threads();
+	std::cerr << "Processing using " << num_threads << " threads." << std::endl;
+	tbb::global_control c(tbb::global_control::max_allowed_parallelism, 
+			num_threads);
+
     std::random_device rd;
     std::default_random_engine re{rd()};
 
-    Circuit circ(1 << N);
+	TIBasis<uint32_t> basis(N, 0, false);
 
-    qunn::Hamiltonian ham_zz_even(zz_even(N).cast<cx_double>());
-    qunn::Hamiltonian ham_zz_odd(zz_odd(N).cast<cx_double>());
-    qunn::Hamiltonian ham_x_all(x_all(N).cast<cx_double>());
+    Circuit circ(basis.getDim());
+
+    qunn::Hamiltonian ham_ti_zz(ti_zz(N, basis).cast<cx_double>());
+    qunn::Hamiltonian ham_x_all(ti_x_all(N, basis).cast<cx_double>());
 
 
     for(uint32_t p = 0; p < depth; ++p)
     {
-        circ.add_op_right(std::make_unique<HamEvol>(ham_zz_even));
-        circ.add_op_right(std::make_unique<HamEvol>(ham_zz_odd));
+        circ.add_op_right(std::make_unique<HamEvol>(ham_ti_zz));
         circ.add_op_right(std::make_unique<HamEvol>(ham_x_all));
     }
 
@@ -85,9 +87,15 @@ int main()
         p = ndist(re);
     }
 
-    Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(1 << N);
-    ini /= sqrt(1 << N);
-    const auto ham = tfi_ham(N, 1.5);
+    Eigen::VectorXcd ini(basis.getDim());
+	for(uint32_t k = 0; k < basis.getDim(); ++k)
+	{
+		ini(k) = sqrt(basis.rotRpt(k))/sqrt(1<<N);
+	}
+
+	std::cout << ini.norm() << std::endl;
+
+    const auto ham = tfi_ham(N, 0.5, basis);
 
 	/*
 	Spectra::SparseSymMatProd<double> prod(ham);
@@ -117,7 +125,7 @@ int main()
 
         circ.derivs();
 
-        Eigen::MatrixXcd grads(1 << N, parameters.size());
+        Eigen::MatrixXcd grads(basis.getDim(), parameters.size());
 
         for(uint32_t k = 0; k < parameters.size(); ++k)
         {
