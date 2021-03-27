@@ -59,6 +59,20 @@ add_test(
 	COMMAND TestHamEvol
 )
 
+add_executable(TestDiagonalHamEvol "Tests/TestDiagonalHamEvol.cpp")
+target_link_libraries(TestDiagonalHamEvol qunn Eigen3::Eigen)
+add_test(
+	NAME TestDiagonalHamEvol
+	COMMAND TestDiagonalHamEvol
+)
+
+add_executable(TestProductHamEvol "Tests/TestProductHamEvol.cpp")
+target_link_libraries(TestProductHamEvol qunn Eigen3::Eigen)
+add_test(
+	NAME TestProductHamEvol
+	COMMAND TestProductHamEvol
+)
+
 add_executable(TestCircuit "Tests/TestCircuit.cpp")
 target_link_libraries(TestCircuit qunn Eigen3::Eigen)
 add_test(
@@ -74,7 +88,8 @@ add_test(
 )
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
-	DEPENDS TestHamEvol TestCircuit TestGrad)
+	DEPENDS TestCircuit TestHamEvol TestDiagonalHamEvol TestProductHamEvol 
+	TestGrad)
 
 
 add_executable(qaoa_tfi "examples/qaoa_tfi.cpp")
@@ -82,3 +97,6 @@ target_link_libraries(qaoa_tfi qunn Eigen3::Eigen)
 
 add_executable(ti_tfi "examples/ti_tfi.cpp")
 target_link_libraries(ti_tfi qunn Eigen3::Eigen)
+
+add_executable(diagonal_product_tfi "examples/diagonal_product_tfi.cpp")
+target_link_libraries(diagonal_product_tfi qunn Eigen3::Eigen)

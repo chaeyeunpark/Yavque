@@ -24,7 +24,11 @@ public:
 	Variable(Variable&& rhs) = default;
 
 	Variable& operator=(const Variable& ) = delete;
-	Variable& operator=(Variable&& ) = delete;
+	Variable& operator=(Variable&& rhs)
+	{
+		p_ = std::move(rhs.p_);
+		return *this;
+	}
 	
 	Variable()
 		: p_{std::make_shared<VariableImpl>(0.0)}
@@ -41,7 +45,7 @@ public:
 	{
 	}
 
-	void change_to(Variable rhs)
+	void change_to(const Variable& rhs)
 	{
 		p_ = rhs.p_;
 	}

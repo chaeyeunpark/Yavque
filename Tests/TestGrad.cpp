@@ -72,7 +72,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 	}
 }
 
-TEST_CASE("Test gradient of cummuting circuit", "[commuting]") {
+TEST_CASE("test gradient of cummuting circuit", "[commuting]") {
 	using namespace qunn;
 	const int N = 8;
 	const int depth = 20;
@@ -89,25 +89,10 @@ TEST_CASE("Test gradient of cummuting circuit", "[commuting]") {
 	SECTION("test zz commuting circuit") {
 		test_commuting(N, depth, pauli_zz(), re);
 	}// end section
-
 }
 
-template<typename RandomEngine>
-std::pair<uint32_t, uint32_t> random_connection(const int N, RandomEngine& re)
-{
-	std::uniform_int_distribution<uint32_t> uid1(0, N-1);
-	std::uniform_int_distribution<uint32_t> uid2(0, N-2);
 
-	auto r1 = uid1(re);
-	auto r2 = uid2(re);
-
-	if(r2 < r1)
-		return std::make_pair(r1, r2);
-	else
-		return std::make_pair(r1, r2+1);
-}
-
-TEST_CASE("Test grad for two-qubit paulis", "[two-qubit-pauli]") {
+TEST_CASE("test grad for two-qubit paulis", "[two-qubit-pauli]") {
 	using namespace qunn;
 	const uint32_t N = 8;
 	const uint32_t depth = 20;
@@ -190,116 +175,150 @@ qaoa_shared_var(const uint32_t N, const uint32_t depth)
 	Circuit circ{N};
 	std::vector<Variable> variables(3*depth);
 
+	std::vector<qunn::Hamiltonian> ham_zzs;
+
+	for(uint32_t i = 0; i < N; ++i)
+	{
+		edp::LocalHamiltonian<double> ham_ct(N, 2);
+		ham_ct.addTwoSiteTerm(std::make_pair(i, (i+1)%N), pauli_zz());
+		
+		std::ostringstream ss;
+		ss << "zz between " << i << " and " << (i+1)%N;
+
+		ham_zzs.emplace_back(
+			edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+			ss.str());
+	}
+
+	std::vector<qunn::Hamiltonian> ham_xs;
+
+	for(uint32_t i = 0; i < N; ++i)
+	{
+		edp::LocalHamiltonian<double> ham_ct(N, 2);
+		ham_ct.addOneSiteTerm(i, pauli_x());
+		
+		std::ostringstream ss;
+		ss << "x on " << i;
+
+		ham_xs.emplace_back(
+			edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+			ss.str());
+	}
+
+
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		for(uint32_t i = 0; i < N; i += 2)
-		{
-			edp::LocalHamiltonian<double> ham_ct(N, 2);
-			ham_ct.addTwoSiteTerm(std::make_pair(i, (i+1)%N), pauli_zz());
-			
-			std::ostringstream ss;
-			ss << "zz between " << i << " and " << (i+1)%N;
+		for(uint32_t i = 0; i < N; i += 2) //add zz even
+			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_zzs[i], variables[3*p]));
 
-			auto ham = qunn::Hamiltonian(
-				edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
-				ss.str());
+		for(uint32_t i = 1; i < N; i += 2) //add zz odd
+			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_zzs[i], variables[3*p+1]));
 
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham, variables[3*p]));
-		}
-		for(uint32_t i = 1; i < N; i += 2)
-		{
-			edp::LocalHamiltonian<double> ham_ct(N, 2);
-			ham_ct.addTwoSiteTerm(std::make_pair(i, (i+1)%N), pauli_zz());
-			
-			std::ostringstream ss;
-			ss << "zz between " << i << " and " << (i+1)%N;
-
-			auto ham = qunn::Hamiltonian(
-					edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
-					ss.str());
-
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham, variables[3*p+1]));
-		}
 		for(uint32_t i = 0; i < N; ++i)
-		{
-			edp::LocalHamiltonian<double> ham_ct(N, 2);
-			ham_ct.addOneSiteTerm(i, pauli_x());
-			
-			std::ostringstream ss;
-			ss << "x on " << i;
-
-			auto ham = qunn::Hamiltonian(
-					edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
-					ss.str());
-
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham, variables[3*p+2]));
-		}
+			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_xs[i], variables[3*p+2]));
 	}
 
 	return std::make_pair(std::move(circ), variables);
 }
 
-qunn::Circuit qaoa_sum_ham(const uint32_t N, const int depth)
+qunn::Circuit qaoa_sum_ham(const uint32_t N, const uint32_t depth)
 {
 	using namespace qunn;
 	Circuit circ{N};
 
+	edp::LocalHamiltonian<double> ham_ct(N, 2);
+	ham_ct.clearTerms();
+	for(uint32_t i = 0; i < N; i += 2)
+	{
+		ham_ct.addTwoSiteTerm(std::make_pair(i, (i+1)%N), pauli_zz());
+	}
+	std::ostringstream ss;
+	ss << "zz even";
+	auto ham_zz_even = qunn::Hamiltonian(
+		edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+		ss.str());
+
+	ham_ct.clearTerms();
+	for(uint32_t i = 1; i < N; i += 2)
+	{
+		ham_ct.addTwoSiteTerm(std::make_pair(i, (i+1)%N), pauli_zz());
+	}
+	ss.clear();
+	ss << "zz odd";
+	auto ham_zz_odd = qunn::Hamiltonian(
+			edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+			ss.str());
+
+	ham_ct.clearTerms();
+	for(uint32_t i = 0; i < N; ++i)
+	{
+		ham_ct.addOneSiteTerm(i, pauli_x());
+	}
+	ss.clear();
+	ss << "x all";
+
+	auto ham_x_all = qunn::Hamiltonian(
+		edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+		ss.str());
+
+
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		edp::LocalHamiltonian<double> ham_ct(N, 2);
-		ham_ct.clearTerms();
-		for(uint32_t i = 0; i < N; i += 2)
-		{
-			ham_ct.addTwoSiteTerm(std::make_pair(i, (i+1)%N), pauli_zz());
-		}
-		{
-			std::ostringstream ss;
-			ss << "zz even";
-
-			auto ham = qunn::Hamiltonian(
-					edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
-					ss.str());
-
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham));
-		}
-
-		ham_ct.clearTerms();
-		for(uint32_t i = 1; i < N; i += 2)
-		{
-			ham_ct.addTwoSiteTerm(std::make_pair(i, (i+1)%N), pauli_zz());
-		}
-		{
-			std::ostringstream ss;
-			ss << "zz odd";
-
-			auto ham = qunn::Hamiltonian(
-					edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
-					ss.str());
-
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham));
-		}
-
-		ham_ct.clearTerms();
-		for(uint32_t i = 0; i < N; ++i)
-		{
-			ham_ct.addOneSiteTerm(i, pauli_x());
-		}
-		{
-			std::ostringstream ss;
-			ss << "x all";
-
-			auto ham = qunn::Hamiltonian(
-				edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
-				ss.str());
-
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham));
-		}
+		circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_zz_even));
+		circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_zz_odd));
+		circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_x_all));
 	}
 	
 	return circ;
 }
 
-TEST_CASE("Test grad for qaoa for TFI", "[qaoa]") {
+qunn::Circuit qaoa_diag_prod_ham(const uint32_t N, const uint32_t depth)
+{
+	using namespace qunn;
+	Circuit circ{1u<<N};
+
+	Eigen::VectorXd zz_even(1<<N);
+	Eigen::VectorXd zz_odd(1<<N);
+	
+	for(uint32_t n = 0; n < (1u<<N); ++n)
+	{
+		int elt = 0;
+		for(uint32_t k = 0; k < N; k += 2)
+		{
+			int z0 = 1-2*((n >> k) & 1);
+			int z1 = 1-2*((n >> ((k+1)%N)) & 1);
+			elt += z0*z1;
+		}
+		zz_even(n) = elt;
+	}
+	
+	for(uint32_t n = 0; n < (1u<<N); ++n)
+	{
+		int elt = 0;
+		for(uint32_t k = 1; k < N; k += 2)
+		{
+			int z0 = 1-2*((n >> k) & 1);
+			int z1 = 1-2*((n >> ((k+1)%N)) & 1);
+			elt += z0*z1;
+		}
+		zz_odd(n) = elt;
+	}
+
+	auto zz_even_ham = qunn::DiagonalOperator(zz_even, "zz even");
+	auto zz_odd_ham = qunn::DiagonalOperator(zz_odd, "zz odd");
+	auto x_all_ham = qunn::SumLocalHam(N, qunn::pauli_x().cast<cx_double>());
+
+	for(uint32_t p = 0; p < depth; ++p)
+	{
+		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_even_ham));
+		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_odd_ham));
+		circ.add_op_right(std::make_unique<qunn::ProductHamEvol>(x_all_ham));
+	}
+	
+	return circ;
+}
+
+TEST_CASE("test grad for qaoa for TFI", "[qaoa]") {
 	using namespace qunn;
 	const int N = 8;
 	const int depth = 10;
@@ -319,6 +338,7 @@ TEST_CASE("Test grad for qaoa for TFI", "[qaoa]") {
 
 		auto [circ1, variables1] = qaoa_shared_var(N, depth);
 		auto circ2 = qaoa_sum_ham(N, depth);
+		auto circ3 = qaoa_diag_prod_ham(N, depth);
 
 		Eigen::VectorXcd v(1<<N);
 		v.setRandom();
@@ -326,11 +346,13 @@ TEST_CASE("Test grad for qaoa for TFI", "[qaoa]") {
 
 		circ1.set_input(v);
 		circ2.set_input(v);
+		circ3.set_input(v);
 
 		for(uint32_t k = 0; k < 3*depth; ++k)
 		{
 			variables1[k] = param_values[k];
 			circ2.parameters()[k] = param_values[k];
+			circ3.parameters()[k] = param_values[k];
 		}
 
 		circ1.evaluate();
@@ -339,12 +361,17 @@ TEST_CASE("Test grad for qaoa for TFI", "[qaoa]") {
 		circ2.evaluate();
 		circ2.derivs();
 
+		circ3.evaluate();
+		circ3.derivs();
+
 		for(uint32_t k = 0; k < 3*depth; ++k)
 		{
 			auto grad1 = *variables1[k].grad();
 			auto grad2 = *circ2.parameters()[k].grad();
+			auto grad3 = *circ3.parameters()[k].grad();
 
 			REQUIRE((grad1 - grad2).norm() < 1e-6);
+			REQUIRE((grad2 - grad3).norm() < 1e-6);
 		}
 
 	}

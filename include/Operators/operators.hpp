@@ -1,8 +1,15 @@
 #pragma once
 
-#include "Operators/Operator.hpp"
-#include "Operators/NonHermitian.hpp"
-#include "Operators/Hamiltonian.hpp"
-#include "Operators/HamEvol.hpp"
-#include "Operators/utils.hpp"
+#include "Operator.hpp"
+
+#include "Hamiltonian.hpp"
+#include "HamEvol.hpp"
+
+#include "DiagonalOperator.hpp"
+#include "DiagonalHamEvol.hpp"
+
+#include "SumLocalHam.hpp"
+#include "ProductHamEvol.hpp"
+
+#include "utils.hpp"
 

@@ -5,7 +5,8 @@
 
 namespace qunn
 {
-
+namespace detail
+{
 class HamiltonianImpl
 {
 private:
@@ -85,32 +86,40 @@ public:
 		return evals_;
 	}
 };
+} //namespace detail
 
 class Hamiltonian final
 	: public Operator
 {
 private:
-	std::shared_ptr<HamiltonianImpl> p_;
+	std::shared_ptr<const detail::HamiltonianImpl> p_;
+	cx_double constant_ = 1.0;
 
 public:
 	explicit Hamiltonian(const Eigen::SparseMatrix<cx_double>& ham, std::string name_)
-		: Operator(ham.rows(), name_), p_{std::make_shared<HamiltonianImpl>(ham)}
+		: Operator(ham.rows(), name_), p_{std::make_shared<detail::HamiltonianImpl>(ham)}
 	{
 		assert(ham.rows() == ham.cols()); //check diagonal
 	}
 
 	explicit Hamiltonian(const Eigen::SparseMatrix<cx_double>& ham)
-		: Operator(ham.rows()), p_{std::make_shared<HamiltonianImpl>(ham)}
+		: Operator(ham.rows()), p_{std::make_shared<detail::HamiltonianImpl>(ham)}
 	{
 		assert(ham.rows() == ham.cols()); //check diagonal
 	}
 
-	explicit Hamiltonian(std::shared_ptr<HamiltonianImpl> p) 
+	explicit Hamiltonian(std::shared_ptr<const detail::HamiltonianImpl> p) 
 		: Operator(p->get_ham().rows()), p_{p}
 	{
 	}
 
-	std::shared_ptr<HamiltonianImpl> get_impl() const
+	explicit Hamiltonian(std::shared_ptr<const detail::HamiltonianImpl> p,
+			std::string name, cx_double constant = 1.0) 
+		: Operator(p->get_ham().rows(), std::move(name)), p_{p}, constant_{constant}
+	{
+	}
+
+	std::shared_ptr<const detail::HamiltonianImpl> get_impl() const
 	{
 		return p_;
 	}
@@ -124,18 +133,18 @@ public:
 	std::unique_ptr<Operator> clone() const override
 	{
 		auto copied = std::make_unique<Hamiltonian>(*this);
-		copied->set_name(name() + " copied");
+		copied->set_name("clone of " + name());
 		return copied;
 	}
 
 	Eigen::SparseMatrix<cx_double> get_ham()  const
 	{
-		return p_->get_ham();
+		return constant_*p_->get_ham();
 	}
 
 	Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
-		return p_->apply_right(st);
+		return constant_*p_->apply_right(st);
 	}
 
 	const Eigen::MatrixXcd& evecs() const
@@ -155,7 +164,7 @@ public:
 
 	void dagger_in_place_impl() override
 	{
-		//do nothing as Hamiltonian is Hermitian
+		constant_ = std::conj(constant_);
 	}
 };
 

@@ -16,8 +16,6 @@ using std::exp;
 
 using Catch::Matchers::Floating::WithinAbsMatcher;
 
-
-
 VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini, 
 		const std::vector<qunn::Hamiltonian>& pauli_strs,
 		const std::vector<uint32_t>& confs,
@@ -41,7 +39,7 @@ VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini,
 	return *circuit.output();
 }
 
-VectorXcd eval_using_ham(const uint32_t N, VectorXcd ini, 
+VectorXcd eval_using_ham(VectorXcd ini, 
 		const std::vector<qunn::Hamiltonian>& pauli_strs,
 		const std::vector<uint32_t>& confs,
 		const std::vector<double>& ts)
@@ -128,7 +126,6 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]") {
 	std::default_random_engine re{rd()};
 	std::normal_distribution<> nd;
 
-
 	std::vector<qunn::Hamiltonian> hams;
 
 	//Add xx
@@ -173,7 +170,7 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]") {
 			ini.normalize();
 
 			auto res1 = eval_using_circuit(N, ini, hams, confs, ts);
-			auto res2 = eval_using_ham(N, ini, hams, confs, ts);
+			auto res2 = eval_using_ham(ini, hams, confs, ts);
 
 			REQUIRE_THAT( (res1 - res2).norm(),
 					WithinAbsMatcher( 0., 1e-6 ));

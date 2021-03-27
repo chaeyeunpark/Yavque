@@ -27,9 +27,9 @@ public:
 		return var_;
 	}
 
-	void set_parameter(Variable var)
+	void change_parameter(Variable var)
 	{
-		var_.change_to(var);
+		var_ = std::move(var);
 	}
 
 	virtual std::unique_ptr<Operator> log_deriv() const = 0;
