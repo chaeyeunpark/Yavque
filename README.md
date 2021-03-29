@@ -1,2 +1,2 @@
 # Yavque
-Yet another variational quantum library
+Yet another variational quantum (eigensolver) library. Hope to be documented soon...
