@@ -47,7 +47,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 endif()
 
 
-add_library(qunn STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" "src/utility.cpp" "src/Operators/utils.cpp")
+add_library(qunn STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" "src/Operators/utils.cpp")
 target_link_libraries(qunn Eigen3::Eigen)
 
 
