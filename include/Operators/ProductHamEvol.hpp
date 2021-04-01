@@ -6,7 +6,7 @@
 
 #include "Variable.hpp"
 #include "utility.hpp"
-#include "Univerate.hpp"
+#include "Univariate.hpp"
 
 #include "Operators/Operator.hpp"
 #include "Operators/SumLocalHam.hpp"
