@@ -44,7 +44,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 endif()
 
 
-add_library(qunn STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" "src/Operators/utils.cpp")
+add_library(qunn STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" "src/Operators/SumPauliString.cpp" "src/Utilities/pauli_operators.cpp")
 target_link_libraries(qunn Eigen3::Eigen)
 
 
@@ -70,6 +70,20 @@ add_test(
 	COMMAND TestProductHamEvol
 )
 
+add_executable(TestSumPauliString "Tests/TestSumPauliString.cpp")
+target_link_libraries(TestSumPauliString qunn Eigen3::Eigen)
+add_test(
+	NAME TestSumPauliString
+	COMMAND TestSumPauliString
+)
+
+add_executable(TestSumPauliStringHamEvol "Tests/TestSumPauliStringHamEvol.cpp")
+target_link_libraries(TestSumPauliStringHamEvol qunn Eigen3::Eigen)
+add_test(
+	NAME TestSumPauliStringHamEvol
+	COMMAND TestSumPauliStringHamEvol
+)
+
 add_executable(TestCircuit "Tests/TestCircuit.cpp")
 target_link_libraries(TestCircuit qunn Eigen3::Eigen)
 add_test(
@@ -86,7 +100,7 @@ add_test(
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
 	DEPENDS TestCircuit TestHamEvol TestDiagonalHamEvol TestProductHamEvol 
-	TestGrad)
+	TestSumPauliString TestSumPauliStringHamEvol TestGrad)
 
 
 add_executable(qaoa_tfi "examples/qaoa_tfi.cpp")
@@ -97,3 +111,6 @@ target_link_libraries(ti_tfi qunn Eigen3::Eigen)
 
 add_executable(diagonal_product_tfi "examples/diagonal_product_tfi.cpp")
 target_link_libraries(diagonal_product_tfi qunn Eigen3::Eigen)
+
+add_executable(qaoa_cluster "examples/qaoa_cluster.cpp")
+target_link_libraries(qaoa_cluster qunn Eigen3::Eigen)

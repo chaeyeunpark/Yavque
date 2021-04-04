@@ -1,8 +1,8 @@
 #include "Circuit.hpp"
-#include "Operators/operators.hpp"
 #include "Variable.hpp"
 #include "Univariate.hpp"
 
+#include "operators.hpp"
 
 namespace qunn
 {

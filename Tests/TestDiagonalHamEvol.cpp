@@ -8,7 +8,7 @@
 #include "EDP/ConstructSparseMat.hpp"
 
 #include "Operators/DiagonalHamEvol.hpp"
-#include "utils.hpp"
+#include "utilities.hpp"
 
 #include "common.hpp"
 

@@ -5,8 +5,8 @@
 #include <Eigen/Eigenvalues> 
 
 #include "Variable.hpp"
-#include "utility.hpp"
 #include "Univariate.hpp"
+#include "utilities.hpp"
 
 #include "Operators/Operator.hpp"
 #include "Operators/Hamiltonian.hpp"

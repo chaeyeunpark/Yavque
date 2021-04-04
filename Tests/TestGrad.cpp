@@ -2,7 +2,7 @@
 #include <catch.hpp>
 #include <sstream>
 
-#include "Operators/operators.hpp"
+#include "operators.hpp"
 #include "Circuit.hpp"
 #include "Variable.hpp"
 

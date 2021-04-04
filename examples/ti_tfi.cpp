@@ -3,10 +3,7 @@
 #include <cmath>
 
 #include <stdlib.h>
-
-
 #include <tbb/global_control.h>
-
 
 #include "Basis/TIBasis.hpp"
 #include "EDP/ConstructSparseMat.hpp"
@@ -16,25 +13,25 @@
 
 #include "Circuit.hpp"
 
-#include "Operators/operators.hpp"
+#include "operators.hpp"
 #include "Optimizers/OptimizerFactory.hpp"
 
 template<typename Basis>
-Eigen::SparseMatrix<double> ti_zz(const uint32_t N, Basis&& basis)
+Eigen::SparseMatrix<double> ti_zz(Basis&& basis)
 {
 	TITFIsing<uint32_t> tfi(basis, -1.0, 0.0);
     return edp::constructSparseMat<double>(basis.getDim(), [&tfi](uint32_t n){ return tfi.getCol(n); });
 }
 
 template<typename Basis>
-Eigen::SparseMatrix<double> ti_x_all(const uint32_t N, Basis&& basis)
+Eigen::SparseMatrix<double> ti_x_all(Basis&& basis)
 {
 	TITFIsing<uint32_t> tfi(basis, 0.0, -1.0);
     return edp::constructSparseMat<double>(basis.getDim(), [&tfi](uint32_t n){ return tfi.getCol(n); });
 }
 
 template<typename Basis>
-Eigen::SparseMatrix<double> tfi_ham(const uint32_t N, double h, Basis&& basis)
+Eigen::SparseMatrix<double> tfi_ham(double h, Basis&& basis)
 {
 	TITFIsing<uint32_t> tfi(basis, 1.0, h);
     return edp::constructSparseMat<double>(basis.getDim(), [&tfi](uint32_t n){ return tfi.getCol(n); });
@@ -69,8 +66,8 @@ int main()
 
     Circuit circ(basis.getDim());
 
-    qunn::Hamiltonian ham_ti_zz(ti_zz(N, basis).cast<cx_double>());
-    qunn::Hamiltonian ham_x_all(ti_x_all(N, basis).cast<cx_double>());
+    qunn::Hamiltonian ham_ti_zz(ti_zz(basis).cast<cx_double>());
+    qunn::Hamiltonian ham_x_all(ti_x_all(basis).cast<cx_double>());
 
 
     for(uint32_t p = 0; p < depth; ++p)
@@ -95,7 +92,7 @@ int main()
 
 	std::cout << ini.norm() << std::endl;
 
-    const auto ham = tfi_ham(N, 0.5, basis);
+    const auto ham = tfi_ham(0.5, basis);
 
 	/*
 	Spectra::SparseSymMatProd<double> prod(ham);

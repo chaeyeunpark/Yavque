@@ -7,7 +7,6 @@
 #include <Eigen/Eigenvalues> 
 
 #include "BitOperations.h"
-#include "utility.hpp"
 #include "Variable.hpp"
 
 #include "Counter.hpp"

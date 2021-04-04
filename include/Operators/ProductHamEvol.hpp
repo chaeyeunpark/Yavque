@@ -5,7 +5,7 @@
 #include <Eigen/Eigenvalues> 
 
 #include "Variable.hpp"
-#include "utility.hpp"
+#include "utilities.hpp"
 #include "Univariate.hpp"
 
 #include "Operators/Operator.hpp"

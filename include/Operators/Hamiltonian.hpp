@@ -1,6 +1,6 @@
 #pragma once
 
-#include "utility.hpp"
+#include "utilities.hpp"
 #include "Operators/Operator.hpp"
 
 namespace qunn

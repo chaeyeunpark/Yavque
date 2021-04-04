@@ -3,7 +3,7 @@
 #include <EDP/LocalHamiltonian.hpp>
 #include <EDP/ConstructSparseMat.hpp>
 
-#include "utility.hpp"
+#include "utilities.hpp"
 #include "Operators/Operator.hpp"
 
 namespace qunn

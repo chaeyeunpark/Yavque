@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
 
-#include "utility.hpp"
+#include "utilities.hpp"
 Eigen::VectorXcd product_state(uint32_t n, const Eigen::VectorXcd& s)
 {
 	Eigen::VectorXcd res(1);

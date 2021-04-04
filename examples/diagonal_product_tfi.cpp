@@ -7,7 +7,7 @@
 
 #include "Circuit.hpp"
 
-#include "Operators/operators.hpp"
+#include "operators.hpp"
 #include "Optimizers/OptimizerFactory.hpp"
 
 Eigen::SparseMatrix<double> tfi_ham(const uint32_t N, double h)

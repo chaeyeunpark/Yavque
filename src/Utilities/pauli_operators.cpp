@@ -1,4 +1,4 @@
-#include "Operators/utils.hpp"
+#include "Utilities/pauli_operators.hpp"
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -9,6 +9,14 @@ Eigen::SparseMatrix<double> pauli_x()
 {
 	std::vector<Eigen::Triplet<double>> t{{1, 0, 1.0}, {0, 1, 1.0}};
 	Eigen::SparseMatrix<double> res(2,2);
+	res.setFromTriplets(t.begin(), t.end());
+	return res;
+}
+Eigen::SparseMatrix<cx_double> pauli_y()
+{
+	constexpr cx_double I(0., 1.);
+	std::vector<Eigen::Triplet<cx_double>> t{{1, 0, I}, {0, 1, -I}};
+	Eigen::SparseMatrix<cx_double> res(2,2);
 	res.setFromTriplets(t.begin(), t.end());
 	return res;
 }

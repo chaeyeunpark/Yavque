@@ -2,7 +2,7 @@
 #include <catch.hpp>
 
 #include "common.hpp"
-#include "Operators/operators.hpp"
+#include "operators.hpp"
 #include "Circuit.hpp"
 
 #include "EDP/LocalHamiltonian.hpp"

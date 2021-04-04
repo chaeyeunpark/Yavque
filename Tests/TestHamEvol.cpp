@@ -6,8 +6,8 @@
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
-#include "Operators/operators.hpp"
-#include "utils.hpp"
+#include "Operators/HamEvol.hpp"
+#include "utilities.hpp"
 
 #include "common.hpp"
 

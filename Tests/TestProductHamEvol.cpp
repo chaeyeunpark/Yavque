@@ -7,8 +7,7 @@
 #include "EDP/ConstructSparseMat.hpp"
 
 #include "Operators/ProductHamEvol.hpp"
-#include "Operators/utils.hpp"
-#include "utils.hpp"
+#include "utilities.hpp"
 
 #include "common.hpp"
 

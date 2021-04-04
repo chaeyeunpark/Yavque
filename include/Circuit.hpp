@@ -5,8 +5,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/Eigenvalues> 
 
-#include "Operators/operators.hpp"
-#include "utils.hpp"
+#include "operators.hpp"
 
 namespace qunn
 {

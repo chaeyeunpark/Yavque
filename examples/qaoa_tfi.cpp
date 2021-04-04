@@ -7,7 +7,7 @@
 
 #include "Circuit.hpp"
 
-#include "Operators/operators.hpp"
+#include "operators.hpp"
 #include "Optimizers/OptimizerFactory.hpp"
 
 Eigen::SparseMatrix<double> zz_even(const uint32_t N)
