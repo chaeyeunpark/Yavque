@@ -1,5 +1,6 @@
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
+#include <tbb/tbb.h>
 
 #include "common.hpp"
 #include "operators.hpp"
@@ -15,6 +16,8 @@ using std::sin;
 using std::exp;
 
 using Catch::Matchers::Floating::WithinAbsMatcher;
+
+tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
 
 VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini, 
 		const std::vector<qunn::Hamiltonian>& pauli_strs,

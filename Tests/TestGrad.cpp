@@ -2,6 +2,8 @@
 #include <catch.hpp>
 #include <sstream>
 
+#include <tbb/tbb.h>
+
 #include "operators.hpp"
 #include "Circuit.hpp"
 #include "Variable.hpp"
@@ -10,6 +12,8 @@
 
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
+
+tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 1);
 
 template<typename RandomEngine>
 void test_commuting(const uint32_t N, const uint32_t depth, 
