@@ -160,6 +160,19 @@ public:
 
 		Eigen::VectorXcd p = (t*evals_.array()).exp();
 		Eigen::MatrixXcd exp_mat = evecs_*p.asDiagonal()*evecs_.adjoint();
+
+		if(indices.size() == 1)
+		{
+			return apply_single_qubit(vec, exp_mat, indices[0]);
+		}
+		if(indices.size() == 2)
+		{
+			return apply_two_qubit(vec, exp_mat, {indices[0], indices[1]});
+		}
+		if(indices.size() == 3)
+		{
+			return apply_three_qubit(vec, exp_mat, {indices[0], indices[1], indices[2]});
+		}
 		
 		for(uint32_t k = 0; k < vec.size(); ++k)
 		{
