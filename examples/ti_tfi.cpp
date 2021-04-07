@@ -53,6 +53,7 @@ int main()
     const uint32_t depth = 6;
     const double sigma = 1.0e-2;
 	const double learning_rate = 1.0e-2;
+	const double h = 0.5;
 
 	const int num_threads = get_num_threads();
 	std::cerr << "Processing using " << num_threads << " threads." << std::endl;
@@ -92,7 +93,7 @@ int main()
 
 	std::cout << ini.norm() << std::endl;
 
-    const auto ham = tfi_ham(0.5, basis);
+    const auto ham = tfi_ham(h, basis);
 
 	/*
 	Spectra::SparseSymMatProd<double> prod(ham);
@@ -107,7 +108,7 @@ int main()
 	*/
 
 	auto optimizer = OptimizerFactory::getInstance().createOptimizer(
-			nlohmann::json{{"name", "Adam"}, {"alpha", 2e-3}});
+			nlohmann::json{{"name", "SGD"}, {"alpha", learning_rate}});
 
     circ.set_input(ini);
 
@@ -137,8 +138,7 @@ int main()
 
         std::cout << energy << "\t" << egrad.norm() << "\t" << output.norm() << std::endl;
 
-		//Eigen::VectorXd opt = optimizer->getUpdate(egrad);
-		Eigen::VectorXd opt = -learning_rate*fisher.inverse()*egrad;
+		Eigen::VectorXd opt = optimizer->getUpdate(egrad);
 
         for(uint32_t k = 0; k < parameters.size(); ++k)
         {
