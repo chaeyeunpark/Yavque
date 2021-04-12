@@ -80,7 +80,7 @@ protected:
 	virtual void dagger_in_place_impl() = 0;
 
 public:
-	~Operator() {}
+	virtual ~Operator() {}
 };
 
 
