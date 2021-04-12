@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	const uint32_t total_epochs = 10;
 	const double h = 0.5;
 
-	const uint32_t N = 18;
+	const uint32_t N = 12;
 	const uint32_t depth = 5;
 	const double sigma = 0.001;
 	const double learning_rate = 0.01;

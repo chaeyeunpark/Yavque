@@ -27,7 +27,7 @@ Eigen::VectorXcd apply_single_qubit(const Eigen::VectorXcd& vec,
 {
 	Eigen::VectorXcd res(vec.size());
 
-	if(vec.size() > (1u<<14))
+	if(vec.size() > (1u<<11))
 	{
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, vec.size()),
 			[&](const tbb::blocked_range<std::size_t>& r)
@@ -61,7 +61,7 @@ Eigen::VectorXcd apply_two_qubit(const Eigen::VectorXcd& vec,
 	using detail::set;
 	using detail::unset;
 	Eigen::VectorXcd res(vec.size());
-	if(vec.size() > (1u<<14))
+	if(vec.size() > (1u<<11))
 	{
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, vec.size()),
 			[&](const tbb::blocked_range<std::size_t>& r)
@@ -102,7 +102,7 @@ Eigen::VectorXcd apply_three_qubit(const Eigen::VectorXcd& vec,
 	using detail::unset;
 	Eigen::VectorXcd res(vec.size());
 
-	if(vec.size() > (1u<<14))
+	if(vec.size() > (1u<<11))
 	{
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, vec.size()),
 			[&](const tbb::blocked_range<std::size_t>& r)

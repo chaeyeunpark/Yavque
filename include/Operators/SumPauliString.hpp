@@ -2,193 +2,20 @@
 
 #include <set>
 #include <Eigen/Eigenvalues>
-#include <unsupported/Eigen/KroneckerProduct>
 
 #include "utilities.hpp"
 
 #include "Operators/Operator.hpp"
+#include "Operators/CompressedPauliString.hpp"
 
 namespace qunn
 {
-enum class Pauli: char {X='X', Y='Y', Z='Z'};
 
 namespace detail
 {
 
 bool commute(const std::map<uint32_t, Pauli>& p1, const std::map<uint32_t, Pauli>& p2);
 std::string extract_pauli_string(const std::map<uint32_t, Pauli>& pmap);
-
-class CompressedPauliString
-{
-private:
-	const std::vector<Pauli> pstring_;
-	Eigen::MatrixXcd mat_;
-	mutable bool diagonalized_ = false;
-	mutable Eigen::MatrixXcd evecs_;
-	mutable Eigen::MatrixXcd evals_;
-
-	std::vector<Pauli> construct_pauli(const std::string& str)
-	{
-		std::vector<Pauli> res;
-		for(auto c: str)
-		{
-			res.emplace_back(Pauli(c));
-		}
-		return res;
-	}
-
-	Eigen::MatrixXcd get_pauli(Pauli p) const
-	{
-		switch(p)
-		{
-		case Pauli::X:
-			return pauli_x().cast<cx_double>();
-		case Pauli::Y:
-			return pauli_y();
-		case Pauli::Z:
-			return pauli_z().cast<cx_double>();
-		}
-		__builtin_unreachable();
-		return Eigen::MatrixXcd();
-	}
-
-	void diagonalize() const
-	{
-		if(!diagonalized_)
-		{
-			Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(mat_);
-			evecs_ = es.eigenvectors();
-			evals_ = es.eigenvalues();
-			diagonalized_ = true;
-		}
-	}
-
-	static uint32_t change_bits(const std::vector<uint32_t>& indices, 
-			uint32_t bitstring, uint32_t bits_to_change)
-	{
-		for(uint32_t n = 0; n <  indices.size(); ++n)
-		{
-			uint32_t b = (bits_to_change >> n) & 1;
-			bitstring = (bitstring & (~(1 << indices[n]))) | (b << indices[n]);
-		}
-		return bitstring;
-	}
-
-	static uint32_t bits(const std::vector<uint32_t>& indices, 
-			uint32_t bitstring)
-	{
-		uint32_t b = 0u;
-
-		for(uint32_t k = 0; k < indices.size(); ++k)
-		{
-			b |= ((bitstring >> indices[k]) & 1) << k;
-		}
-		return b;
-	}
-
-	void construct_matrix()
-	{
-		mat_ = Eigen::MatrixXcd::Ones(1,1);
-		for(auto iter = pstring_.rbegin(); iter != pstring_.rend(); ++iter)
-		{
-			mat_ = Eigen::KroneckerProduct(mat_, get_pauli(*iter)).eval();
-		}
-	}
-	
-public:
-	explicit CompressedPauliString(const std::string& str)
-		: pstring_{construct_pauli(str)}
-	{
-		construct_matrix();
-	}
-
-	explicit CompressedPauliString(const std::vector<Pauli>& pvec)
-		: pstring_{pvec}
-	{
-		construct_matrix();
-	}
-
-	Pauli at(uint32_t idx) const
-	{
-		return pstring_[idx];
-	}
-
-	Eigen::VectorXcd apply(const std::vector<uint32_t>& indices, 
-			const Eigen::VectorXcd& vec) const
-	{
-		assert(pstring_.size() == indices.size());
-		uint32_t dim = 1u << pstring_.size();
-		Eigen::VectorXcd res = Eigen::VectorXcd::Zero(vec.size());
-
-		if(indices.size() == 1)
-		{
-			return apply_single_qubit(vec, mat_, indices[0]);
-		}
-		if(indices.size() == 2)
-		{
-			return apply_two_qubit(vec, mat_, {indices[0], indices[1]});
-		}
-		if(indices.size() == 3)
-		{
-			return apply_three_qubit(vec, mat_, {indices[0], indices[1], indices[2]});
-		}
-		
-		for(uint32_t k = 0; k < vec.size(); ++k)
-		{
-			cx_double v = 0.0;
-			uint32_t row = bits(indices, k);
-			for(uint32_t col = 0; col < dim; ++col)
-			{
-				uint32_t l = change_bits(indices, k, col);
-				v += mat_(row, col) * vec(l);
-			}
-			res(k) = v;
-		}
-		return res;
-	}
-
-	/* return exp(t*P) applied to indices */
-	Eigen::VectorXcd apply_exp(cx_double t, const std::vector<uint32_t>& indices, 
-			const Eigen::VectorXcd& vec) const
-	{
-		assert(pstring_.size() == indices.size());
-		uint32_t dim = 1u << pstring_.size();
-		Eigen::VectorXcd res = Eigen::VectorXcd::Zero(vec.size());
-
-		if(!diagonalized_)
-			diagonalize();
-
-		Eigen::VectorXcd p = (t*evals_.array()).exp();
-		Eigen::MatrixXcd exp_mat = evecs_*p.asDiagonal()*evecs_.adjoint();
-
-		if(indices.size() == 1)
-		{
-			return apply_single_qubit(vec, exp_mat, indices[0]);
-		}
-		if(indices.size() == 2)
-		{
-			return apply_two_qubit(vec, exp_mat, {indices[0], indices[1]});
-		}
-		if(indices.size() == 3)
-		{
-			return apply_three_qubit(vec, exp_mat, {indices[0], indices[1], indices[2]});
-		}
-		
-		for(uint32_t k = 0; k < vec.size(); ++k)
-		{
-			cx_double v = 0.0;
-			uint32_t row = bits(indices, k);
-			for(uint32_t col = 0; col < dim; ++col)
-			{
-				uint32_t l = change_bits(indices, k, col);
-				v += exp_mat(row, col) * vec(l);
-			}
-			res(k) = v;
-		}
-		return res;
-	}
-};
-
 
 class SumPauliStringImpl
 {
@@ -198,17 +25,15 @@ public:
 private:
 	const uint32_t num_qubits_;
 	std::vector<PauliString> pauli_strings_;
-	mutable std::map<std::string, CompressedPauliString> unique_strings_;
-	mutable std::size_t updated_to_ = 0;
+	mutable std::vector<std::shared_ptr<detail::CompressedPauliString> > cps_;
 
-	void update_unique_strings() const
+	void update_cps() const
 	{
-		for(std::size_t idx = updated_to_; idx < pauli_strings_.size(); ++idx)
+		for(std::size_t n = cps_.size(); n < pauli_strings_.size(); ++n)
 		{
-			std::string pstr = extract_pauli_string(pauli_strings_[idx]);
-			unique_strings_.try_emplace(pstr, CompressedPauliString(pstr));
+			cps_.emplace_back(CPSFactory::get_instance().get_pauli_string_for(
+					extract_pauli_string(pauli_strings_[n])));
 		}
-		updated_to_ = pauli_strings_.size();
 	}
 
 public:
@@ -264,16 +89,18 @@ public:
 	Eigen::VectorXcd apply(const Eigen::VectorXcd& vec) const
 	{
 		assert(vec.size() == (1u << num_qubits_));
-		if(updated_to_ != pauli_strings_.size())
-			update_unique_strings();
+
+		if(cps_.size() < pauli_strings_.size())
+			update_cps();
+
 		Eigen::VectorXcd res = Eigen::VectorXcd::Zero(vec.size());
-		for(const auto& pauli_string: pauli_strings_)
+		for(std::size_t n = 0; n < pauli_strings_.size(); ++n)
 		{
-			auto iter = unique_strings_.find(extract_pauli_string(pauli_string));
+			const auto& pauli_string = pauli_strings_[n];
 			std::vector<uint32_t> indices;
 			std::transform(pauli_string.cbegin(), pauli_string.cend(), 
 					std::back_inserter(indices), [](const auto& p){ return p.first; });
-			res += (iter->second).apply(indices, vec);
+			res += cps_[n]->apply(indices, vec);
 		}
 		return res;
 	}
@@ -284,16 +111,18 @@ public:
 	Eigen::VectorXcd apply_exp(cx_double t, const Eigen::VectorXcd& vec) const
 	{
 		assert(vec.size() == (1u << num_qubits_));
-		if(updated_to_ != pauli_strings_.size())
-			update_unique_strings();
+
+		if(cps_.size() < pauli_strings_.size())
+			update_cps();
+
 		Eigen::VectorXcd res = vec;
-		for(const auto& pauli_string: pauli_strings_)
+		for(std::size_t n = 0; n < pauli_strings_.size(); ++n)
 		{
-			auto iter = unique_strings_.find(extract_pauli_string(pauli_string));
+			const auto& pauli_string = pauli_strings_[n];
 			std::vector<uint32_t> indices;
 			std::transform(pauli_string.cbegin(), pauli_string.cend(), 
 					std::back_inserter(indices), [](const auto& p){ return p.first; });
-			res = (iter->second).apply_exp(t, indices, res);
+			res = cps_[n]->apply_exp(t, indices, res);
 		}
 		return res;
 	}

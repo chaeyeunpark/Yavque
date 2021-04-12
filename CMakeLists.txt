@@ -2,11 +2,11 @@ cmake_minimum_required(VERSION 3.9)
 
 project(QUNN)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories("${CMAKE_SOURCE_DIR}/externals") 
-include_directories("${CMAKE_SOURCE_DIR}/externals/ExactDiagonalization/Include/")
-include_directories("${CMAKE_SOURCE_DIR}/externals/nlohmann_json_cmake_fetchcontent/include/")
-include_directories("${CMAKE_SOURCE_DIR}/externals/spectra/include/")
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories("${PROJECT_SOURCE_DIR}/externals") 
+include_directories("${PROJECT_SOURCE_DIR}/externals/ExactDiagonalization/Include/")
+include_directories("${PROJECT_SOURCE_DIR}/externals/nlohmann_json_cmake_fetchcontent/include/")
+include_directories("${PROJECT_SOURCE_DIR}/externals/spectra/include/")
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
@@ -21,7 +21,7 @@ find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -DEIGEN_USE_MKL_ALL")
 
 set(CATCH_URL "https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp")
-set(CATCH_DOWNLOAD_PATH "${CMAKE_SOURCE_DIR}/externals/catch.hpp")
+set(CATCH_DOWNLOAD_PATH "${PROJECT_SOURCE_DIR}/externals/catch.hpp")
 
 
 if (NOT EXISTS "${CATCH_DOWNLOAD_PATH}")
