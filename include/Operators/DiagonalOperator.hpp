@@ -102,7 +102,6 @@ public:
 	std::unique_ptr<Operator> clone() const override
 	{
 		auto cloned = std::make_unique<DiagonalOperator>(*this);
-		cloned->set_name(std::string("clone of ") + name());
 		return cloned;
 	}
 

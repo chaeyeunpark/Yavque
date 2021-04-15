@@ -26,7 +26,7 @@ int main()
 	using namespace qunn;
 	using std::sqrt;
 	const uint32_t N = 16;
-	const uint32_t depth = 10;
+	const uint32_t depth = 1;
 	const double sigma = 1.0e-2;
 	const double learning_rate = 1.0e-2;
 
@@ -108,8 +108,8 @@ int main()
 		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
 		fisher += 1e-3*Eigen::MatrixXd::Identity(parameters.size(), parameters.size());
 
-		Eigen::VectorXd egrad = (output.transpose()*ham*grads).real();
-		double energy = real(cx_double(output.transpose()*ham*output));
+		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
+		double energy = real(cx_double(output.adjoint()*ham*output));
 
 		std::cout << energy << "\t" << egrad.norm() << "\t" << output.norm() << std::endl;
 

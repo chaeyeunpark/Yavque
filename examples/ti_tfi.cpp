@@ -133,8 +133,8 @@ int main()
 		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
 		fisher += 1e-3*Eigen::MatrixXd::Identity(parameters.size(), parameters.size());
 
-		Eigen::VectorXd egrad = (output.transpose()*ham*grads).real();
-		double energy = real(cx_double(output.transpose()*ham*output));
+		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
+		double energy = real(cx_double(output.adjoint()*ham*output));
 
 		std::cout << energy << "\t" << egrad.norm() << "\t" << output.norm() << std::endl;
 

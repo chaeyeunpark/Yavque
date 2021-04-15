@@ -122,12 +122,12 @@ public:
 	}
 
 	/**
-	 * subcircuit from d to end [d,end]
+	 * subcircuit from d to end [d,end)
 	 */
 	Circuit from(uint32_t d) const
 	{
 		Circuit circ(dim_, ops_.begin()+d, ops_.end());
-		if(states_updated_to_ >= d)
+		if(states_updated_to_ > d)
 		{
 			circ.states_from_left_ = 
 				std::vector<std::shared_ptr<const Eigen::VectorXcd>>(states_from_left_.begin() + d,
@@ -191,9 +191,9 @@ public:
 	{
 		//change to format in C++20
 		std::ostringstream ss;
-		for(uint32_t depth = 0; depth < ops_.size(); ++depth)
+		for(uint32_t d = 0; d < ops_.size(); ++d)
 		{
-			ss << "depth " << depth << ": [" << ops_[depth]->desc() <<
+			ss << "layer" << d << ": [" << ops_[d]->desc() <<
 				"]"<< std::endl;
 		}
 		return ss.str();

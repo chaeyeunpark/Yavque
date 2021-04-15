@@ -133,7 +133,6 @@ public:
 	std::unique_ptr<Operator> clone() const override
 	{
 		auto copied = std::make_unique<Hamiltonian>(*this);
-		copied->set_name("clone of " + name());
 		return copied;
 	}
 

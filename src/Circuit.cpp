@@ -15,6 +15,7 @@ Circuit::Circuit(const Circuit& rhs)
 		ops_.emplace_back(op->clone());
 	}
 }
+
 Circuit& Circuit::operator=(const Circuit& rhs)
 {
 	dim_ = rhs.dim_;
@@ -26,13 +27,6 @@ Circuit& Circuit::operator=(const Circuit& rhs)
 	}
 
 	return *this;
-}
-
-
-Circuit operator|(Circuit a, const Circuit& b)
-{
-	a |= b;
-	return a;
 }
 
 std::vector<Variable> Circuit::parameters() const
@@ -63,6 +57,18 @@ void Circuit::derivs() const
 	}
 }
 
+Circuit operator|(Circuit a, const Circuit& b)
+{
+	Circuit res = a;
+	res |= b;
+	return res;
+}
+Circuit operator|(Circuit a, Circuit&& b)
+{
+	Circuit res = a;
+	res |= std::move(b);
+	return res;
+}
 
 
 } //namespace qunn

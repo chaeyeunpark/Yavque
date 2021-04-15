@@ -98,9 +98,16 @@ add_test(
 	COMMAND TestGrad
 )
 
+add_executable(TestTFI "Tests/TestTFI.cpp")
+target_link_libraries(TestTFI qunn Eigen3::Eigen)
+add_test(
+	NAME TestTFI
+	COMMAND TestTFI
+)
+
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
 	DEPENDS TestCircuit TestHamEvol TestDiagonalHamEvol TestProductHamEvol 
-	TestSumPauliString TestSumPauliStringHamEvol TestGrad)
+	TestSumPauliString TestSumPauliStringHamEvol TestGrad TestTFI)
 
 
 add_executable(qaoa_tfi "examples/qaoa_tfi.cpp")

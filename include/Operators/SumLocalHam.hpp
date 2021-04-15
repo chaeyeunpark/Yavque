@@ -150,7 +150,6 @@ public:
 	std::unique_ptr<Operator> clone() const override
 	{
 		auto copied = std::make_unique<SumLocalHam>(*this);
-		copied->set_name(std::string("clone of ") + name());
 		return copied;
 	}
 

@@ -54,7 +54,6 @@ public:
 	std::unique_ptr<Operator> clone() const override
 	{
 		auto p = std::unique_ptr<DiagonalHamEvol>(new DiagonalHamEvol(*this));
-		p->set_name(std::string("clone of ") + name());
 		p->change_parameter(Variable{var_.value()});
 		return p;
 	}

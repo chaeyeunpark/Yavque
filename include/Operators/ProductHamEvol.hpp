@@ -38,7 +38,7 @@ public:
 
 	explicit ProductHamEvol(SumLocalHam ham, Variable var)
 		: Operator(ham.dim(), "ProductHamEvol of " + ham.name()), 
-		Univariate(std::move(var)) 
+		Univariate(std::move(var)), ham_{ham.get_impl()}
 	{
 	}
 
@@ -48,7 +48,6 @@ public:
 	std::unique_ptr<Operator> clone() const override
 	{
 		auto p = std::unique_ptr<ProductHamEvol>{new ProductHamEvol(*this)};
-		p->set_name(std::string("clone of ") + name());
 		p->change_parameter(Variable{var_.value()});
 		return p;
 	}
