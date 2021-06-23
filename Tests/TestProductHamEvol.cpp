@@ -6,7 +6,7 @@
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
-#include "Operators/ProductHamEvol.hpp"
+#include "Operators/SumLocalHamEvol.hpp"
 #include "utilities.hpp"
 
 #include "common.hpp"
@@ -26,7 +26,7 @@ TEST_CASE("test sum of local hamiltonian", "[sum-local]") {
 
 	SparseMatrix<cx_double> m = pauli_x().cast<cx_double>();
 	SumLocalHam ham(N, m);
-	ProductHamEvol ham_evol(ham);
+	SumLocalHamEvol ham_evol(ham);
 	auto var = ham_evol.parameter();
 	
 	for(uint32_t k = 0; k < 100; ++k) //instance for loop

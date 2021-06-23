@@ -14,7 +14,7 @@
 namespace qunn
 {
 
-class ProductHamEvol final
+class SumLocalHamEvol final
 	: public Operator, public Univariate
 {
 private:
@@ -26,28 +26,28 @@ private:
 		conjugate_ = !conjugate_;
 	}
 
-	ProductHamEvol(ProductHamEvol&& ) = default;
-	ProductHamEvol(const ProductHamEvol& ) = default;
+	SumLocalHamEvol(SumLocalHamEvol&& ) = default;
+	SumLocalHamEvol(const SumLocalHamEvol& ) = default;
 
 public:
-	explicit ProductHamEvol(SumLocalHam ham)
-		: Operator(ham.dim(), "ProductHamEvol of " + ham.name()), 
+	explicit SumLocalHamEvol(SumLocalHam ham)
+		: Operator(ham.dim(), "SumLocalHamEvol of " + ham.name()), 
 		ham_{ham.get_impl()}
 	{
 	}
 
-	explicit ProductHamEvol(SumLocalHam ham, Variable var)
-		: Operator(ham.dim(), "ProductHamEvol of " + ham.name()), 
+	explicit SumLocalHamEvol(SumLocalHam ham, Variable var)
+		: Operator(ham.dim(), "SumLocalHamEvol of " + ham.name()), 
 		Univariate(std::move(var)), ham_{ham.get_impl()}
 	{
 	}
 
-	ProductHamEvol& operator=(const ProductHamEvol& ) = delete;
-	ProductHamEvol& operator=(ProductHamEvol&& ) = delete;
+	SumLocalHamEvol& operator=(const SumLocalHamEvol& ) = delete;
+	SumLocalHamEvol& operator=(SumLocalHamEvol&& ) = delete;
 
 	std::unique_ptr<Operator> clone() const override
 	{
-		auto p = std::unique_ptr<ProductHamEvol>{new ProductHamEvol(*this)};
+		auto p = std::unique_ptr<SumLocalHamEvol>{new SumLocalHamEvol(*this)};
 		p->change_parameter(Variable{var_.value()});
 		return p;
 	}
@@ -78,7 +78,7 @@ public:
 
 	bool can_merge(const Operator& rhs) const override
 	{
-		if(const ProductHamEvol* p = dynamic_cast<const ProductHamEvol*>(&rhs))
+		if(const SumLocalHamEvol* p = dynamic_cast<const SumLocalHamEvol*>(&rhs))
 		{
 			if (ham_ == p->ham_)
 				return true;

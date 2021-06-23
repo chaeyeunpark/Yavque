@@ -316,7 +316,7 @@ qunn::Circuit qaoa_diag_prod_ham(const uint32_t N, const uint32_t depth)
 	{
 		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_even_ham));
 		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_odd_ham));
-		circ.add_op_right(std::make_unique<qunn::ProductHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham));
 	}
 	
 	return circ;

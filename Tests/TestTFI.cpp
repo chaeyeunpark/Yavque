@@ -6,7 +6,7 @@
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
-#include "Operators/ProductHamEvol.hpp"
+#include "Operators/SumLocalHamEvol.hpp"
 #include "Circuit.hpp"
 #include "utilities.hpp"
 
@@ -37,7 +37,7 @@ qunn::Circuit construct_diagonal_tfi(const uint32_t N)
 	for(uint32_t p = 0; p < 4; ++p)
 	{
 		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<qunn::ProductHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham));
 	}
 	circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_all_ham));
 	return circ;
@@ -64,7 +64,7 @@ auto construct_bare_tfi(const uint32_t N)
 		{
 			circ.add_op_right(std::make_unique<qunn::HamEvol>(zz_hams[k], parameters[2*p+0]));
 		}
-		circ.add_op_right(std::make_unique<qunn::ProductHamEvol>(x_all_ham, parameters[2*p+1]));
+		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham, parameters[2*p+1]));
 	}
 	for(uint32_t k = 0; k < N; k++)
 	{
@@ -156,7 +156,7 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]") {
 	for(uint32_t p = 0; p < 1; ++p)
 	{
 		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<qunn::ProductHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham));
 	}
 
 	Eigen::MatrixXd ham(4,4);
@@ -262,7 +262,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]") {
 	for(uint32_t p = 0; p < 2; ++p)
 	{
 		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<qunn::ProductHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham));
 	}
 
 	Eigen::MatrixXd ham = zz_all.asDiagonal();

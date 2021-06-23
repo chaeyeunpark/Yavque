@@ -12,4 +12,4 @@
 #include "Operators/SumPauliStringHamEvol.hpp"
 
 #include "Operators/SumLocalHam.hpp"
-#include "Operators/ProductHamEvol.hpp"
+#include "Operators/SumLocalHamEvol.hpp"
