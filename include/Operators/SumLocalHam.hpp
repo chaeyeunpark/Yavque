@@ -95,7 +95,7 @@ public:
 			diagonalized_ = true;
 		}
 		Eigen::VectorXcd v = exp(x*evals_.array());
-		return evecs_*v.asDiagonal()*evecs_;
+		return evecs_*v.asDiagonal()*evecs_.adjoint();
 	}
 };
 } //namespace detail
@@ -108,30 +108,17 @@ private:
 	cx_double constant_ = 1.0;
 
 public:
-	explicit SumLocalHam(uint32_t num_qubits, const Eigen::SparseMatrix<cx_double>& ham)
-		: Operator(1u<<num_qubits), 
-		p_{std::make_shared<detail::SumLocalHamImpl>(num_qubits, ham)}
-	{
-		assert(ham.rows() == ham.cols()); //check diagonal
-	}
-
 	explicit SumLocalHam(uint32_t num_qubits, const Eigen::SparseMatrix<cx_double>& ham,
-		std::string name)
-		: Operator(ham.rows(), name), 
+		std::string name = {})
+		: Operator(ham.rows(), std::move(name)), 
 		p_{std::make_shared<const detail::SumLocalHamImpl>(num_qubits, ham)}
 	{
 		assert(ham.rows() == ham.cols()); //check diagonal
 	}
 
 	
-	explicit SumLocalHam(std::shared_ptr<const detail::SumLocalHamImpl> p) 
-		: Operator(p->dim()), p_{std::move(p)}
-	{
-	}
-
 	explicit SumLocalHam(std::shared_ptr<const detail::SumLocalHamImpl> p,
-			std::string name,
-			cx_double constant = 1.0) 
+			std::string name = {}, cx_double constant = 1.0) 
 		: Operator(p->dim(), std::move(name)), p_{std::move(p)}, constant_{constant}
 	{
 	}

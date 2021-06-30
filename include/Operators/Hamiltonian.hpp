@@ -96,25 +96,14 @@ private:
 	cx_double constant_ = 1.0;
 
 public:
-	explicit Hamiltonian(const Eigen::SparseMatrix<cx_double>& ham, std::string name_)
-		: Operator(ham.rows(), name_), p_{std::make_shared<detail::HamiltonianImpl>(ham)}
+	explicit Hamiltonian(const Eigen::SparseMatrix<cx_double>& ham, std::string name = {})
+		: Operator(ham.rows(), name), p_{std::make_shared<detail::HamiltonianImpl>(ham)}
 	{
 		assert(ham.rows() == ham.cols()); //check diagonal
-	}
-
-	explicit Hamiltonian(const Eigen::SparseMatrix<cx_double>& ham)
-		: Operator(ham.rows()), p_{std::make_shared<detail::HamiltonianImpl>(ham)}
-	{
-		assert(ham.rows() == ham.cols()); //check diagonal
-	}
-
-	explicit Hamiltonian(std::shared_ptr<const detail::HamiltonianImpl> p) 
-		: Operator(p->get_ham().rows()), p_{p}
-	{
 	}
 
 	explicit Hamiltonian(std::shared_ptr<const detail::HamiltonianImpl> p,
-			std::string name, cx_double constant = 1.0) 
+			std::string name = {}, cx_double constant = 1.0) 
 		: Operator(p->get_ham().rows(), std::move(name)), p_{p}, constant_{constant}
 	{
 	}

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-project(QUNN)
+project(yavque)
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories("${PROJECT_SOURCE_DIR}/externals") 
@@ -12,14 +12,14 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
 
-enable_testing()
-
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -DEIGEN_USE_MKL_ALL")
+option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_EXAMPLES "Build examples" OFF)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -DEIGEN_USE_MKL_ALL")
 set(CATCH_URL "https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp")
 set(CATCH_DOWNLOAD_PATH "${PROJECT_SOURCE_DIR}/externals/catch.hpp")
 
@@ -45,79 +45,23 @@ endif()
 
 
 add_library(qunn STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" "src/Operators/SumPauliString.cpp" "src/Utilities/pauli_operators.cpp")
-target_link_libraries(qunn Eigen3::Eigen)
+target_link_libraries(qunn INTERFACE Eigen3::Eigen)
 
+if(BUILD_EXAMPLES)
+	add_executable(qaoa_tfi "examples/qaoa_tfi.cpp")
+	target_link_libraries(qaoa_tfi PRIVATE qunn Eigen3::Eigen)
 
-######################## Test objects ##########################################
-add_executable(TestHamEvol "Tests/TestHamEvol.cpp")
-target_link_libraries(TestHamEvol qunn Eigen3::Eigen)
-add_test(
-	NAME TestHamEvol
-	COMMAND TestHamEvol
-)
+	add_executable(ti_tfi "examples/ti_tfi.cpp")
+	target_link_libraries(ti_tfi PRIVATE qunn Eigen3::Eigen)
 
-add_executable(TestDiagonalHamEvol "Tests/TestDiagonalHamEvol.cpp")
-target_link_libraries(TestDiagonalHamEvol qunn Eigen3::Eigen)
-add_test(
-	NAME TestDiagonalHamEvol
-	COMMAND TestDiagonalHamEvol
-)
+	add_executable(diagonal_product_tfi "examples/diagonal_product_tfi.cpp")
+	target_link_libraries(diagonal_product_tfi PRIVATE qunn Eigen3::Eigen)
 
-add_executable(TestProductHamEvol "Tests/TestProductHamEvol.cpp")
-target_link_libraries(TestProductHamEvol qunn Eigen3::Eigen)
-add_test(
-	NAME TestProductHamEvol
-	COMMAND TestProductHamEvol
-)
+	add_executable(qaoa_cluster "examples/qaoa_cluster.cpp")
+	target_link_libraries(qaoa_cluster PRIVATE qunn Eigen3::Eigen)
+endif()
 
-add_executable(TestSumPauliString "Tests/TestSumPauliString.cpp")
-target_link_libraries(TestSumPauliString qunn Eigen3::Eigen)
-add_test(
-	NAME TestSumPauliString
-	COMMAND TestSumPauliString
-)
-
-add_executable(TestSumPauliStringHamEvol "Tests/TestSumPauliStringHamEvol.cpp")
-target_link_libraries(TestSumPauliStringHamEvol qunn Eigen3::Eigen)
-add_test(
-	NAME TestSumPauliStringHamEvol
-	COMMAND TestSumPauliStringHamEvol
-)
-
-add_executable(TestCircuit "Tests/TestCircuit.cpp")
-target_link_libraries(TestCircuit qunn Eigen3::Eigen)
-add_test(
-	NAME TestCircuit
-	COMMAND TestCircuit
-)
-
-add_executable(TestGrad "Tests/TestGrad.cpp")
-target_link_libraries(TestGrad qunn Eigen3::Eigen)
-add_test(
-	NAME TestGrad
-	COMMAND TestGrad
-)
-
-add_executable(TestTFI "Tests/TestTFI.cpp")
-target_link_libraries(TestTFI qunn Eigen3::Eigen)
-add_test(
-	NAME TestTFI
-	COMMAND TestTFI
-)
-
-add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND}
-	DEPENDS TestCircuit TestHamEvol TestDiagonalHamEvol TestProductHamEvol 
-	TestSumPauliString TestSumPauliStringHamEvol TestGrad TestTFI)
-
-
-add_executable(qaoa_tfi "examples/qaoa_tfi.cpp")
-target_link_libraries(qaoa_tfi qunn Eigen3::Eigen)
-
-add_executable(ti_tfi "examples/ti_tfi.cpp")
-target_link_libraries(ti_tfi qunn Eigen3::Eigen)
-
-add_executable(diagonal_product_tfi "examples/diagonal_product_tfi.cpp")
-target_link_libraries(diagonal_product_tfi qunn Eigen3::Eigen)
-
-add_executable(qaoa_cluster "examples/qaoa_cluster.cpp")
-target_link_libraries(qaoa_cluster qunn Eigen3::Eigen)
+if(BUILD_TESTS)
+	enable_testing()
+	add_subdirectory("${PROJECT_SOURCE_DIR}/Tests")
+endif()
