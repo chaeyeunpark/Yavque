@@ -56,20 +56,19 @@ private:
 	std::string name_;
 
 protected:
-	explicit Operator(uint32_t dim)
-		: dim_{dim}
-	{
-		static Counter counter;
-		//change to c++20 format
-		std::stringstream ss;
-		ss << "operator_";
-		ss << counter.count();
-		name_ = ss.str();
-	}
 
 	explicit Operator(uint32_t dim, const std::string& name)
 		: dim_{dim}, name_{name}
 	{
+		static Counter name_counter;
+		if(name.empty())
+		{
+			//change to c++20 format
+			std::stringstream ss;
+			ss << "operator_";
+			ss << name_counter.count();
+			name_ = ss.str();
+		}
 	}
 
 	void set_name(std::string new_name)

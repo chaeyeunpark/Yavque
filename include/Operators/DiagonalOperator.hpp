@@ -63,25 +63,14 @@ private:
 	}
 
 public:
-	explicit DiagonalOperator(const Eigen::VectorXcd& diag_op)
-		: Operator(diag_op.size()), 
-		p_{std::make_shared<detail::DiagonalOperatorImpl>(diag_op)}
-	{
-	}
-
-	explicit DiagonalOperator(const Eigen::VectorXcd& diag_op, std::string name)
+	explicit DiagonalOperator(const Eigen::VectorXcd& diag_op, std::string name = {})
 		: Operator(diag_op.size(), std::move(name)), 
 		p_{std::make_shared<detail::DiagonalOperatorImpl>(diag_op)}
 	{
 	}
 
-	explicit DiagonalOperator(std::shared_ptr<const detail::DiagonalOperatorImpl> p) 
-		: Operator(p->get_diag_op().size()), p_{std::move(p)}
-	{
-	}
-
 	explicit DiagonalOperator(std::shared_ptr<const detail::DiagonalOperatorImpl> p,
-			std::string name,
+			std::string name = {},
 			cx_double constant = 1.0)
 		: Operator(p->get_diag_op().size(), std::move(name)), p_{std::move(p)}, constant_{constant}
 	{

@@ -24,9 +24,10 @@ private:
 	mutable uint32_t states_updated_to_ = 0;
 
 protected:
+	template<typename ConstIterator>
 	Circuit(uint32_t dim, 
-			const std::vector<std::unique_ptr<Operator>>::const_iterator& begin,
-			const std::vector<std::unique_ptr<Operator>>::const_iterator& end)
+			const ConstIterator& begin,
+			const ConstIterator& end)
 		: dim_{dim}
 	{
 		//check all ops has the same dim
@@ -47,6 +48,11 @@ public:
 
 	Circuit& operator=(const Circuit& rhs);
 	Circuit& operator=(Circuit&& rhs) = default;
+
+	uint32_t get_dim() const
+	{
+		return dim_;
+	}
 
 	bool is_evaluated() const
 	{
@@ -76,10 +82,15 @@ public:
 		states_from_left_.resize(1);
 	}
 
-
-	std::unique_ptr<Operator> operator_at(std::size_t idx) const
+	std::size_t num_operators() const
 	{
-		return ops_[idx]->clone();
+		return ops_.size();
+	}
+
+
+	const std::unique_ptr<Operator>& operator_at(std::size_t idx) const
+	{
+		return ops_[idx];
 	}
 
 
@@ -163,6 +174,16 @@ public:
 		b.states_from_left_.resize(0);
 		b.ops_.resize(0);
 		return *this;
+	}
+
+	Circuit dagger() const
+	{	
+		Circuit res(dim_, ops_.crbegin(), ops_.crend());
+		for(std::size_t idx = 0; idx < ops_.size(); ++idx)
+		{
+			res.ops_[idx]->dagger_in_place();
+		}
+		return res;
 	}
 
 	std::vector<Variable> parameters() const;

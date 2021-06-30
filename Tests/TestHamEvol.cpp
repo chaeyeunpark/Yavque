@@ -159,7 +159,7 @@ TEST_CASE("Test gradient", "[log-deriv]") {
 		Eigen::VectorXcd grad2 = hamEvol.apply_right(ini);
 		hamEvol.parameter() = val - M_PI/2;
 		grad2 -= hamEvol.apply_right(ini);
-		grad2 /= 2;
+		grad2 /= 2.0;
 
 		REQUIRE((grad1 - grad2).norm() < 1e-6);
 	}

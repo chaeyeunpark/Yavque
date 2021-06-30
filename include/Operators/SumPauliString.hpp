@@ -148,35 +148,23 @@ private:
 
 
 public:
-	explicit SumPauliString(const uint32_t num_qubits)
-		: Operator(1<<num_qubits),
+	explicit SumPauliString(const uint32_t num_qubits, std::string name = {})
+		: Operator(1<<num_qubits, std::move(name)),
 		p_{std::make_shared<detail::SumPauliStringImpl>(num_qubits)}
 	{
-	}
-	explicit SumPauliString(const uint32_t num_qubits,
-			const std::vector<std::map<uint32_t, Pauli>>& pauli_strings)
-		: Operator(1<<num_qubits),
-		p_{std::make_shared<detail::SumPauliStringImpl>(num_qubits, pauli_strings)}
-	{
-
 	}
 
 	explicit SumPauliString(const uint32_t num_qubits,
 			const std::vector<std::map<uint32_t, Pauli>>& pauli_strings, 
-			std::string name)
+			std::string name = {})
 		: Operator(1u << num_qubits, std::move(name)),
 		p_{std::make_shared<detail::SumPauliStringImpl>(num_qubits, pauli_strings)}
 	{
 
 	}
 
-	explicit SumPauliString(std::shared_ptr<const detail::SumPauliStringImpl> p)
-		: Operator(1u << p->num_qubits()), p_{std::move(p)}
-	{
-	}
-
 	explicit SumPauliString(std::shared_ptr<const detail::SumPauliStringImpl> p,
-			std::string name, cx_double constant = 1.0)
+			std::string name = {}, cx_double constant = 1.0)
 		: Operator(1u << p->num_qubits(), std::move(name)), p_{std::move(p)},
 		constant_{constant}
 	{

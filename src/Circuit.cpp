@@ -70,5 +70,4 @@ Circuit operator|(Circuit a, Circuit&& b)
 	return res;
 }
 
-
 } //namespace qunn
