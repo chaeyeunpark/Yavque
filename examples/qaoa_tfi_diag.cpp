@@ -24,7 +24,7 @@ int main()
 	using std::sqrt;
 	const uint32_t N = 12;
 	const uint32_t depth = 6;
-	const double sigma = 1.0e-2;
+	const double sigma = 1.0e-3;
 	const double learning_rate = 1.0e-2;
 
 	std::random_device rd;
@@ -103,6 +103,8 @@ int main()
 		}
 
 		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
+		Eigen::RowVectorXcd o = (output.adjoint()*grads);
+		fisher -= (o.adjoint()*o).real();
 		fisher += 1e-3*Eigen::MatrixXd::Identity(parameters.size(), parameters.size());
 
 		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();

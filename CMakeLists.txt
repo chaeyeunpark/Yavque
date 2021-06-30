@@ -72,6 +72,9 @@ if(BUILD_EXAMPLES)
 
 	add_executable(qaoa_cluster "examples/qaoa_cluster.cpp")
 	target_link_libraries(qaoa_cluster PRIVATE yavque Eigen3::Eigen)
+
+	add_executable(solve_chem "examples/solve_chem.cpp")
+	target_link_libraries(solve_chem PRIVATE yavque Eigen3::Eigen)
 endif()
 
 if(BUILD_TESTS)
