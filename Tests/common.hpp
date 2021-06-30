@@ -22,7 +22,7 @@ Eigen::VectorXcd apply_kronecker(uint32_t N,
 	Eigen::VectorXcd res = vec;
 	for(uint32_t k = 0; k < N; ++k)
 	{
-		res = qunn::apply_single_qubit(res, m, k);
+		res = yavque::apply_single_qubit(res, m, k);
 	}
 	return res;
 }
@@ -45,7 +45,7 @@ std::pair<uint32_t, uint32_t> random_connection(const int N, RandomEngine& re)
 template<typename RandomEngine>
 Eigen::MatrixXcd random_unitary(uint32_t dim, RandomEngine&& re)
 {
-	constexpr qunn::cx_double I(0.0, 1.0);
+	constexpr yavque::cx_double I(0.0, 1.0);
 	std::normal_distribution<double> ndist;
 
 	Eigen::MatrixXcd m(dim, dim);
@@ -63,7 +63,7 @@ Eigen::MatrixXcd random_unitary(uint32_t dim, RandomEngine&& re)
 template<typename RandomEngine>
 Eigen::VectorXcd random_vector(uint32_t dim, RandomEngine&& re)
 {
-	constexpr qunn::cx_double I(0.0, 1.0);
+	constexpr yavque::cx_double I(0.0, 1.0);
 	std::normal_distribution<double> ndist;
 
 	Eigen::VectorXcd res(dim);

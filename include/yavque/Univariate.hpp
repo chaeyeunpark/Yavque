@@ -2,7 +2,7 @@
 #include "Variable.hpp"
 #include "Operators/Operator.hpp"
 
-namespace qunn
+namespace yavque
 {
 class Univariate
 {
@@ -34,4 +34,4 @@ public:
 
 	virtual std::unique_ptr<Operator> log_deriv() const = 0;
 };
-} //namespace qunn
+} //namespace yavque

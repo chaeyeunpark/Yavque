@@ -11,7 +11,7 @@
 #include "Operator.hpp"
 #include "SumLocalHam.hpp"
 
-namespace qunn
+namespace yavque
 {
 
 class SumLocalHamEvol final

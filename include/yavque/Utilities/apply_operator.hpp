@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 #include <tbb/tbb.h>
 
-namespace qunn
+namespace yavque
 {
 namespace detail
 {
@@ -150,4 +150,4 @@ Eigen::VectorXcd apply_three_qubit(const Eigen::VectorXcd& vec,
 	}
 	return res;
 }
-} //namespace qunn
+} //namespace yavque

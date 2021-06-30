@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
-namespace qunn
+namespace yavque
 {
 Eigen::SparseMatrix<double> pauli_x()
 {
@@ -72,4 +72,4 @@ Eigen::SparseMatrix<double> pauli_zz()
 	res.makeCompressed();
 	return res;
 }
-}// namespace qunn
+}// namespace yavque

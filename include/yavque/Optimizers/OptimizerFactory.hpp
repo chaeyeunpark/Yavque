@@ -10,7 +10,7 @@
 #include "AdaMax.hpp"
 
 
-namespace qunn 
+namespace yavque 
 {
 
 class OptimizerFactory
@@ -54,4 +54,4 @@ public:
 		return iter->second(opt);
 	}
 };
-} //namespace qunn
+} //namespace yavque

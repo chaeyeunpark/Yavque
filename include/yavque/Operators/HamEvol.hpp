@@ -11,7 +11,7 @@
 #include "Operator.hpp"
 #include "Hamiltonian.hpp"
 
-namespace qunn
+namespace yavque
 {
 
 class HamEvol final

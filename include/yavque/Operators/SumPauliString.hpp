@@ -8,7 +8,7 @@
 #include "Operator.hpp"
 #include "CompressedPauliString.hpp"
 
-namespace qunn
+namespace yavque
 {
 
 namespace detail
@@ -215,4 +215,4 @@ public:
 	}
 };
 
-} //namespace qunn
+} //namespace yavque

@@ -14,9 +14,9 @@
 
 tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
 
-qunn::Circuit construct_diagonal_tfi(const uint32_t N)
+yavque::Circuit construct_diagonal_tfi(const uint32_t N)
 {
-	qunn::Circuit circ(1 << N);
+	yavque::Circuit circ(1 << N);
 	Eigen::VectorXd zz_all(1<<N);
 	
 	for(uint32_t n = 0; n < (1u<<N); ++n)
@@ -31,44 +31,44 @@ qunn::Circuit construct_diagonal_tfi(const uint32_t N)
 		zz_all(n) = elt;
 	}
 	
-	auto zz_all_ham = qunn::DiagonalOperator(zz_all, "zz all");
-	auto x_all_ham = qunn::SumLocalHam(N, qunn::pauli_x().cast<qunn::cx_double>(), "x all");
+	auto zz_all_ham = yavque::DiagonalOperator(zz_all, "zz all");
+	auto x_all_ham = yavque::SumLocalHam(N, yavque::pauli_x().cast<yavque::cx_double>(), "x all");
 
 	for(uint32_t p = 0; p < 4; ++p)
 	{
-		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_all_ham));
+		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
 	}
-	circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_all_ham));
+	circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_all_ham));
 	return circ;
 }
 
 auto construct_bare_tfi(const uint32_t N)
 {
-	qunn::Circuit circ(1 << N);
-	std::vector<qunn::Variable> parameters(9);
+	yavque::Circuit circ(1 << N);
+	std::vector<yavque::Variable> parameters(9);
 
-	std::vector<qunn::Hamiltonian> zz_hams;
+	std::vector<yavque::Hamiltonian> zz_hams;
 	
 	for(uint32_t k = 0; k < N; ++k)
 	{
 		edp::LocalHamiltonian<double> lh(N,2);
-		lh.addTwoSiteTerm({k, (k+1)%N}, qunn::pauli_zz());
-		zz_hams.emplace_back(edp::constructSparseMat<qunn::cx_double>(1<<N, lh));
+		lh.addTwoSiteTerm({k, (k+1)%N}, yavque::pauli_zz());
+		zz_hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1<<N, lh));
 	}
-	auto x_all_ham = qunn::SumLocalHam(N, qunn::pauli_x().cast<qunn::cx_double>(), "x all");
+	auto x_all_ham = yavque::SumLocalHam(N, yavque::pauli_x().cast<yavque::cx_double>(), "x all");
 
 	for(uint32_t p = 0; p < 4; ++p)
 	{
 		for(uint32_t k = 0; k < N; k++)
 		{
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(zz_hams[k], parameters[2*p+0]));
+			circ.add_op_right(std::make_unique<yavque::HamEvol>(zz_hams[k], parameters[2*p+0]));
 		}
-		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham, parameters[2*p+1]));
+		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham, parameters[2*p+1]));
 	}
 	for(uint32_t k = 0; k < N; k++)
 	{
-		circ.add_op_right(std::make_unique<qunn::HamEvol>(zz_hams[k], parameters[8]));
+		circ.add_op_right(std::make_unique<yavque::HamEvol>(zz_hams[k], parameters[8]));
 	}
 
 	return std::make_pair(std::move(circ), std::move(parameters));
@@ -77,7 +77,7 @@ auto construct_bare_tfi(const uint32_t N)
 Eigen::VectorXcd analytic_twoqubit(double theta, double phi)
 {
 	Eigen::VectorXcd res(4);
-	constexpr qunn::cx_double I(0., 1.);
+	constexpr yavque::cx_double I(0., 1.);
 
 	res(0) = cos(2*phi)*exp(-I*theta) - I*sin(2*phi)*exp(I*theta);
 	res(1) = cos(2*phi)*exp(I*theta) - I*sin(2*phi)*exp(-I*theta);
@@ -89,7 +89,7 @@ Eigen::VectorXcd analytic_twoqubit(double theta, double phi)
 
 Eigen::MatrixXcd rot_x(double phi)
 {
-	constexpr qunn::cx_double I(0., 1.);
+	constexpr yavque::cx_double I(0., 1.);
 	Eigen::MatrixXcd rot_x(2,2);
 
 	rot_x << cos(phi), -I*sin(phi),
@@ -111,7 +111,7 @@ Eigen::MatrixXcd kron_n(const Eigen::MatrixXcd& m, uint32_t n)
 Eigen::VectorXcd product_fourqubit(double theta1, double phi1, double theta2, double phi2)
 {
 	Eigen::VectorXcd res(16);
-	constexpr qunn::cx_double I(0., 1.);
+	constexpr yavque::cx_double I(0., 1.);
 
 	Eigen::VectorXd zz(16);
 	zz << 4, 0, 0, 0, 0, -4, 0, 0, 0, 0, -4, 0, 0, 0, 0, 4;
@@ -128,7 +128,7 @@ Eigen::VectorXcd product_fourqubit(double theta1, double phi1, double theta2, do
 }
 
 TEST_CASE("test two qubit", "[tfi-twoqubit]") {
-	using namespace qunn;
+	using namespace yavque;
 	using namespace Eigen;
 
 	std::random_device rd;
@@ -148,15 +148,15 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]") {
 		zz(n) = z0*z1;
 	}
 	
-	auto zz_all_ham = qunn::DiagonalOperator(zz, "zz all");
-	auto x_all_ham = qunn::SumLocalHam(N, qunn::pauli_x().cast<qunn::cx_double>(), "x all");
+	auto zz_all_ham = yavque::DiagonalOperator(zz, "zz all");
+	auto x_all_ham = yavque::SumLocalHam(N, yavque::pauli_x().cast<yavque::cx_double>(), "x all");
 
-	auto circ = qunn::Circuit(1 << N);
+	auto circ = yavque::Circuit(1 << N);
 
 	for(uint32_t p = 0; p < 1; ++p)
 	{
-		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_all_ham));
+		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
 	}
 
 	Eigen::MatrixXd ham(4,4);
@@ -228,7 +228,7 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]") {
 }
 
 TEST_CASE("test four qubit", "[tfi-fourqubit]") {
-	using namespace qunn;
+	using namespace yavque;
 	using namespace Eigen;
 
 	std::random_device rd;
@@ -254,15 +254,15 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]") {
 	}
 
 	
-	auto zz_all_ham = qunn::DiagonalOperator(zz_all, "zz all");
-	auto x_all_ham = qunn::SumLocalHam(N, qunn::pauli_x().cast<qunn::cx_double>(), "x all");
+	auto zz_all_ham = yavque::DiagonalOperator(zz_all, "zz all");
+	auto x_all_ham = yavque::SumLocalHam(N, yavque::pauli_x().cast<yavque::cx_double>(), "x all");
 
-	auto circ = qunn::Circuit(1 << N);
+	auto circ = yavque::Circuit(1 << N);
 
 	for(uint32_t p = 0; p < 2; ++p)
 	{
-		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_all_ham));
+		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
 	}
 
 	Eigen::MatrixXd ham = zz_all.asDiagonal();
@@ -351,7 +351,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]") {
 
 
 TEST_CASE("test tfi", "[tfi]") {
-	using namespace qunn;
+	using namespace yavque;
 	using namespace Eigen;
 
 	constexpr unsigned int N = 10;

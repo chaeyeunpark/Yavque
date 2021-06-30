@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 #include <nlohmann/json.hpp>
 
-namespace qunn
+namespace yavque
 {
 class Optimizer
 {
@@ -13,4 +13,4 @@ public:
 
 	virtual ~Optimizer() { }
 };
-} //namespace qunn
+} //namespace yavque

@@ -6,7 +6,7 @@
 
 #include "DenseHermitianMatrix.hpp"
 
-namespace qunn
+namespace yavque
 {
 
 class SingleQubitOperator final

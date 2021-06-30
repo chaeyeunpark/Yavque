@@ -22,7 +22,7 @@ void test_single_qubit(const uint32_t N,
 	using std::sin;
 	using std::exp;
 
-	constexpr qunn::cx_double I(0.,1.);
+	constexpr yavque::cx_double I(0.,1.);
 	std::normal_distribution<> nd;
 
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
@@ -31,8 +31,8 @@ void test_single_qubit(const uint32_t N,
 		ham_ct.addOneSiteTerm(i, m);
 	}
 
-	auto ham = qunn::Hamiltonian(edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct));
-	auto hamEvol = qunn::HamEvol(ham);
+	auto ham = yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct));
+	auto hamEvol = yavque::HamEvol(ham);
 	auto var = hamEvol.parameter();
 
 	for(int i = 0; i < 100; i++)
@@ -75,17 +75,17 @@ TEST_CASE("test single qubit Hamiltonian", "[one-site]") {
 	std::default_random_engine re{rd()};
 
 	SECTION("test using pauli X") {
-		test_single_qubit(N, qunn::pauli_x(), re);
+		test_single_qubit(N, yavque::pauli_x(), re);
 	}
 
 	SECTION("test using pauli Z") {
-		test_single_qubit(N, qunn::pauli_z(), re);
+		test_single_qubit(N, yavque::pauli_z(), re);
 	}
 }
 
 TEST_CASE("Test basic operations", "[basic]") {
 	using namespace Eigen;
-	using namespace qunn;
+	using namespace yavque;
 	using std::sqrt;
 	using std::cos;
 	using std::sin;
@@ -100,16 +100,16 @@ TEST_CASE("Test basic operations", "[basic]") {
 	std::default_random_engine re{rd()};
 	std::normal_distribution<> nd;
 
-	constexpr qunn::cx_double I(0.,1.);
+	constexpr yavque::cx_double I(0.,1.);
 
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
 	for(uint32_t i = 0; i < N; i++)
 	{
-		ham_ct.addOneSiteTerm(i, qunn::pauli_x());
+		ham_ct.addOneSiteTerm(i, yavque::pauli_x());
 	}
 
-	auto ham = qunn::Hamiltonian(
-			edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct));
+	auto ham = yavque::Hamiltonian(
+			edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct));
 	auto hamEvol = HamEvol(ham);
 
 	auto copied = hamEvol.clone();
@@ -121,7 +121,7 @@ TEST_CASE("Test basic operations", "[basic]") {
 
 TEST_CASE("Test gradient", "[log-deriv]") {
 	using namespace Eigen;
-	using namespace qunn;
+	using namespace yavque;
 	using std::sqrt;
 	using std::cos;
 	using std::sin;
@@ -131,7 +131,7 @@ TEST_CASE("Test gradient", "[log-deriv]") {
 	std::random_device rd;
 	std::default_random_engine re{rd()};
 	
-	std::vector<Eigen::SparseMatrix<double> > pauli_ops = {qunn::pauli_xx(), qunn::pauli_yy(), qunn::pauli_zz()};
+	std::vector<Eigen::SparseMatrix<double> > pauli_ops = {yavque::pauli_xx(), yavque::pauli_yy(), yavque::pauli_zz()};
 
 	std::uniform_int_distribution<> uid(0, 2);
 	std::normal_distribution<> nd;
@@ -145,8 +145,8 @@ TEST_CASE("Test gradient", "[log-deriv]") {
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
 		ham_ct.addTwoSiteTerm(random_connection(N, re), pauli_ops[uid(re)]);
 
-		auto ham = qunn::Hamiltonian(
-				edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct));
+		auto ham = yavque::Hamiltonian(
+				edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct));
 		auto hamEvol = HamEvol(ham);
 		
 		double val = nd(re);

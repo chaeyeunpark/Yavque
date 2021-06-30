@@ -5,16 +5,19 @@
 #include <stdlib.h>
 #include <tbb/global_control.h>
 
+#include <nlohmann/json.hpp>
+
 #include "Basis/TIBasis.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 #include "EDP/LocalHamiltonian.hpp"
 
 #include "Hamiltonians/TITFIsing.hpp"
+#include "yavque.hpp"
 
-#include "Circuit.hpp"
-
-#include "operators.hpp"
-#include "Optimizers/OptimizerFactory.hpp"
+/*
+ * This code simulate the QAOA circuit within the translation invariant
+ * subspace.
+ * */
 
 template<typename Basis>
 Eigen::SparseMatrix<double> ti_zz(Basis&& basis)
@@ -47,9 +50,9 @@ int get_num_threads()
 
 int main()
 {
-	using namespace qunn;
+	using namespace yavque;
 	using std::sqrt;
-	const uint32_t N = 14;
+	const uint32_t N = 12;
 	const uint32_t depth = 6;
 	const double sigma = 1.0e-2;
 	const double learning_rate = 1.0e-2;
@@ -67,8 +70,8 @@ int main()
 
 	Circuit circ(basis.getDim());
 
-	qunn::Hamiltonian ham_ti_zz(ti_zz(basis).cast<cx_double>());
-	qunn::Hamiltonian ham_x_all(ti_x_all(basis).cast<cx_double>());
+	yavque::Hamiltonian ham_ti_zz(ti_zz(basis).cast<cx_double>());
+	yavque::Hamiltonian ham_x_all(ti_x_all(basis).cast<cx_double>());
 
 
 	for(uint32_t p = 0; p < depth; ++p)
@@ -94,21 +97,6 @@ int main()
 	std::cout << ini.norm() << std::endl;
 
 	const auto ham = tfi_ham(h, basis);
-
-	/*
-	   Spectra::SparseSymMatProd<double> prod(ham);
-	   Spectra::SymEigsSolver<double, 
-	   Spectra::SMALLEST_ALGE, Spectra::SparseSymMatProd<double> > solver(&prod, 2, 6);
-
-	   solver.init();
-	   solver.compute();
-	   Eigen::VectorXd evals = solver.eigenvalues();
-
-	   std::cout << evals.transpose() << std::endl;
-	   */
-
-	auto optimizer = OptimizerFactory::getInstance().createOptimizer(
-			nlohmann::json{{"name", "SGD"}, {"alpha", learning_rate}});
 
 	circ.set_input(ini);
 
@@ -138,7 +126,7 @@ int main()
 
 		std::cout << energy << "\t" << egrad.norm() << "\t" << output.norm() << std::endl;
 
-		Eigen::VectorXd opt = optimizer->getUpdate(egrad);
+		Eigen::VectorXd opt = -learning_rate*fisher.inverse()*egrad;
 
 		for(uint32_t k = 0; k < parameters.size(); ++k)
 		{

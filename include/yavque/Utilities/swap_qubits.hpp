@@ -2,7 +2,7 @@
 #include <Eigen/Dense>
 
 #include "./bit_operations.hpp"
-namespace qunn
+namespace yavque
 {
 namespace detail
 {

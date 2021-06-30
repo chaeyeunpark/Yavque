@@ -3,7 +3,7 @@
 #include "../utils.hpp"
 #include "Operator.hpp"
 
-namespace qunn
+namespace yavque
 {
 namespace detail
 {
@@ -156,4 +156,4 @@ public:
 	}
 };
 
-} //namespace qunn
+} //namespace yavque

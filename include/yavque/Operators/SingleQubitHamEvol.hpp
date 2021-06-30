@@ -14,7 +14,7 @@
 #include "DenseHermitianMatrix.hpp"
 #include "SingleQubitOperator.hpp"
 
-namespace qunn
+namespace yavque
 {
 
 class SingleQubitHamEvol final

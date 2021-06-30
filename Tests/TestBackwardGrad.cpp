@@ -48,8 +48,8 @@ Eigen::SparseMatrix<double> tfi_ham(uint32_t N, double h)
 	edp::LocalHamiltonian<double> lh(N, 2);
 	for(uint32_t k = 0; k < N; ++k)
 	{
-		lh.addTwoSiteTerm({k, (k+1)%N}, -qunn::pauli_zz());
-		lh.addOneSiteTerm(k, -h*qunn::pauli_x());
+		lh.addTwoSiteTerm({k, (k+1)%N}, -yavque::pauli_zz());
+		lh.addOneSiteTerm(k, -h*yavque::pauli_x());
 	}
 
 	return edp::constructSparseMat<double>(1u << N, lh);
@@ -57,7 +57,7 @@ Eigen::SparseMatrix<double> tfi_ham(uint32_t N, double h)
 
 TEST_CASE("Test gradients using a random circuit")
 {
-	using namespace qunn;
+	using namespace yavque;
 	constexpr uint32_t N = 14;
 	constexpr uint32_t dim = 1 << N; //dimension of the total Hilbert space
 	

@@ -11,7 +11,7 @@
 #include "Operator.hpp"
 #include "DiagonalOperator.hpp"
 
-namespace qunn
+namespace yavque
 {
 
 class DiagonalHamEvol final

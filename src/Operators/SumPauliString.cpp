@@ -1,6 +1,6 @@
 #include "yavque/Operators/SumPauliString.hpp"
 
-namespace qunn::detail
+namespace yavque::detail
 {
 bool commute(const std::map<uint32_t, Pauli>& p1,
 	const std::map<uint32_t, Pauli>& p2)
@@ -33,4 +33,4 @@ std::string extract_pauli_string(const std::map<uint32_t, Pauli>& pmap)
 	return std::string(pstr.begin(), pstr.end());
 }
 
-} //namespace qunn::detail
+} //namespace yavque::detail

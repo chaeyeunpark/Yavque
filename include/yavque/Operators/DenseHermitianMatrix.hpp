@@ -6,7 +6,7 @@
 #include "../utils.hpp"
 #include "Operator.hpp"
 
-namespace qunn
+namespace yavque
 {
 
 class DenseHermitianMatrix
@@ -93,4 +93,4 @@ public:
 	}
 };
 
-} //namespace qunn
+} //namespace yavque

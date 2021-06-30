@@ -7,7 +7,7 @@
 #include "SumPauliString.hpp"
 
 
-namespace qunn
+namespace yavque
 {
 class SumPauliStringHamEvol
 	: public Operator, public Univariate
@@ -75,4 +75,4 @@ public:
 	}
 };
 
-} //namespace qunn
+} //namespace yavque

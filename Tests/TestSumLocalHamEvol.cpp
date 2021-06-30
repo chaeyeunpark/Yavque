@@ -12,7 +12,7 @@
 #include "common.hpp"
 
 TEST_CASE("test sum of local hamiltonian", "[sum-local]") {
-	using namespace qunn;
+	using namespace yavque;
 	using namespace Eigen;
 
 	constexpr unsigned int N = 8;

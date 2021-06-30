@@ -5,28 +5,25 @@
 #include "EDP/ConstructSparseMat.hpp"
 #include "EDP/LocalHamiltonian.hpp"
 
-#include "Circuit.hpp"
-
-#include "operators.hpp"
-#include "Optimizers/OptimizerFactory.hpp"
+#include "yavque.hpp"
 
 Eigen::SparseMatrix<double> tfi_ham(const uint32_t N, double h)
 {
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
 	for(uint32_t k = 0; k < N; ++k)
 	{
-		ham_ct.addTwoSiteTerm(std::make_pair(k, (k+1) % N), qunn::pauli_zz());
-		ham_ct.addOneSiteTerm(k, h*qunn::pauli_x());
+		ham_ct.addTwoSiteTerm(std::make_pair(k, (k+1) % N), yavque::pauli_zz());
+		ham_ct.addOneSiteTerm(k, h*yavque::pauli_x());
 	}
 	return -edp::constructSparseMat<double>(1 << N, ham_ct);
 }
 
 int main()
 {
-	using namespace qunn;
+	using namespace yavque;
 	using std::sqrt;
-	const uint32_t N = 16;
-	const uint32_t depth = 1;
+	const uint32_t N = 12;
+	const uint32_t depth = 6;
 	const double sigma = 1.0e-2;
 	const double learning_rate = 1.0e-2;
 
@@ -62,15 +59,15 @@ int main()
 		zz_odd(n) = elt;
 	}
 
-	auto zz_even_ham = qunn::DiagonalOperator(zz_even, "zz even");
-	auto zz_odd_ham = qunn::DiagonalOperator(zz_odd, "zz odd");
-	auto x_all_ham = qunn::SumLocalHam(N, qunn::pauli_x().cast<cx_double>());
+	auto zz_even_ham = yavque::DiagonalOperator(zz_even, "zz even");
+	auto zz_odd_ham = yavque::DiagonalOperator(zz_odd, "zz odd");
+	auto x_all_ham = yavque::SumLocalHam(N, yavque::pauli_x().cast<cx_double>());
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_even_ham));
-		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_odd_ham));
-		circ.add_op_right(std::make_unique<qunn::ProductHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_even_ham));
+		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_odd_ham));
+		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
 	}
 
 	auto parameters = circ.parameters();

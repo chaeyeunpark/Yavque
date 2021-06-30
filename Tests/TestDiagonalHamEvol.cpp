@@ -14,15 +14,15 @@
 
 TEST_CASE("test random diagonal", "[random-diagonal]") {
 	constexpr uint32_t N = 8;
-	constexpr qunn::cx_double I(0., 1.);
+	constexpr yavque::cx_double I(0., 1.);
 	std::random_device rd;
 	std::default_random_engine re{rd()};
 
 	std::normal_distribution<> nd;
 
 	Eigen::VectorXd ham = Eigen::VectorXd::Random(1<<N);
-	qunn::DiagonalOperator diag_op(ham);
-	qunn::DiagonalHamEvol diag_ham_evol(diag_op);
+	yavque::DiagonalOperator diag_op(ham);
+	yavque::DiagonalHamEvol diag_ham_evol(diag_op);
 
 	for(uint32_t k = 0; k < 100; ++k) //instance
 	{
@@ -69,15 +69,15 @@ TEST_CASE("test basic operations", "[basic-operation]") {
 	std::normal_distribution<> nd;
 
 	Eigen::VectorXd ham = Eigen::VectorXd::Random(1<<N);
-	qunn::DiagonalOperator diag_op(ham);
-	qunn::DiagonalHamEvol diag_ham_evol(diag_op);
+	yavque::DiagonalOperator diag_op(ham);
+	yavque::DiagonalHamEvol diag_ham_evol(diag_op);
 
 	diag_ham_evol.parameter() = 1.0;
 
 	auto clonned = diag_ham_evol.clone();
 
 	std::cout << clonned->desc() << std::endl;
-	auto p = dynamic_cast<qunn::Univariate*>(clonned.get());
+	auto p = dynamic_cast<yavque::Univariate*>(clonned.get());
 	p->parameter() = -1.0;
 
 	REQUIRE(diag_ham_evol.parameter().value() == 1.0);

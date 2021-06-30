@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-namespace qunn
+namespace yavque
 {
 namespace detail
 {

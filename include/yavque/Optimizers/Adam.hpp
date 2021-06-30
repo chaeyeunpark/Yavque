@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include "Optimizer.hpp"
 
-namespace qunn
+namespace yavque
 {
 class Adam
 	: public Optimizer
@@ -86,4 +86,4 @@ public:
 		return -alphat*m_.cwiseQuotient(denom);
 	}
 };
-} //namespace qunn
+} //namespace yavque

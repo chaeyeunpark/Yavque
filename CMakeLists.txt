@@ -61,14 +61,14 @@ target_include_directories(yavque PUBLIC
 	"${PROJECT_SOURCE_DIR}/externals/nlohmann_json_cmake_fetchcontent/include/")
 
 if(BUILD_EXAMPLES)
-	add_executable(qaoa_tfi "examples/qaoa_tfi.cpp")
-	target_link_libraries(qaoa_tfi PRIVATE yavque Eigen3::Eigen)
+	add_executable(qaoa_tfi_diag "examples/qaoa_tfi_diag.cpp")
+	target_link_libraries(qaoa_tfi_diag PRIVATE yavque Eigen3::Eigen)
 
-	add_executable(ti_tfi "examples/ti_tfi.cpp")
-	target_link_libraries(ti_tfi PRIVATE yavque Eigen3::Eigen)
+	add_executable(qaoa_tfi_pauli "examples/qaoa_tfi_pauli.cpp")
+	target_link_libraries(qaoa_tfi_pauli PRIVATE yavque Eigen3::Eigen)
 
-	add_executable(diagonal_product_tfi "examples/diagonal_product_tfi.cpp")
-	target_link_libraries(diagonal_product_tfi PRIVATE yavque Eigen3::Eigen)
+	add_executable(qaoa_tfi_ti "examples/qaoa_tfi_ti.cpp")
+	target_link_libraries(qaoa_tfi_ti PRIVATE yavque Eigen3::Eigen)
 
 	add_executable(qaoa_cluster "examples/qaoa_cluster.cpp")
 	target_link_libraries(qaoa_cluster PRIVATE yavque Eigen3::Eigen)

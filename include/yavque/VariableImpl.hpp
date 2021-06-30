@@ -4,7 +4,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-namespace qunn
+namespace yavque
 {
 class Circuit;
 class VariableImpl

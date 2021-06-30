@@ -1,14 +1,14 @@
 #include "yavque/backward_grad.hpp"
 
 std::pair<double, Eigen::VectorXd>
-qunn::value_and_grad(const Eigen::SparseMatrix<qunn::cx_double>& op, const Circuit& circuit)
+yavque::value_and_grad(const Eigen::SparseMatrix<yavque::cx_double>& op, const Circuit& circuit)
 {
 	/*
 	 * We use the notation in arXiv:2009.02823
 	 * */
 	Eigen::VectorXcd psi = *circuit.output();
 
-	double value = real(qunn::cx_double(psi.adjoint()*op*psi));
+	double value = real(yavque::cx_double(psi.adjoint()*op*psi));
 	Circuit lambda_circuit = circuit.dagger();
 
 	lambda_circuit.set_input(op*psi);
@@ -25,7 +25,7 @@ qunn::value_and_grad(const Eigen::SparseMatrix<qunn::cx_double>& op, const Circu
 			right = diff_op->log_deriv()->apply_right(right);
 
 			Eigen::VectorXcd left = *lambda_circuit.state_at(op_size - idx);
-			double deriv = 2.0*real(qunn::cx_double(left.adjoint() * right));
+			double deriv = 2.0*real(yavque::cx_double(left.adjoint() * right));
 			derivs.emplace_back(deriv);
 		}
 	}

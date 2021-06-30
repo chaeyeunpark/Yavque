@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include "Optimizer.hpp"
 
-namespace qunn
+namespace yavque
 {
 class SGD
 	: public Optimizer
@@ -47,4 +47,4 @@ public:
 		return -eta*v;
 	}
 };
-}//namespace qunn
+}//namespace yavque

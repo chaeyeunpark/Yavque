@@ -5,7 +5,7 @@
 
 #include "../utils.hpp"
 
-namespace qunn
+namespace yavque
 {
 enum class Pauli: char {X='X', Y='Y', Z='Z'};
 
@@ -215,4 +215,4 @@ public:
 		return instance;
 	}
 };
-} //namespace qunn
+} //namespace yavque

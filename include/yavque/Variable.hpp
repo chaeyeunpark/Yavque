@@ -9,7 +9,7 @@
 #include "Counter.hpp"
 #include "VariableImpl.hpp"
 
-namespace qunn
+namespace yavque
 {
 class Circuit;
 

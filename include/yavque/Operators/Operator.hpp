@@ -9,7 +9,7 @@
 #include "../Variable.hpp"
 #include "../Counter.hpp"
 
-namespace qunn
+namespace yavque
 {
 class Operator
 {
@@ -88,5 +88,5 @@ inline Eigen::VectorXcd operator*(const Operator& op,
 }
 
 
-} // namespace qunn
+} // namespace yavque
 

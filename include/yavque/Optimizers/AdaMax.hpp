@@ -2,7 +2,7 @@
 #include <limits>
 #include "Optimizer.hpp"
 
-namespace qunn
+namespace yavque
 {
 class AdaMax
 	: public Optimizer
@@ -79,4 +79,4 @@ public:
 	}
 
 };
-}//namespace qunn
+}//namespace yavque

@@ -1,7 +1,7 @@
 #pragma once
 #include <complex>
 
-namespace qunn
+namespace yavque
 {
 using cx_double = std::complex<double>;
 }

@@ -7,7 +7,7 @@
 
 #include "operators.hpp"
 
-namespace qunn
+namespace yavque
 {
 class Variable;
 /**
@@ -224,4 +224,4 @@ public:
 Circuit operator|(Circuit a, const Circuit& b);
 Circuit operator|(Circuit a, Circuit&& b);
 
-} // namespace qunn
+} // namespace yavque

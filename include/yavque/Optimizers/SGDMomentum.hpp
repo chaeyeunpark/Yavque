@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include "Optimizer.hpp"
 
-namespace qunn
+namespace yavque
 {
 class SGDMomentum
 	: public Optimizer
@@ -60,4 +60,4 @@ public:
 		return -eta*m_;
 	}
 };
-} //namespace qunn
+} //namespace yavque

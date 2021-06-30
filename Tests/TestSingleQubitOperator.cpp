@@ -30,7 +30,7 @@ Eigen::MatrixXcd matrix_log(const Eigen::MatrixXcd& m)
 
 TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 {
-	using namespace qunn;
+	using namespace yavque;
 	constexpr uint32_t N = 10;
 	constexpr uint32_t dim = 1u << N;
 	constexpr cx_double I(0, 1.0);
@@ -79,7 +79,7 @@ TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 
 TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 {
-	using namespace qunn;
+	using namespace yavque;
 	constexpr uint32_t N = 10;
 	constexpr uint32_t dim = 1u << N;
 	constexpr cx_double I(0, 1.0);
