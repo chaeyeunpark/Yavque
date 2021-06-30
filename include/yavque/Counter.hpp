@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+
 class Counter
 {
 private:

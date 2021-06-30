@@ -6,9 +6,9 @@
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
-#include "Operators/SumLocalHamEvol.hpp"
-#include "Circuit.hpp"
-#include "utilities.hpp"
+#include "yavque/operators.hpp"
+#include "yavque/Circuit.hpp"
+#include "yavque/utils.hpp"
 
 #include "common.hpp"
 

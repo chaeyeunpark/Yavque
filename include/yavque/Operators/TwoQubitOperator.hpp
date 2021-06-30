@@ -2,10 +2,10 @@
 
 #include <memory>
 #include <exception>
-#include "Operators/Operator.hpp"
-#include "Utilities/apply_operator.hpp"
+#include "Operator.hpp"
+#include "../utils.hpp"
 
-#include "Operators/DenseHermitianMatrix.hpp"
+#include "DenseHermitianMatrix.hpp"
 
 namespace qunn
 {

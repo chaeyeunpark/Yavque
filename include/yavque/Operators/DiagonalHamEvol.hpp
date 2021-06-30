@@ -4,50 +4,56 @@
 #include <Eigen/Sparse>
 #include <Eigen/Eigenvalues> 
 
-#include "Variable.hpp"
-#include "utilities.hpp"
-#include "Univariate.hpp"
+#include "../Variable.hpp"
+#include "../utils.hpp"
+#include "../Univariate.hpp"
 
-#include "Operators/Operator.hpp"
-#include "Operators/SumLocalHam.hpp"
+#include "Operator.hpp"
+#include "DiagonalOperator.hpp"
 
 namespace qunn
 {
 
-class SumLocalHamEvol final
+class DiagonalHamEvol final
 	: public Operator, public Univariate
 {
 private:
 	bool conjugate_ = false;
-	std::shared_ptr<const detail::SumLocalHamImpl> ham_;
+	std::shared_ptr<const detail::DiagonalOperatorImpl> ham_;
 
 	void dagger_in_place_impl() override
 	{
 		conjugate_ = !conjugate_;
 	}
 
-	SumLocalHamEvol(SumLocalHamEvol&& ) = default;
-	SumLocalHamEvol(const SumLocalHamEvol& ) = default;
+	DiagonalHamEvol(const DiagonalHamEvol& ) = default;
+	DiagonalHamEvol(DiagonalHamEvol&& ) = default;
 
 public:
-	explicit SumLocalHamEvol(SumLocalHam ham)
-		: Operator(ham.dim(), "SumLocalHamEvol of " + ham.name()), 
+	explicit DiagonalHamEvol(DiagonalOperator ham)
+		: Operator(ham.dim(), "DiagonalHamEvol of " + ham.name()), 
 		ham_{ham.get_impl()}
 	{
 	}
 
-	explicit SumLocalHamEvol(SumLocalHam ham, Variable var)
-		: Operator(ham.dim(), "SumLocalHamEvol of " + ham.name()), 
+	explicit DiagonalHamEvol(DiagonalOperator ham, Variable var)
+		: Operator(ham.dim(), "DiagonalHamEvol of " + ham.name()), 
 		Univariate(std::move(var)), ham_{ham.get_impl()}
 	{
 	}
 
-	SumLocalHamEvol& operator=(const SumLocalHamEvol& ) = delete;
-	SumLocalHamEvol& operator=(SumLocalHamEvol&& ) = delete;
+	DiagonalHamEvol& operator=(const DiagonalHamEvol& ) = delete;
+	DiagonalHamEvol& operator=(DiagonalHamEvol&& ) = delete;
+
+
+	DiagonalOperator hamiltonian() const
+	{
+		return DiagonalOperator(ham_);
+	}
 
 	std::unique_ptr<Operator> clone() const override
 	{
-		auto p = std::unique_ptr<SumLocalHamEvol>{new SumLocalHamEvol(*this)};
+		auto p = std::unique_ptr<DiagonalHamEvol>(new DiagonalHamEvol(*this));
 		p->change_parameter(Variable{var_.value()});
 		return p;
 	}
@@ -57,28 +63,19 @@ public:
 		constexpr std::complex<double> I(0.,1.0);
 		std::string op_name = std::string("derivative of ") + name(); //change to fmt
 		cx_double constant = conjugate_?I:-I;
-		return std::make_unique<SumLocalHam>(ham_, op_name, constant);
+		return std::make_unique<DiagonalOperator>(ham_, op_name, constant);
 	}
 
 	Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
 		constexpr std::complex<double> I(0.,1.0);
-		Eigen::VectorXcd res = st;
-		Eigen::MatrixXcd m = ham_->get_local_ham();
-
 		double t = conjugate_?-var_.value():var_.value();
-		Eigen::MatrixXcd expm = ham_->local_ham_exp(-I*t);
-
-		for(uint32_t k = 0; k < ham_->num_qubits(); ++k)
-		{
-			res = apply_single_qubit(res, expm, k);
-		}
-		return res;
+		return exp(-I*ham_->get_diag_op().array()*t)*st.array();
 	}	
 
 	bool can_merge(const Operator& rhs) const override
 	{
-		if(const SumLocalHamEvol* p = dynamic_cast<const SumLocalHamEvol*>(&rhs))
+		if(const DiagonalHamEvol* p = dynamic_cast<const DiagonalHamEvol*>(&rhs))
 		{
 			if (ham_ == p->ham_)
 				return true;

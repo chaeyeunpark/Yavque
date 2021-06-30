@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
 
-#include "utilities.hpp"
+#include "../utils.hpp"
 
 namespace qunn
 {

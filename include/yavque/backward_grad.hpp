@@ -2,6 +2,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "Circuit.hpp"
+#include "utils.hpp"
 
 namespace qunn
 {

@@ -3,8 +3,8 @@
 #include <random>
 #include <Eigen/Dense>
 
-#include "Operators/SumPauliString.hpp"
-#include "utilities.hpp"
+#include "yavque/Operators/SumPauliString.hpp"
+#include "yavque/utils.hpp"
 
 #include "common.hpp"
 

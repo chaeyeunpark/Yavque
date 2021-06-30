@@ -4,9 +4,9 @@
 
 #include <tbb/tbb.h>
 
-#include "operators.hpp"
-#include "Circuit.hpp"
-#include "Variable.hpp"
+#include "yavque/operators.hpp"
+#include "yavque/Circuit.hpp"
+#include "yavque/Variable.hpp"
 
 #include "common.hpp"
 

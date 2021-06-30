@@ -12,13 +12,9 @@
 #include "EDP/LocalHamiltonian.hpp"
 
 #include "common.hpp"
-#include "operators.hpp"
 
-#include "Operators/SingleQubitOperator.hpp"
-#include "Operators/SingleQubitHamEvol.hpp"
-#include "Operators/TwoQubitOperator.hpp"
-#include "Circuit.hpp"
-
+#include "yavque/Circuit.hpp"
+#include "yavque/operators.hpp"
 
 tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
 

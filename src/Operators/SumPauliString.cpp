@@ -1,4 +1,4 @@
-#include "Operators/SumPauliString.hpp"
+#include "yavque/Operators/SumPauliString.hpp"
 
 namespace qunn::detail
 {

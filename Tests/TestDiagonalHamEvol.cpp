@@ -7,11 +7,10 @@
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
-#include "Operators/DiagonalHamEvol.hpp"
-#include "utilities.hpp"
+#include "yavque/Operators/DiagonalHamEvol.hpp"
+#include "yavque/utils.hpp"
 
 #include "common.hpp"
-
 
 TEST_CASE("test random diagonal", "[random-diagonal]") {
 	constexpr uint32_t N = 8;

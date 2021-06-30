@@ -3,17 +3,15 @@
 #include <tbb/tbb.h>
 
 #include "common.hpp"
-#include "operators.hpp"
-#include "Circuit.hpp"
+#include "yavque/operators.hpp"
+#include "yavque/Circuit.hpp"
 
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
 using namespace Eigen;
-using std::sqrt;
 using std::cos;
 using std::sin;
-using std::exp;
 
 using Catch::Matchers::Floating::WithinAbsMatcher;
 

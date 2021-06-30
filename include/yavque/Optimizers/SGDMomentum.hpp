@@ -1,7 +1,7 @@
 #pragma once
 #include <Eigen/Dense>
 #include <nlohmann/json.hpp>
-#include "Optimizers/Optimizer.hpp"
+#include "Optimizer.hpp"
 
 namespace qunn
 {

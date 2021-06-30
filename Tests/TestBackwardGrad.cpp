@@ -1,70 +1,160 @@
-#include "Operators/Hamiltonian.hpp"
+#include <random>
 #include <sstream>
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <tbb/tbb.h>
 
-#include <Circuit.hpp>
-#include <operators.hpp>
-#include <EDP/LocalHamiltonian.hpp>
+#include "EDP/LocalHamiltonian.hpp"
+#include "EDP/ConstructSparseMat.hpp"
+
+#include "yavque/Circuit.hpp"
+#include "yavque/operators.hpp"
+#include "yavque/backward_grad.hpp"
 
 tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
 
-Eigen::SparseMatrix<qunn::cx_double> hadamard()
+Eigen::Matrix2cd hadamard()
 {
 	using std::sqrt;
-	Eigen::SparseMatrix<qunn::cx_double> h(2,2);
-	h.coeffRef(0, 0) = 1.0/sqrt(2.0);
-	h.coeffRef(0, 1) = 1.0/sqrt(2.0);
-	h.coeffRef(1, 0) = 1.0/sqrt(2.0);
-	h.coeffRef(1, 1) = -1.0/sqrt(2.0);
+	Eigen::Matrix2cd h;
+	h << 1.0/sqrt(2.0), 1.0/sqrt(2.0),
+		1.0/sqrt(2.0),-1.0/sqrt(2.0);
 
-	h.makeCompressed();
 	return h;
 };
 
-std::unique_ptr<qunn::Hamiltonian> hadamard_at(uint32_t n_qubits, uint32_t idx)
+Eigen::Matrix4cd cnot()
 {
-	edp::LocalHamiltonian<qunn::cx_double> ham_ct(n_qubits, 2);
-	ham_ct.addOneSiteTerm(idx, hadamard());
-	auto ham = edp::constructSparseMat<qunn::cx_double>(1 << n_qubits, ham_ct);
+	using std::sqrt;
+	Eigen::Matrix4cd m;
+	m.setZero();
 
-	std::ostringstream os;
-	os << "Hadamard at " << idx << std::endl;
+	m(0, 0) = 1.0;
+	m(1, 1) = 1.0;
+	m(2, 3) = 1.0;
+	m(3, 2) = 1.0;
 
-	return std::make_unique<qunn::Hamiltonian>(ham, os.str());
-}
+	return m;
+};
 
-std::unique_ptr<qunn::Hamiltonian> 
-cnot_at(uint32_t n_qubits, uint32_t control, uint32_t target)
+enum class Gate
 {
-	const uint32_t dim = (1u << n_qubits);
-	Eigen::SparseMatrix<qunn::cx_double> op(dim, dim);
-	for(uint32_t k = 0; k < dim; ++k)
+	RotX = 0, RotY = 1, RotZ = 2, // rotations e^{-I \theta \sigma}
+	Hadamard = 3, CNOT = 4
+};
+
+Eigen::SparseMatrix<double> tfi_ham(uint32_t N, double h)
+{
+	edp::LocalHamiltonian<double> lh(N, 2);
+	for(uint32_t k = 0; k < N; ++k)
 	{
-		uint32_t t = k ^ (((dim >> control) & 1) << target);
-		op.coeffRef(t, k) = 1;
+		lh.addTwoSiteTerm({k, (k+1)%N}, -qunn::pauli_zz());
+		lh.addOneSiteTerm(k, -h*qunn::pauli_x());
 	}
-	op.makeCompressed();
 
-	std::ostringstream os;
-	os << "CNOT [" << control << ", " << target << "]" << std::endl;
-
-
-	return std::make_unique<qunn::Hamiltonian>(op, os.str());
+	return edp::constructSparseMat<double>(1u << N, lh);
 }
 
-
-TEST_CASE("Test gradients using the QAOA circuit")
+TEST_CASE("Test gradients using a random circuit")
 {
 	using namespace qunn;
-	constexpr uint32_t N = 16;
+	constexpr uint32_t N = 14;
 	constexpr uint32_t dim = 1 << N; //dimension of the total Hilbert space
-	Circuit circuit(dim);
 	
-	// set initial state |0\rangle^{\otimes N}
-	Eigen::VectorXd ini = Eigen::VectorXd::Zero(dim);
-	ini(0) = 1.0;
+	const uint32_t depth = 40;
+	std::uniform_int_distribution<uint32_t> gate_dist(0, 4);
+	std::uniform_int_distribution<uint32_t> qidx_dist(0, N-1);
 
-	
+	std::random_device rd;
+	std::default_random_engine re{rd()};
+
+	for(uint32_t instance_idx = 0; instance_idx < 10; ++instance_idx)
+	{
+
+		// construct random circuit
+		Circuit circuit(dim);
+		auto pauli_x_ham = std::make_shared<DenseHermitianMatrix>(pauli_x());
+		auto pauli_y_ham = std::make_shared<DenseHermitianMatrix>(pauli_y());
+		auto pauli_z_ham = std::make_shared<DenseHermitianMatrix>(pauli_z());
+
+		for(uint32_t k = 0; k < depth; ++k)
+		{
+			switch(static_cast<Gate>(gate_dist(re)))
+			{
+			case Gate::RotX:
+				{
+				auto idx = qidx_dist(re);
+				circuit.add_op_right(
+					std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, idx)
+				);
+				}
+				break;
+			case Gate::RotY:
+				{
+				auto idx = qidx_dist(re);
+				circuit.add_op_right(
+					std::make_unique<SingleQubitHamEvol>(pauli_y_ham, N, idx)
+				);
+				}
+				break;
+			case Gate::RotZ:
+				{
+				auto idx = qidx_dist(re);
+				circuit.add_op_right(
+					std::make_unique<SingleQubitHamEvol>(pauli_z_ham, N, idx)
+				);
+				}
+				break;
+			case Gate::Hadamard:
+				{
+				auto idx = qidx_dist(re);
+				circuit.add_op_right(
+					std::make_unique<SingleQubitOperator>(hadamard(), N, idx)
+				);
+				}
+				break;
+			case Gate::CNOT:	
+				{
+				auto i = qidx_dist(re);
+				auto j = qidx_dist(re);
+				while(j == i)
+				{
+					j = qidx_dist(re);
+				}
+				circuit.add_op_right(
+					std::make_unique<TwoQubitOperator>(cnot(), N, i, j)
+				);
+				}
+				break;
+			}
+		}
+
+		auto parameters = circuit.parameters();
+		std::normal_distribution<double> ndist;
+		for(auto& param: parameters)
+		{
+			param = ndist(re);
+		}
+		
+		// set initial state |0\rangle^{\otimes N}
+		Eigen::VectorXd ini = Eigen::VectorXd::Zero(dim);
+		ini(0) = 1.0;
+		circuit.set_input(ini);
+
+		auto ham = tfi_ham(N, 1.0);
+
+		circuit.derivs();
+		Eigen::VectorXcd output = *circuit.output();
+		Eigen::VectorXd egrad(parameters.size());
+		for(uint32_t k = 0; k < parameters.size(); ++k)
+		{
+			Eigen::VectorXcd grad = *parameters[k].grad();
+			egrad(k) = 2*real(cx_double(grad.adjoint()*ham*output));
+		}
+
+		const auto [value, egrad2] = 
+			value_and_grad(ham.cast<cx_double>(), circuit);
+
+		REQUIRE((egrad - egrad2).norm() < 1e-6);
+	}
 }

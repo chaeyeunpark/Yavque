@@ -1,7 +1,8 @@
 #include <memory>
 #include <sstream>
-#include "Variable.hpp"
-#include "Circuit.hpp"
+
+#include "yavque/Variable.hpp"
+#include "yavque/Circuit.hpp"
 
 namespace qunn
 {

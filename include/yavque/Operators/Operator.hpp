@@ -6,10 +6,8 @@
 #include <Eigen/Sparse>
 #include <Eigen/Eigenvalues> 
 
-#include "BitOperations.h"
-#include "Variable.hpp"
-
-#include "Counter.hpp"
+#include "../Variable.hpp"
+#include "../Counter.hpp"
 
 namespace qunn
 {

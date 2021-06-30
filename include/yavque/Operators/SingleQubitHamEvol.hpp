@@ -4,15 +4,15 @@
 #include <sstream>
 #include <exception>
 
-#include "Variable.hpp"
-#include "Univariate.hpp"
-#include "utilities.hpp"
+#include "../Variable.hpp"
+#include "../Univariate.hpp"
+#include "../utils.hpp"
 
-#include "Operators/Operator.hpp"
-#include "Operators/Hamiltonian.hpp"
+#include "Operator.hpp"
+#include "Hamiltonian.hpp"
 
-#include "Operators/DenseHermitianMatrix.hpp"
-#include "Operators/SingleQubitOperator.hpp"
+#include "DenseHermitianMatrix.hpp"
+#include "SingleQubitOperator.hpp"
 
 namespace qunn
 {

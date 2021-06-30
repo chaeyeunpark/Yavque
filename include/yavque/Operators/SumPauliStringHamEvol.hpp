@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Variable.hpp"
-#include "Univariate.hpp"
-#include "utilities.hpp"
+#include "../Variable.hpp"
+#include "../Univariate.hpp"
+#include "../utils.hpp"
 
-#include "Operators/SumPauliString.hpp"
+#include "SumPauliString.hpp"
 
 
 namespace qunn

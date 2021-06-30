@@ -3,10 +3,10 @@
 #include <set>
 #include <Eigen/Eigenvalues>
 
-#include "utilities.hpp"
+#include "../utils.hpp"
 
-#include "Operators/Operator.hpp"
-#include "Operators/CompressedPauliString.hpp"
+#include "Operator.hpp"
+#include "CompressedPauliString.hpp"
 
 namespace qunn
 {

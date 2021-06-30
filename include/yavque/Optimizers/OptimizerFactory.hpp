@@ -2,12 +2,12 @@
 #include <functional>
 #include <utility>
 
-#include "Optimizers/Optimizer.hpp"
+#include "Optimizer.hpp"
 
-#include "Optimizers/SGD.hpp"
-#include "Optimizers/SGDMomentum.hpp"
-#include "Optimizers/Adam.hpp"
-#include "Optimizers/AdaMax.hpp"
+#include "SGD.hpp"
+#include "SGDMomentum.hpp"
+#include "Adam.hpp"
+#include "AdaMax.hpp"
 
 
 namespace qunn 

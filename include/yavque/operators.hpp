@@ -13,3 +13,8 @@
 
 #include "Operators/SumLocalHam.hpp"
 #include "Operators/SumLocalHamEvol.hpp"
+
+#include "Operators/DenseHermitianMatrix.hpp"
+#include "Operators/SingleQubitOperator.hpp"
+#include "Operators/SingleQubitHamEvol.hpp"
+#include "Operators/TwoQubitOperator.hpp"
