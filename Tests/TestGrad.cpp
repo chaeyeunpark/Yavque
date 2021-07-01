@@ -4,9 +4,9 @@
 
 #include <tbb/tbb.h>
 
-#include "operators.hpp"
-#include "Circuit.hpp"
-#include "Variable.hpp"
+#include "yavque/operators.hpp"
+#include "yavque/Circuit.hpp"
+#include "yavque/Variable.hpp"
 
 #include "common.hpp"
 
@@ -19,7 +19,7 @@ template<typename RandomEngine>
 void test_commuting(const uint32_t N, const uint32_t depth, 
 		Eigen::SparseMatrix<double> op, RandomEngine& re)
 {
-	using namespace qunn;
+	using namespace yavque;
 	constexpr std::complex<double> I(0., 1.);
 
 	std::uniform_real_distribution<> urd(-M_PI, M_PI);
@@ -36,18 +36,18 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
 
-		std::vector<qunn::Hamiltonian> hams;
+		std::vector<yavque::Hamiltonian> hams;
 		for(uint32_t i = 0; i < depth; i ++)
 		{
 			ham_ct.clearTerms();
 			std::shuffle(indices.begin(), indices.end(), re);
 			auto connection = std::pair<int,int>{indices[0], indices[1]};
 			ham_ct.addTwoSiteTerm(connection, op);
-			auto ham = qunn::Hamiltonian(edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct));
+			auto ham = yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct));
 
 			hams.push_back(ham);
 
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham));
+			circ.add_op_right(std::make_unique<yavque::HamEvol>(ham));
 		}
 
 		Eigen::VectorXcd v(1<<N);
@@ -77,7 +77,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 }
 
 TEST_CASE("test gradient of cummuting circuit", "[commuting]") {
-	using namespace qunn;
+	using namespace yavque;
 	const int N = 8;
 	const int depth = 20;
 
@@ -97,7 +97,7 @@ TEST_CASE("test gradient of cummuting circuit", "[commuting]") {
 
 
 TEST_CASE("test grad for two-qubit paulis", "[two-qubit-pauli]") {
-	using namespace qunn;
+	using namespace yavque;
 	const uint32_t N = 8;
 	const uint32_t depth = 20;
 
@@ -128,10 +128,10 @@ TEST_CASE("test grad for two-qubit paulis", "[two-qubit-pauli]") {
 			ss << pauli_names[p] << " between " << connection.first << " and " 
 				<< connection.second;
 
-			auto ham = qunn::Hamiltonian(
-					edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct), ss.str());
+			auto ham = yavque::Hamiltonian(
+					edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct), ss.str());
 
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham));
+			circ.add_op_right(std::make_unique<yavque::HamEvol>(ham));
 		}
 
 		Eigen::VectorXcd v(1<<N);
@@ -172,14 +172,14 @@ TEST_CASE("test grad for two-qubit paulis", "[two-qubit-pauli]") {
 	}
 }
 
-std::pair<qunn::Circuit, std::vector<qunn::Variable>>
+std::pair<yavque::Circuit, std::vector<yavque::Variable>>
 qaoa_shared_var(const uint32_t N, const uint32_t depth)
 {
-	using namespace qunn;
+	using namespace yavque;
 	Circuit circ{N};
 	std::vector<Variable> variables(3*depth);
 
-	std::vector<qunn::Hamiltonian> ham_zzs;
+	std::vector<yavque::Hamiltonian> ham_zzs;
 
 	for(uint32_t i = 0; i < N; ++i)
 	{
@@ -190,11 +190,11 @@ qaoa_shared_var(const uint32_t N, const uint32_t depth)
 		ss << "zz between " << i << " and " << (i+1)%N;
 
 		ham_zzs.emplace_back(
-			edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+			edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct),
 			ss.str());
 	}
 
-	std::vector<qunn::Hamiltonian> ham_xs;
+	std::vector<yavque::Hamiltonian> ham_xs;
 
 	for(uint32_t i = 0; i < N; ++i)
 	{
@@ -205,7 +205,7 @@ qaoa_shared_var(const uint32_t N, const uint32_t depth)
 		ss << "x on " << i;
 
 		ham_xs.emplace_back(
-			edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+			edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct),
 			ss.str());
 	}
 
@@ -213,21 +213,21 @@ qaoa_shared_var(const uint32_t N, const uint32_t depth)
 	for(uint32_t p = 0; p < depth; ++p)
 	{
 		for(uint32_t i = 0; i < N; i += 2) //add zz even
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_zzs[i], variables[3*p]));
+			circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_zzs[i], variables[3*p]));
 
 		for(uint32_t i = 1; i < N; i += 2) //add zz odd
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_zzs[i], variables[3*p+1]));
+			circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_zzs[i], variables[3*p+1]));
 
 		for(uint32_t i = 0; i < N; ++i)
-			circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_xs[i], variables[3*p+2]));
+			circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_xs[i], variables[3*p+2]));
 	}
 
 	return std::make_pair(std::move(circ), variables);
 }
 
-qunn::Circuit qaoa_sum_ham(const uint32_t N, const uint32_t depth)
+yavque::Circuit qaoa_sum_ham(const uint32_t N, const uint32_t depth)
 {
-	using namespace qunn;
+	using namespace yavque;
 	Circuit circ{N};
 
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
@@ -238,8 +238,8 @@ qunn::Circuit qaoa_sum_ham(const uint32_t N, const uint32_t depth)
 	}
 	std::ostringstream ss;
 	ss << "zz even";
-	auto ham_zz_even = qunn::Hamiltonian(
-		edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+	auto ham_zz_even = yavque::Hamiltonian(
+		edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct),
 		ss.str());
 
 	ham_ct.clearTerms();
@@ -249,8 +249,8 @@ qunn::Circuit qaoa_sum_ham(const uint32_t N, const uint32_t depth)
 	}
 	ss.clear();
 	ss << "zz odd";
-	auto ham_zz_odd = qunn::Hamiltonian(
-			edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+	auto ham_zz_odd = yavque::Hamiltonian(
+			edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct),
 			ss.str());
 
 	ham_ct.clearTerms();
@@ -261,24 +261,24 @@ qunn::Circuit qaoa_sum_ham(const uint32_t N, const uint32_t depth)
 	ss.clear();
 	ss << "x all";
 
-	auto ham_x_all = qunn::Hamiltonian(
-		edp::constructSparseMat<qunn::cx_double>(1<<N, ham_ct),
+	auto ham_x_all = yavque::Hamiltonian(
+		edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct),
 		ss.str());
 
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_zz_even));
-		circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_zz_odd));
-		circ.add_op_right(std::make_unique<qunn::HamEvol>(ham_x_all));
+		circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_zz_even));
+		circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_zz_odd));
+		circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_x_all));
 	}
 	
 	return circ;
 }
 
-qunn::Circuit qaoa_diag_prod_ham(const uint32_t N, const uint32_t depth)
+yavque::Circuit qaoa_diag_prod_ham(const uint32_t N, const uint32_t depth)
 {
-	using namespace qunn;
+	using namespace yavque;
 	Circuit circ{1u<<N};
 
 	Eigen::VectorXd zz_even(1<<N);
@@ -308,22 +308,22 @@ qunn::Circuit qaoa_diag_prod_ham(const uint32_t N, const uint32_t depth)
 		zz_odd(n) = elt;
 	}
 
-	auto zz_even_ham = qunn::DiagonalOperator(zz_even, "zz even");
-	auto zz_odd_ham = qunn::DiagonalOperator(zz_odd, "zz odd");
-	auto x_all_ham = qunn::SumLocalHam(N, qunn::pauli_x().cast<cx_double>());
+	auto zz_even_ham = yavque::DiagonalOperator(zz_even, "zz even");
+	auto zz_odd_ham = yavque::DiagonalOperator(zz_odd, "zz odd");
+	auto x_all_ham = yavque::SumLocalHam(N, yavque::pauli_x().cast<cx_double>());
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_even_ham));
-		circ.add_op_right(std::make_unique<qunn::DiagonalHamEvol>(zz_odd_ham));
-		circ.add_op_right(std::make_unique<qunn::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_even_ham));
+		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_odd_ham));
+		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
 	}
 	
 	return circ;
 }
 
 TEST_CASE("test grad for qaoa for TFI", "[qaoa]") {
-	using namespace qunn;
+	using namespace yavque;
 	const int N = 8;
 	const int depth = 10;
 

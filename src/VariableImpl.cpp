@@ -1,9 +1,10 @@
 #include <memory>
 #include <sstream>
-#include "Variable.hpp"
-#include "Circuit.hpp"
 
-namespace qunn
+#include "yavque/Variable.hpp"
+#include "yavque/Circuit.hpp"
+
+namespace yavque
 {
 VariableImpl::VariableImpl(double value)
 	: value_{value}
@@ -87,4 +88,4 @@ void VariableImpl::zero_grad()
 	std::vector<std::shared_ptr<Circuit> >{}.swap(deriv_circuits_);
 	grad_updated_ = false;
 }
-}// namespace qunn
+}// namespace yavque

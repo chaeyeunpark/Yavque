@@ -3,41 +3,38 @@
 #include <cmath>
 
 #include <fstream>
+#include <tbb/tbb.h>
 
 #include "EDP/ConstructSparseMat.hpp"
 #include "EDP/LocalHamiltonian.hpp"
 
-#include "Circuit.hpp"
+#include "yavque.hpp"
 
-#include "operators.hpp"
-#include "Optimizers/OptimizerFactory.hpp"
 
-#include <tbb/tbb.h>
-
-Eigen::SparseMatrix<qunn::cx_double> single_pauli(const uint32_t N, const uint32_t idx, 
-		const Eigen::SparseMatrix<qunn::cx_double>& m)
+Eigen::SparseMatrix<yavque::cx_double> single_pauli(const uint32_t N, const uint32_t idx, 
+		const Eigen::SparseMatrix<yavque::cx_double>& m)
 {
-	edp::LocalHamiltonian<qunn::cx_double> lh(N, 2);
+	edp::LocalHamiltonian<yavque::cx_double> lh(N, 2);
 	lh.addOneSiteTerm(idx, m);
-	return edp::constructSparseMat<qunn::cx_double>(1<<N, lh);
+	return edp::constructSparseMat<yavque::cx_double>(1<<N, lh);
 }
 
-Eigen::SparseMatrix<qunn::cx_double> identity(const uint32_t N)
+Eigen::SparseMatrix<yavque::cx_double> identity(const uint32_t N)
 {
-	std::vector<Eigen::Triplet<qunn::cx_double>> triplets;
+	std::vector<Eigen::Triplet<yavque::cx_double>> triplets;
 	for(uint32_t n = 0; n < (1u<<N); ++n)
 	{
 		triplets.emplace_back(n, n, 1.0);
 	}
-	Eigen::SparseMatrix<qunn::cx_double> m(1<<N,1<<N);
+	Eigen::SparseMatrix<yavque::cx_double> m(1<<N,1<<N);
 	m.setFromTriplets(triplets.begin(), triplets.end());
 	return m;
 }
 
 
-Eigen::SparseMatrix<qunn::cx_double> cluster_ham(uint32_t N, double h)
+Eigen::SparseMatrix<yavque::cx_double> cluster_ham(uint32_t N, double h)
 {
-	using namespace qunn;
+	using namespace yavque;
 	Eigen::SparseMatrix<cx_double> ham(1<<N, 1<<N);
 	for(uint32_t k = 0; k < N; k++)
 	{
@@ -69,16 +66,16 @@ int get_num_threads()
 
 int main(int argc, char *argv[])
 {
-    using namespace qunn;
+    using namespace yavque;
     using std::sqrt;
 
 	const uint32_t total_epochs = 10;
 	const double h = 0.5;
 
 	const uint32_t N = 12;
-	const uint32_t depth = 5;
-	const double sigma = 0.001;
-	const double learning_rate = 0.01;
+	const uint32_t depth = 6;
+	const double sigma = 1.0e-2;
+	const double learning_rate = 1.0e-2;
 
 	const int num_threads = get_num_threads();
 	std::cerr << "Processing using " << num_threads << " threads." << std::endl;
@@ -102,13 +99,13 @@ int main(int argc, char *argv[])
 		ti_zxz.emplace_back(std::move(term));
 	}
 
-	auto zxz_ham = qunn::SumPauliString(N, ti_zxz);
-	auto x_all_ham = qunn::SumLocalHam(N, qunn::pauli_x().cast<cx_double>());
+	auto zxz_ham = yavque::SumPauliString(N, ti_zxz);
+	auto x_all_ham = yavque::SumLocalHam(N, yavque::pauli_x().cast<cx_double>());
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<qunn::SumPauliStringHamEvol>(zxz_ham));
-		circ.add_op_right(std::make_unique<qunn::ProductHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<yavque::SumPauliStringHamEvol>(zxz_ham));
+		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
 	}
 
 	auto parameters = circ.parameters();

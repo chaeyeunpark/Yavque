@@ -7,10 +7,8 @@
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
-#include "Operators/DiagonalHamEvol.hpp"
-#include "Operators/HamEvol.hpp"
-#include "Operators/SumPauliStringHamEvol.hpp"
-#include "utilities.hpp"
+#include "yavque/operators.hpp"
+#include "yavque/utils.hpp"
 
 #include "common.hpp"
 
@@ -19,7 +17,7 @@ TEST_CASE("test random ZZ", "[random-zz]") {
 	const uint32_t N = 14;
 	const uint32_t n_terms = 10;
 
-	using namespace qunn;
+	using namespace yavque;
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
@@ -82,21 +80,21 @@ TEST_CASE("test random ZZ", "[random-zz]") {
 	}
 }
 
-Eigen::SparseMatrix<qunn::cx_double> single_pauli(const uint32_t N, const uint32_t idx, 
-		const Eigen::SparseMatrix<qunn::cx_double>& m)
+Eigen::SparseMatrix<yavque::cx_double> single_pauli(const uint32_t N, const uint32_t idx, 
+		const Eigen::SparseMatrix<yavque::cx_double>& m)
 {
-	edp::LocalHamiltonian<qunn::cx_double> lh(N, 2);
+	edp::LocalHamiltonian<yavque::cx_double> lh(N, 2);
 	lh.addOneSiteTerm(idx, m);
-	return edp::constructSparseMat<qunn::cx_double>(1<<N, lh);
+	return edp::constructSparseMat<yavque::cx_double>(1<<N, lh);
 }
-Eigen::SparseMatrix<qunn::cx_double> identity(const uint32_t N)
+Eigen::SparseMatrix<yavque::cx_double> identity(const uint32_t N)
 {
-	std::vector<Eigen::Triplet<qunn::cx_double>> triplets;
+	std::vector<Eigen::Triplet<yavque::cx_double>> triplets;
 	for(uint32_t n = 0; n < (1u<<N); ++n)
 	{
 		triplets.emplace_back(n, n, 1.0);
 	}
-	Eigen::SparseMatrix<qunn::cx_double> m(1<<N,1<<N);
+	Eigen::SparseMatrix<yavque::cx_double> m(1<<N,1<<N);
 	m.setFromTriplets(triplets.begin(), triplets.end());
 	return m;
 }
@@ -104,7 +102,7 @@ Eigen::SparseMatrix<qunn::cx_double> identity(const uint32_t N)
 TEST_CASE("test ZXZ", "[zxz]") {
 	const uint32_t N = 10;
 
-	using namespace qunn;
+	using namespace yavque;
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};

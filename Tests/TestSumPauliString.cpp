@@ -3,13 +3,13 @@
 #include <random>
 #include <Eigen/Dense>
 
-#include "Operators/SumPauliString.hpp"
-#include "utilities.hpp"
+#include "yavque/Operators/SumPauliString.hpp"
+#include "yavque/utils.hpp"
 
 #include "common.hpp"
 
 TEST_CASE("test commuting operators", "[test-commuting]") {
-	using namespace qunn;
+	using namespace yavque;
 	{
 		std::map<uint32_t, Pauli> pstr1;
 		std::map<uint32_t, Pauli> pstr2;
@@ -65,7 +65,7 @@ TEST_CASE("test commuting operators", "[test-commuting]") {
 }
 
 TEST_CASE("test CompressedPauliString", "[pauli-string]") {
-	using namespace qunn;
+	using namespace yavque;
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
@@ -133,7 +133,7 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]") {
 	}
 }
 TEST_CASE("test SumPauliString", "[sum-pauli-string]") {
-	using namespace qunn;
+	using namespace yavque;
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};

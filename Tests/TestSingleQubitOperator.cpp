@@ -12,13 +12,9 @@
 #include "EDP/LocalHamiltonian.hpp"
 
 #include "common.hpp"
-#include "operators.hpp"
 
-#include "Operators/SingleQubitOperator.hpp"
-#include "Operators/SingleQubitHamEvol.hpp"
-#include "Operators/TwoQubitOperator.hpp"
-#include "Circuit.hpp"
-
+#include "yavque/Circuit.hpp"
+#include "yavque/operators.hpp"
 
 tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
 
@@ -34,7 +30,7 @@ Eigen::MatrixXcd matrix_log(const Eigen::MatrixXcd& m)
 
 TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 {
-	using namespace qunn;
+	using namespace yavque;
 	constexpr uint32_t N = 10;
 	constexpr uint32_t dim = 1u << N;
 	constexpr cx_double I(0, 1.0);
@@ -83,7 +79,7 @@ TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 
 TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 {
-	using namespace qunn;
+	using namespace yavque;
 	constexpr uint32_t N = 10;
 	constexpr uint32_t dim = 1u << N;
 	constexpr cx_double I(0, 1.0);

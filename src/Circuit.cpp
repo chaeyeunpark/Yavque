@@ -1,10 +1,10 @@
-#include "Circuit.hpp"
-#include "Variable.hpp"
-#include "Univariate.hpp"
+#include "yavque/Circuit.hpp"
+#include "yavque/Variable.hpp"
+#include "yavque/Univariate.hpp"
 
-#include "operators.hpp"
+#include "yavque/operators.hpp"
 
-namespace qunn
+namespace yavque
 {
 Circuit::Circuit(const Circuit& rhs)
 	: dim_{rhs.dim_}, states_from_left_{rhs.states_from_left_},
@@ -70,4 +70,4 @@ Circuit operator|(Circuit a, Circuit&& b)
 	return res;
 }
 
-} //namespace qunn
+} //namespace yavque

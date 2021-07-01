@@ -6,13 +6,13 @@
 #include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 
-#include "Operators/SumLocalHamEvol.hpp"
-#include "utilities.hpp"
+#include "yavque/Operators/SumLocalHamEvol.hpp"
+#include "yavque/utils.hpp"
 
 #include "common.hpp"
 
 TEST_CASE("test sum of local hamiltonian", "[sum-local]") {
-	using namespace qunn;
+	using namespace yavque;
 	using namespace Eigen;
 
 	constexpr unsigned int N = 8;
