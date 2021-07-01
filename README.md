@@ -18,7 +18,7 @@ $ cmake -DBUILD_EXAMPLES=ON ..
 $ make all
 ```
 
-In the examples, you can find three different implementations of variational quantum eigensolvers (VQE) with the quantum alternating operator Ansatz for the transverse field Ising model: `qaoa_tfi_diag`, `qaoa_tfi_pauli`, and `qaoa_tfi_ti`, and the hardware efficient Ansatz for solving a chemical Hamiltonian solve_chem. As we included sample Hamiltonians for H<sub>2</sub> and NH<sub>3</sub> molecules, you can test run them.
+In the examples, you can find three different implementations of variational quantum eigensolvers (VQE) with the quantum alternating operator Ansatz for the transverse field Ising model: `qaoa_tfi_diag`, `qaoa_tfi_pauli`, and `qaoa_tfi_ti`, and the hardware efficient Ansatz for solving a chemical Hamiltonian `solve_chem`. As we included sample Hamiltonians for H<sub>2</sub> and NH<sub>3</sub> molecules, you can test run them.
 
 
 ```bash
