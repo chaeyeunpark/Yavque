@@ -1,6 +1,6 @@
 [submodule "externals/ExactDiagonalization"]
 	path = externals/ExactDiagonalization
-	url = git@github.com:chaeyeunpark/ExactDiagonalization.git
+	url = https://github.com/chaeyeunpark/ExactDiagonalization.git
 [submodule "externals/nlohmann_json_cmake_fetchcontent"]
 	path = externals/nlohmann_json_cmake_fetchcontent
 	url = https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent.git
