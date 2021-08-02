@@ -84,7 +84,7 @@ private:
 		mat_ = Eigen::MatrixXcd::Ones(1,1);
 		for(auto iter = pstring_.rbegin(); iter != pstring_.rend(); ++iter)
 		{
-			mat_ = Eigen::KroneckerProduct(mat_, get_pauli(*iter)).eval();
+			mat_ = Eigen::kroneckerProduct(mat_, get_pauli(*iter)).eval();
 		}
 	}
 	

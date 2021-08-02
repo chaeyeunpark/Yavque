@@ -167,4 +167,4 @@ public:
 	}
 };
 
-}
+} // namespace yavque

@@ -34,4 +34,4 @@ public:
 	std::shared_ptr<const Eigen::VectorXcd> grad() const;
 	void zero_grad();
 };
-}
+} //namespace yavque

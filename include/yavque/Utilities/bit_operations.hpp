@@ -11,4 +11,4 @@ constexpr uint32_t bitswap(uint32_t b, uint32_t i, uint32_t j)
 	return b;
 }
 }
-}
+} // namespace yavque::detail

@@ -150,4 +150,4 @@ Eigen::VectorXcd apply_three_qubit(const Eigen::VectorXcd& vec,
 	}
 	return res;
 }
-} //namespace yavque
+} //namespace yavque::detail

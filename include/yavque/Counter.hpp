@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 
+
+namespace yavque
+{
 class Counter
 {
 private:
@@ -23,3 +26,4 @@ public:
 		return counter_++;
 	}
 };
+} // namespace yavque
