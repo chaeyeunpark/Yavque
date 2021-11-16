@@ -10,11 +10,29 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(BLAS REQUIRED)
 
+message(STATUS "Using BLAS library with ${BLAS_LIBRARIES}.\n"
+	"To use another BLAS implementation, set BLA_VENDOR variable in CMake.")
+
+
+# Build executables
 option(BUILD_TESTS "Build tests" OFF)
 option(BUILD_EXAMPLES "Build examples" OFF)
 
-# download CATCH
+# Clang-tidy
+option(CLANG_TIDY "Set Clang-Tidy" OFF)
+
+
+if(CLANG_TIDY)
+	message(STATUS "Use Clang-Tidy")
+	set(CMAKE_CXX_CLANG_TIDY 
+		clang-tidy;-header-filter=${PROJECT_SOURCE_DIR}/include;-extra-arg=-std=c++17;
+		-checks=*,-modernize-use-trailing-return-type,-fuchsia-overloaded-operator,-llvm-header-guard,-fuchsia-default-arguments-calls,-*-non-private-member-variables-in-classes,-fuchsia-multiple-inheritance,-fuchsia-default-arguments-declarations;
+		-warnings-as-errors=*,-hicpp-uppercase-literal-suffix,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers;)
+endif()
+
+# Download CATCH
 set(CATCH_URL "https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp")
 set(CATCH_DOWNLOAD_PATH "${PROJECT_SOURCE_DIR}/externals/catch.hpp")
 
@@ -23,30 +41,29 @@ if (NOT EXISTS "${CATCH_DOWNLOAD_PATH}")
 endif()
 
 
-# set external dependencies
-if(NOT DEFINED ENV{MKLROOT})
-	message(FATAL_ERROR "MKL (which is not a part of OneAPI) must be installed for this library. \
-	If you have already installed MKL, check wheter the environment varialbles are corretly loaded.")
-endif()
 if(NOT DEFINED ENV{TBBROOT})
-	message(FATAL_ERROR "TBB (which is not a part of OneAPI) must be installed for this library. \
+	message(FATAL_ERROR "OneTBB or IntelTBB must be installed for this library. \
 	If you have already installed TBB, check wheter the environment varialbles are corretly loaded.")
 endif()
 
 add_library(external_dependency INTERFACE)
 target_include_directories(external_dependency INTERFACE "$ENV{MKLROOT}/include")
 
-# setup MKL
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+# Setup BLAS
+if ((CMAKE_CXX_COMPILER_ID STREQUAL "Intel") AND ($"{BLA_VENDOR}" MATCHES "Intel.*"))
+	message(STATUS "Use Intel Compiler with natural mkl support")
 	target_compile_options(external_dependency INTERFACE "-mkl=parallel -tbb")
 	target_link_libraries(external_dependency INTERFACE tbb stdc++ pthread m dl)
-else()
-	target_link_libraries(external_dependency INTERFACE	mkl_intel_lp64 
-		mkl_tbb_thread mkl_core tbb pthread m dl)
+	target_compile_options(external_dependency INTERFACE "-DEIGEN_USE_MKL_ALL") # For Eigen
+else ()
+	target_link_libraries(external_dependency INTERFACE	"${BLAS_LIBRARIES}")
+	target_link_options(external_dependency INTERFACE "${BLAS_LINKER_FLAGS}")
+	target_link_libraries(external_dependency INTERFACE tbb stdc++ pthread m dl)
+	target_compile_options(external_dependency INTERFACE "-DEIGEN_USE_BLAS") # For Eigen
 endif()
 
-# always set -Wall -Wextra
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+# Always set -Wall -Wextra -Werror -Wpedantic
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wpedantic")
 
 
 add_library(yavque STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" 
@@ -54,7 +71,6 @@ add_library(yavque STATIC "src/VariableImpl.cpp" "src/Circuit.cpp"
 	"src/backward_grad.cpp")
 target_link_libraries(yavque PUBLIC Eigen3::Eigen external_dependency)
 target_include_directories(yavque PUBLIC "${PROJECT_SOURCE_DIR}/include")
-target_compile_options(yavque PUBLIC "-DEIGEN_USE_MKL_ALL")
 
 target_include_directories(yavque PUBLIC 
 	"${PROJECT_SOURCE_DIR}/externals/ExactDiagonalization/Include/"

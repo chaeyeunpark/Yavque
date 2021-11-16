@@ -1,6 +1,6 @@
 #include "yavque/Circuit.hpp"
-#include "yavque/Variable.hpp"
 #include "yavque/Univariate.hpp"
+#include "yavque/Variable.hpp"
 
 #include "yavque/operators.hpp"
 
@@ -18,9 +18,15 @@ Circuit::Circuit(const Circuit& rhs)
 
 Circuit& Circuit::operator=(const Circuit& rhs)
 {
+	if(this == &rhs)
+	{
+		return *this;
+	}
 	dim_ = rhs.dim_;
 	states_from_left_ = rhs.states_from_left_;
 	states_updated_to_ = rhs.states_updated_to_;
+
+	ops_.clear();
 	for(const auto& op: rhs.ops_)
 	{
 		ops_.emplace_back(op->clone());
@@ -29,14 +35,14 @@ Circuit& Circuit::operator=(const Circuit& rhs)
 	return *this;
 }
 
-std::vector<Variable> Circuit::parameters() const
+std::vector<Variable> Circuit::variables() const
 {
 	std::vector<Variable> params;
 	for(const auto& op: ops_)
 	{
-		if(auto diff_op = dynamic_cast<Univariate*>(op.get()))//may change?
+		if(auto* diff_op = dynamic_cast<Univariate*>(op.get()))//may change?
 		{
-			params.emplace_back(diff_op->parameter());
+			params.emplace_back(diff_op->get_variable());
 		}
 	}
 	return params;
@@ -52,22 +58,20 @@ void Circuit::derivs() const
 			circuit_der.add_op_right(diff_op->log_deriv());
 			circuit_der |= this->from(idx+1);
 
-			diff_op->parameter().add_grad(std::move(circuit_der));
+			diff_op->get_variable().add_grad(std::move(circuit_der));
 		}
 	}
 }
 
 Circuit operator|(Circuit a, const Circuit& b)
 {
-	Circuit res = a;
-	res |= b;
-	return res;
+	a |= b;
+	return a;
 }
 Circuit operator|(Circuit a, Circuit&& b)
 {
-	Circuit res = a;
-	res |= std::move(b);
-	return res;
+	a |= std::move(b);
+	return a;
 }
 
 } //namespace yavque

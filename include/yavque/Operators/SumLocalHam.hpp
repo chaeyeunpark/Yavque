@@ -1,10 +1,11 @@
 #pragma once
 
-#include <EDP/LocalHamiltonian.hpp>
 #include <EDP/ConstructSparseMat.hpp>
+#include <EDP/LocalHamiltonian.hpp>
+
+#include "Operator.hpp"
 
 #include "../utils.hpp"
-#include "Operator.hpp"
 
 namespace yavque
 {
@@ -28,7 +29,7 @@ private:
 		{
 			ham_ct.addOneSiteTerm(k, local_ham_);
 		}
-		full_ham_ = edp::constructSparseMat<cx_double>(1u << num_qubits_, ham_ct);
+		full_ham_ = edp::constructSparseMat<cx_double>(1U << num_qubits_, ham_ct);
 	}
 
 public:
@@ -40,52 +41,44 @@ public:
 		construct_full_ham();
 	}
 
-	SumLocalHamImpl(uint32_t num_qubits, Eigen::SparseMatrix<cx_double>&& local_ham)
-		: num_qubits_{num_qubits}, local_ham_{std::move(local_ham)}
-	{
-		assert(local_ham.cols() == 2);
-		assert(local_ham.rows() == 2);
-		construct_full_ham();
-	}
-
-	const Eigen::SparseMatrix<cx_double>& get_local_ham() const&
+	[[nodiscard]] const Eigen::SparseMatrix<cx_double>& get_local_ham() const&
 	{
 		return local_ham_;
 	}
 
-	Eigen::SparseMatrix<cx_double> get_local_ham() &&
+	[[nodiscard]] Eigen::SparseMatrix<cx_double> get_local_ham() &&
 	{
 		return local_ham_;
 	}
 
-	const Eigen::SparseMatrix<cx_double>& get_full_ham() const&
+	[[nodiscard]] const Eigen::SparseMatrix<cx_double>& get_full_ham() const&
 	{
 		return full_ham_;
 	}
 
-	Eigen::SparseMatrix<cx_double> get_full_ham() &&
+	[[nodiscard]] Eigen::SparseMatrix<cx_double> get_full_ham() &&
 	{
 		return full_ham_;
 	}
 
-	Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const 
+	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const 
 	{
 		return full_ham_*st;
 	}
 
-	uint32_t dim() const
+	[[nodiscard]] uint32_t dim() const
 	{
-		return 1u << num_qubits_;
+		return (1U << num_qubits_);
 	}
 
-	uint32_t num_qubits() const
+	[[nodiscard]] uint32_t num_qubits() const
 	{
 		return num_qubits_;
 	}
 
 	/*
 	 * compute exp(x*local_ham_) */
-	Eigen::MatrixXcd local_ham_exp(cx_double x) const
+	[[nodiscard]] Eigen::MatrixXcd local_ham_exp(cx_double x) const
 	{
 		if(!diagonalized_)
 		{
@@ -109,8 +102,8 @@ private:
 
 public:
 	explicit SumLocalHam(uint32_t num_qubits, const Eigen::SparseMatrix<cx_double>& ham,
-		std::string name = {})
-		: Operator(ham.rows(), std::move(name)), 
+		const std::string& name = {})
+		: Operator(ham.rows(), name),
 		p_{std::make_shared<const detail::SumLocalHamImpl>(num_qubits, ham)}
 	{
 		assert(ham.rows() == ham.cols()); //check diagonal
@@ -118,12 +111,12 @@ public:
 
 	
 	explicit SumLocalHam(std::shared_ptr<const detail::SumLocalHamImpl> p,
-			std::string name = {}, cx_double constant = 1.0) 
-		: Operator(p->dim(), std::move(name)), p_{std::move(p)}, constant_{constant}
+			const std::string& name = {}, cx_double constant = 1.0) 
+		: Operator(p->dim(), name), p_{std::move(p)}, constant_{constant}
 	{
 	}
 
-	std::shared_ptr<const detail::SumLocalHamImpl> get_impl() const
+	[[nodiscard]] std::shared_ptr<const detail::SumLocalHamImpl> get_impl() const
 	{
 		return p_;
 	}
@@ -134,23 +127,25 @@ public:
 	SumLocalHam& operator=(const SumLocalHam& ) = delete;
 	SumLocalHam& operator=(SumLocalHam&& ) = delete;
 
-	std::unique_ptr<Operator> clone() const override
+	~SumLocalHam() override = default;
+
+	[[nodiscard]] std::unique_ptr<Operator> clone() const override
 	{
 		auto copied = std::make_unique<SumLocalHam>(*this);
 		return copied;
 	}
 
-	Eigen::SparseMatrix<cx_double> get_ham()  const
+	[[nodiscard]] Eigen::SparseMatrix<cx_double> get_ham()  const
 	{
 		return constant_*p_->get_full_ham();
 	}
 
-	Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
+	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
 		return constant_*p_->apply_right(st);
 	}
 
-	bool is_same_ham(const SumLocalHam& rhs) const
+	[[nodiscard]] bool is_same_ham(const SumLocalHam& rhs) const
 	{
 		return (rhs.p_ == p_);
 	}
@@ -160,5 +155,4 @@ public:
 		constant_ = std::conj(constant_);
 	}
 };
-
 } //namespace yavque

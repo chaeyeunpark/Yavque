@@ -1,26 +1,27 @@
 #pragma once
-#include <vector>
 #include <memory>
+#include <vector>
+
 #include <Eigen/Dense>
-#include <Eigen/Sparse>
 #include <Eigen/Eigenvalues> 
+#include <Eigen/Sparse>
 
 #include "operators.hpp"
 
 namespace yavque
 {
 class Variable;
-/**
- * Circuit class decribes the computational graph of quantum circuit
- */
+
 class Circuit
 {
 private:
 	uint32_t dim_;
-
-	std::vector<std::unique_ptr<Operator> > ops_; //operations
 	
-	mutable std::vector<std::shared_ptr<const Eigen::VectorXcd> > states_from_left_; //states evaluated from the left
+	// Operators
+	std::vector<std::unique_ptr<Operator> > ops_;
+
+	// States evaluated from the left
+	mutable std::vector<std::shared_ptr<const Eigen::VectorXcd>> states_from_left_ = {};
 	mutable uint32_t states_updated_to_ = 0;
 
 protected:
@@ -43,11 +44,13 @@ public:
 	{
 	}
 
-	Circuit(const Circuit& rhs);
+	Circuit(const Circuit& rhs); // Defined in cpp
 	Circuit(Circuit&& rhs) = default;
 
-	Circuit& operator=(const Circuit& rhs);
+	Circuit& operator=(const Circuit& rhs); // Defined in cpp
 	Circuit& operator=(Circuit&& rhs) = default;
+
+	~Circuit() = default;
 
 	uint32_t get_dim() const
 	{
@@ -62,11 +65,17 @@ public:
 	//evaluate 
 	void evaluate() const
 	{
-		if(states_updated_to_ == 0) //initial state hasn't been set
+ 		// Initial state hasn't been set
+		if(states_updated_to_ == 0)
+		{
 			return ;
-
-		if(states_updated_to_ == ops_.size() + 1) //all states are evaluated;
+		}
+ 		
+		// All states are evaluated
+		if(states_updated_to_ == ops_.size() + 1)
+		{
 			return ;
+		}
 
 		for(auto d = states_from_left_.size()-1; d < ops_.size(); ++d)
 		{
@@ -109,7 +118,7 @@ public:
 	 * evaluate |st> - C
 	 * When C = U_N \cdots U_1, it computes U_N \cdots U_1 | st \rangle
 	 * */
-	void set_input(Eigen::VectorXcd st)
+	void set_input(const Eigen::VectorXcd& st)
 	{
 		states_updated_to_ = 1;
 		states_from_left_.clear();
@@ -186,17 +195,23 @@ public:
 		return res;
 	}
 
-	std::vector<Variable> parameters() const;
+	std::vector<Variable> variables() const;
 
 	void derivs() const;
 
 	std::shared_ptr<const Eigen::VectorXcd> state_at(uint32_t idx) const
 	{
+		// May throw exception instead
 		if(idx > ops_.size())
-			return nullptr; //may throw exception instead
+		{
+			return nullptr;
+		}
 
+		// If not all stastes are evaluated
 		if(idx > states_updated_to_)
+		{
 			evaluate();
+		}
 
 		return states_from_left_[idx];
 	}
@@ -204,11 +219,13 @@ public:
 	std::shared_ptr<const Eigen::VectorXcd> output() const
 	{
 		if(!is_evaluated())
+		{
 			evaluate();
+		}
 		return states_from_left_.back();
 	}
 
-	std::string desc() const
+	[[nodiscard]] std::string desc() const
 	{
 		//change to format in C++20
 		std::ostringstream ss;

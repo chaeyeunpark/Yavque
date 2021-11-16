@@ -1,12 +1,13 @@
 #pragma once
 #include <memory>
-#include <Eigen/Dense>
-#include <Eigen/Sparse>
-#include <Eigen/Eigenvalues> 
 
+#include <Eigen/Dense>
+#include <Eigen/Eigenvalues> 
+#include <Eigen/Sparse>
+
+#include "../Univariate.hpp"
 #include "../Variable.hpp"
 #include "../utils.hpp"
-#include "../Univariate.hpp"
 
 #include "Operator.hpp"
 #include "SumLocalHam.hpp"
@@ -30,13 +31,13 @@ private:
 	SumLocalHamEvol(const SumLocalHamEvol& ) = default;
 
 public:
-	explicit SumLocalHamEvol(SumLocalHam ham)
+	explicit SumLocalHamEvol(const SumLocalHam& ham)
 		: Operator(ham.dim(), "SumLocalHamEvol of " + ham.name()), 
 		ham_{ham.get_impl()}
 	{
 	}
 
-	explicit SumLocalHamEvol(SumLocalHam ham, Variable var)
+	explicit SumLocalHamEvol(const SumLocalHam& ham, Variable var)
 		: Operator(ham.dim(), "SumLocalHamEvol of " + ham.name()), 
 		Univariate(std::move(var)), ham_{ham.get_impl()}
 	{
@@ -45,14 +46,16 @@ public:
 	SumLocalHamEvol& operator=(const SumLocalHamEvol& ) = delete;
 	SumLocalHamEvol& operator=(SumLocalHamEvol&& ) = delete;
 
-	std::unique_ptr<Operator> clone() const override
+	~SumLocalHamEvol() override = default;
+
+	[[nodiscard]] std::unique_ptr<Operator> clone() const override
 	{
 		auto p = std::unique_ptr<SumLocalHamEvol>{new SumLocalHamEvol(*this)};
-		p->change_parameter(Variable{var_.value()});
+		p->change_variable(Variable{var_.value()});
 		return p;
 	}
 
-	std::unique_ptr<Operator> log_deriv() const override
+	[[nodiscard]] std::unique_ptr<Operator> log_deriv() const override
 	{
 		constexpr std::complex<double> I(0.,1.0);
 		std::string op_name = std::string("derivative of ") + name(); //change to fmt
@@ -60,7 +63,7 @@ public:
 		return std::make_unique<SumLocalHam>(ham_, op_name, constant);
 	}
 
-	Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
+	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
 		constexpr std::complex<double> I(0.,1.0);
 		Eigen::VectorXcd res = st;
@@ -76,17 +79,19 @@ public:
 		return res;
 	}	
 
-	bool can_merge(const Operator& rhs) const override
+	[[nodiscard]] bool can_merge(const Operator& rhs) const override
 	{
-		if(const SumLocalHamEvol* p = dynamic_cast<const SumLocalHamEvol*>(&rhs))
+		if(const auto* p = dynamic_cast<const SumLocalHamEvol*>(&rhs))
 		{
 			if (ham_ == p->ham_)
+			{
 				return true;
+			}
 		}
 		return false;
 	}
 
-	std::string desc() const override
+	[[nodiscard]] std::string desc() const override
 	{
 		std::ostringstream ss;
 		ss << "[" << name() << ", variable name: " << var_.name() << ", " 
@@ -94,4 +99,4 @@ public:
 		return ss.str();
 	}
 };
-}
+}// namespace yavque

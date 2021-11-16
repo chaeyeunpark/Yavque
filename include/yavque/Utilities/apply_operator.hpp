@@ -6,19 +6,22 @@
 #include <Eigen/Dense>
 #include <tbb/tbb.h>
 
+
 namespace yavque
 {
 namespace detail
 {
 constexpr uint32_t set(uint32_t bitstring, uint32_t idx)
 {
-	return bitstring | (1u << idx);
+	return bitstring | (1U << idx);
 }
 constexpr uint32_t unset(uint32_t bitstring, uint32_t idx)
 {
-	return bitstring & (~(1u << idx));
+	return bitstring & (~(1U << idx));
 }
 }//namespace detail
+
+constexpr int64_t MIN_PARALLEL_DIM = (1U<<11U);
 
 /* apply single qubit gate m to pos */
 template<typename T>
@@ -27,16 +30,16 @@ Eigen::VectorXcd apply_single_qubit(const Eigen::VectorXcd& vec,
 {
 	Eigen::VectorXcd res(vec.size());
 
-	if(vec.size() > (1u<<11))
+	if(vec.size() > MIN_PARALLEL_DIM)
 	{
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, vec.size()),
 			[&](const tbb::blocked_range<std::size_t>& r)
 		{
 			for(uint32_t n = r.begin(); n != r.end(); ++n)
 			{
-				uint32_t k = (n >> pos) & 1u;
-				uint32_t i0 = n & (~(1u << pos));
-				uint32_t i1 = n | (1u << pos);
+				uint32_t k = (n >> pos) & 1U;
+				uint32_t i0 = n & (~(1U << pos));
+				uint32_t i1 = n | (1U << pos);
 				res(n) = m(k, 0) * vec(i0) + m(k, 1) * vec(i1);
 			}
 		});
@@ -45,9 +48,9 @@ Eigen::VectorXcd apply_single_qubit(const Eigen::VectorXcd& vec,
 	{
 		for(uint32_t n = 0; n != vec.size(); ++n)
 		{
-			uint32_t k = (n >> pos) & 1u;
-			uint32_t i0 = n & (~(1u << pos));
-			uint32_t i1 = n | (1u << pos);
+			uint32_t k = (n >> pos) & 1U;
+			uint32_t i0 = n & (~(1U << pos));
+			uint32_t i1 = n | (1U << pos);
 			res(n) = m(k, 0) * vec(i0) + m(k, 1) * vec(i1);
 		}
 	}
@@ -61,14 +64,14 @@ Eigen::VectorXcd apply_two_qubit(const Eigen::VectorXcd& vec,
 	using detail::set;
 	using detail::unset;
 	Eigen::VectorXcd res(vec.size());
-	if(vec.size() > (1u<<11))
+	if(vec.size() > MIN_PARALLEL_DIM)
 	{
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, vec.size()),
 			[&](const tbb::blocked_range<std::size_t>& r)
 		{
 			for(uint32_t n = r.begin(); n != r.end(); ++n)
 			{
-				uint32_t k = (((n >> pos[1]) & 1u) << 1) | ((n >> pos[0]) & 1u);
+				uint32_t k = (((n >> pos[1]) & 1U) << 1U) | ((n >> pos[0]) & 1U);
 				uint32_t i0 = unset(unset(n,pos[0]),pos[1]); //0b00
 				uint32_t i1 = unset(  set(n,pos[0]),pos[1]); //0b01
 				uint32_t i2 =   set(unset(n,pos[0]),pos[1]); //0b10
@@ -82,7 +85,7 @@ Eigen::VectorXcd apply_two_qubit(const Eigen::VectorXcd& vec,
 	{
 		for(uint32_t n = 0; n != vec.size(); ++n)
 		{
-			uint32_t k = (((n >> pos[1]) & 1u) << 1) | ((n >> pos[0]) & 1u);
+			uint32_t k = (((n >> pos[1]) & 1U) << 1U) | ((n >> pos[0]) & 1U);
 			uint32_t i0 = unset(unset(n,pos[0]),pos[1]); //0b00
 			uint32_t i1 = unset(  set(n,pos[0]),pos[1]); //0b01
 			uint32_t i2 =   set(unset(n,pos[0]),pos[1]); //0b10
@@ -102,15 +105,15 @@ Eigen::VectorXcd apply_three_qubit(const Eigen::VectorXcd& vec,
 	using detail::unset;
 	Eigen::VectorXcd res(vec.size());
 
-	if(vec.size() > (1u<<11))
+	if(vec.size() > MIN_PARALLEL_DIM)
 	{
 		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, vec.size()),
 			[&](const tbb::blocked_range<std::size_t>& r)
 		{
 			for(uint32_t n = r.begin(); n != r.end(); ++n)
 			{
-				uint32_t k = (((n >> pos[2]) & 1u) << 2) |
-					(((n >> pos[1]) & 1u) << 1) | ((n >> pos[0]) & 1u);
+				uint32_t k = (((n >> pos[2]) & 1U) << 2U) |
+					(((n >> pos[1]) & 1U) << 1U) | ((n >> pos[0]) & 1U);
 				uint32_t i0 = unset(unset(unset(n,pos[0]),pos[1]),pos[2]); //0b000
 				uint32_t i1 = unset(unset(  set(n,pos[0]),pos[1]),pos[2]); //0b001
 				uint32_t i2 = unset(  set(unset(n,pos[0]),pos[1]),pos[2]); //0b010
@@ -131,8 +134,8 @@ Eigen::VectorXcd apply_three_qubit(const Eigen::VectorXcd& vec,
 	{
 		for(uint32_t n = 0; n != vec.size(); ++n)
 		{
-			uint32_t k = (((n >> pos[2]) & 1u) << 2) |
-				(((n >> pos[1]) & 1u) << 1) | ((n >> pos[0]) & 1u);
+			uint32_t k = (((n >> pos[2]) & 1U) << 2U) |
+				(((n >> pos[1]) & 1U) << 1U) | ((n >> pos[0]) & 1U);
 			uint32_t i0 = unset(unset(unset(n,pos[0]),pos[1]),pos[2]); //0b000
 			uint32_t i1 = unset(unset(  set(n,pos[0]),pos[1]),pos[2]); //0b001
 			uint32_t i2 = unset(  set(unset(n,pos[0]),pos[1]),pos[2]); //0b010
@@ -150,4 +153,4 @@ Eigen::VectorXcd apply_three_qubit(const Eigen::VectorXcd& vec,
 	}
 	return res;
 }
-} //namespace yavque::detail
+} //namespace yavque

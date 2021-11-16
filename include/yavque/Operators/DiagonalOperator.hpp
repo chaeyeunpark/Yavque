@@ -14,27 +14,27 @@ private:
 	Eigen::VectorXcd diag_op_;
 
 public:
-	DiagonalOperatorImpl(const Eigen::VectorXcd& diag_op)
-		: diag_op_{diag_op}
-	{
-	}
-
-	DiagonalOperatorImpl(Eigen::VectorXcd&& diag_op)
+	explicit DiagonalOperatorImpl(Eigen::VectorXcd diag_op)
 		: diag_op_{std::move(diag_op)}
 	{
 	}
 
-	const Eigen::VectorXcd& get_diag_op() const&
+	explicit DiagonalOperatorImpl(Eigen::VectorXcd&& diag_op)
+		: diag_op_{std::move(diag_op)}
+	{
+	}
+
+	[[nodiscard]] const Eigen::VectorXcd& get_diag_op() const&
 	{
 		return diag_op_;
 	}
 
-	Eigen::VectorXcd get_diag_op() &&
+	[[nodiscard]] Eigen::VectorXcd get_diag_op() &&
 	{
 		return diag_op_;
 	}
 
-	Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const 
+	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const 
 	{
 		return diag_op_.cwiseProduct(st);
 	}
@@ -63,21 +63,24 @@ private:
 	}
 
 public:
-	explicit DiagonalOperator(const Eigen::VectorXcd& diag_op, std::string name = {})
-		: Operator(diag_op.size(), std::move(name)), 
+	explicit DiagonalOperator(const Eigen::VectorXcd& diag_op, 
+			const std::string& name = {})
+		: Operator(diag_op.size(), name), 
 		p_{std::make_shared<detail::DiagonalOperatorImpl>(diag_op)}
 	{
 	}
 
 	explicit DiagonalOperator(std::shared_ptr<const detail::DiagonalOperatorImpl> p,
-			std::string name = {},
+			const std::string& name = {},
 			cx_double constant = 1.0)
-		: Operator(p->get_diag_op().size(), std::move(name)), p_{std::move(p)}, constant_{constant}
+		: Operator(p->get_diag_op().size(), name), p_{std::move(p)}, constant_{constant}
 	{
 	}
 
+	~DiagonalOperator() override = default;
 
-	std::shared_ptr<const detail::DiagonalOperatorImpl> get_impl() const
+
+	[[nodiscard]] std::shared_ptr<const detail::DiagonalOperatorImpl> get_impl() const
 	{
 		return p_;
 	}
@@ -88,18 +91,18 @@ public:
 	DiagonalOperator& operator=(const DiagonalOperator& ) = delete;
 	DiagonalOperator& operator=(DiagonalOperator&& ) = delete;
 
-	std::unique_ptr<Operator> clone() const override
+	[[nodiscard]] std::unique_ptr<Operator> clone() const override
 	{
 		auto cloned = std::make_unique<DiagonalOperator>(*this);
 		return cloned;
 	}
 
-	Eigen::VectorXcd get_diag_op()  const
+	[[nodiscard]] Eigen::VectorXcd get_diag_op() const
 	{
 		return p_->get_diag_op();
 	}
 
-	Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
+	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
 		return constant_*p_->apply_right(st);
 	}

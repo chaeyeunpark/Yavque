@@ -1,12 +1,13 @@
 #pragma once
 
 #include <set>
+
 #include <Eigen/Eigenvalues>
 
-#include "../utils.hpp"
-
-#include "Operator.hpp"
 #include "CompressedPauliString.hpp"
+#include "Operator.hpp"
+
+#include "../utils.hpp"
 
 namespace yavque
 {
@@ -37,14 +38,14 @@ private:
 	}
 
 public:
-	SumPauliStringImpl(uint32_t num_qubits)
+	explicit SumPauliStringImpl(uint32_t num_qubits)
 		: num_qubits_{num_qubits}
 	{
 	}
 	
 	explicit SumPauliStringImpl(uint32_t num_qubits, 
-			const std::vector<PauliString>& pauli_strings)
-		: num_qubits_{num_qubits}, pauli_strings_{pauli_strings}
+			std::vector<PauliString> pauli_strings)
+		: num_qubits_{num_qubits}, pauli_strings_{std::move(pauli_strings)}
 	{
 		//check sites pauli strings applied < num_qubits
 	}
@@ -80,7 +81,9 @@ public:
 			for(uint32_t j = i+1; j < pauli_strings_.size(); ++j)
 			{
 				if(! commute(pauli_strings_[i], pauli_strings_[j]))
+				{
 					return false;
+				}
 			}
 		}
 		return true;
@@ -88,10 +91,12 @@ public:
 
 	Eigen::VectorXcd apply(const Eigen::VectorXcd& vec) const
 	{
-		assert(vec.size() == (1u << num_qubits_));
+		assert(vec.size() == (1U << num_qubits_));
 
 		if(cps_.size() < pauli_strings_.size())
+		{
 			update_cps();
+		}
 
 		Eigen::VectorXcd res = Eigen::VectorXcd::Zero(vec.size());
 		for(std::size_t n = 0; n < pauli_strings_.size(); ++n)
@@ -110,10 +115,12 @@ public:
 	 * */
 	Eigen::VectorXcd apply_exp(cx_double t, const Eigen::VectorXcd& vec) const
 	{
-		assert(vec.size() == (1u << num_qubits_));
+		assert(vec.size() == (1U << num_qubits_));
 
 		if(cps_.size() < pauli_strings_.size())
+		{
 			update_cps();
+		}
 
 		Eigen::VectorXcd res = vec;
 		for(std::size_t n = 0; n < pauli_strings_.size(); ++n)
@@ -129,7 +136,7 @@ public:
 
 
 };
-}
+}// namespace detail
 
 class SumPauliString final
 	: public Operator
@@ -148,34 +155,34 @@ private:
 
 
 public:
-	explicit SumPauliString(const uint32_t num_qubits, std::string name = {})
-		: Operator(1<<num_qubits, std::move(name)),
+	explicit SumPauliString(const uint32_t num_qubits, const std::string& name = {})
+		: Operator(1U << num_qubits, name),
 		p_{std::make_shared<detail::SumPauliStringImpl>(num_qubits)}
 	{
 	}
 
 	explicit SumPauliString(const uint32_t num_qubits,
 			const std::vector<std::map<uint32_t, Pauli>>& pauli_strings, 
-			std::string name = {})
-		: Operator(1u << num_qubits, std::move(name)),
+			const std::string& name = {})
+		: Operator(1U << num_qubits, name),
 		p_{std::make_shared<detail::SumPauliStringImpl>(num_qubits, pauli_strings)}
 	{
 
 	}
 
 	explicit SumPauliString(std::shared_ptr<const detail::SumPauliStringImpl> p,
-			std::string name = {}, cx_double constant = 1.0)
-		: Operator(1u << p->num_qubits(), std::move(name)), p_{std::move(p)},
+			const std::string& name = {}, cx_double constant = 1.0)
+		: Operator(1U << p->num_qubits(), name), p_{std::move(p)},
 		constant_{constant}
 	{
 	}
 
-	bool mutually_commuting() const
+	[[nodiscard]] bool mutually_commuting() const
 	{
 		return p_->mutually_commuting();
 	}
 
-	std::shared_ptr<const detail::SumPauliStringImpl> get_impl() const
+	[[nodiscard]] std::shared_ptr<const detail::SumPauliStringImpl> get_impl() const
 	{
 		return p_;
 	}
@@ -203,13 +210,15 @@ public:
 	SumPauliString& operator=(const SumPauliString& ) = delete;
 	SumPauliString& operator=(SumPauliString&& ) = delete;
 
-	std::unique_ptr<Operator> clone() const override
+	~SumPauliString() override = default;
+
+	[[nodiscard]] std::unique_ptr<Operator> clone() const override
 	{
 		auto cloned = std::make_unique<SumPauliString>(*this);
 		return cloned;
 	}
 
-	Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
+	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
 		return constant_*p_->apply(st);
 	}

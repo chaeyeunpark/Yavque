@@ -10,9 +10,7 @@ private:
 	uint32_t counter_ = 0;
 
 public:
-	Counter()
-	{
-	}
+	Counter() = default;
 
 	static Counter& getInstance() 
 	{

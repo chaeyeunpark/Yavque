@@ -1,7 +1,8 @@
 #pragma once
-#include <vector>
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
+
+#include <vector>
 
 #include "../utils.hpp"
 
@@ -20,7 +21,7 @@ private:
 	mutable Eigen::MatrixXcd evecs_;
 	mutable Eigen::MatrixXcd evals_;
 
-	std::vector<Pauli> construct_pauli(const std::string& str)
+	static std::vector<Pauli> construct_pauli(const std::string& str)
 	{
 		std::vector<Pauli> res;
 		for(auto c: str)
@@ -30,7 +31,7 @@ private:
 		return res;
 	}
 
-	Eigen::MatrixXcd get_pauli(Pauli p) const
+	static Eigen::MatrixXcd get_pauli(Pauli p)
 	{
 		switch(p)
 		{
@@ -61,8 +62,8 @@ private:
 	{
 		for(uint32_t n = 0; n <  indices.size(); ++n)
 		{
-			uint32_t b = (bits_to_change >> n) & 1;
-			bitstring = (bitstring & (~(1 << indices[n]))) | (b << indices[n]);
+			uint32_t b = (bits_to_change >> n) & 1U;
+			bitstring = (bitstring & (~(1U << indices[n]))) | (b << indices[n]);
 		}
 		return bitstring;
 	}
@@ -70,11 +71,11 @@ private:
 	static uint32_t bits(const std::vector<uint32_t>& indices, 
 			uint32_t bitstring)
 	{
-		uint32_t b = 0u;
+		uint32_t b = 0U;
 
 		for(uint32_t k = 0; k < indices.size(); ++k)
 		{
-			b |= ((bitstring >> indices[k]) & 1) << k;
+			b |= ((bitstring >> indices[k]) & 1U) << k;
 		}
 		return b;
 	}
@@ -95,8 +96,8 @@ public:
 		construct_matrix();
 	}
 
-	explicit CompressedPauliString(const std::vector<Pauli>& pvec)
-		: pstring_{pvec}
+	explicit CompressedPauliString(std::vector<Pauli> pvec)
+		: pstring_{std::move(pvec)}
 	{
 		construct_matrix();
 	}
@@ -110,7 +111,7 @@ public:
 			const Eigen::VectorXcd& vec) const
 	{
 		assert(pstring_.size() == indices.size());
-		uint32_t dim = 1u << pstring_.size();
+		uint32_t dim = 1U << pstring_.size();
 		Eigen::VectorXcd res = Eigen::VectorXcd::Zero(vec.size());
 
 		if(indices.size() == 1)
@@ -145,11 +146,13 @@ public:
 			const Eigen::VectorXcd& vec) const
 	{
 		assert(pstring_.size() == indices.size());
-		uint32_t dim = 1u << pstring_.size();
+		uint32_t dim = 1U << pstring_.size();
 		Eigen::VectorXcd res = Eigen::VectorXcd::Zero(vec.size());
 
 		if(!diagonalized_)
+		{
 			diagonalize();
+		}
 
 		Eigen::VectorXcd p = (t*evals_.array()).exp();
 		Eigen::MatrixXcd exp_mat = evecs_*p.asDiagonal()*evecs_.adjoint();
@@ -188,13 +191,15 @@ class CPSFactory
 private:
 	std::map<std::string, std::weak_ptr<detail::CompressedPauliString> > map_;
 
-	CPSFactory()
-	{
-	}
+	CPSFactory() = default;
 
 public:
 	CPSFactory(const CPSFactory& ) = delete;
 	CPSFactory& operator=(const CPSFactory& ) = delete;
+
+	CPSFactory(CPSFactory&& ) = delete;
+	CPSFactory& operator=(CPSFactory&& ) = delete;
+	~CPSFactory() = default;
 
 	std::shared_ptr<detail::CompressedPauliString>
 		get_pauli_string_for(const std::string& pstr)

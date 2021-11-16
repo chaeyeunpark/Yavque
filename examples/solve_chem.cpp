@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	const uint32_t N = ham.getN();
 	const uint32_t dim = 1u << N;
 	const double sigma = 1.0e-3;
-	const int depth = atoi(argv[2]);
+	const uint32_t depth = atoi(argv[2]);
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};

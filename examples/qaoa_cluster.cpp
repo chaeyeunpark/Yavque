@@ -64,7 +64,7 @@ int get_num_threads()
 	return atoi(p);
 }
 
-int main(int argc, char *argv[])
+int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 {
     using namespace yavque;
     using std::sqrt;

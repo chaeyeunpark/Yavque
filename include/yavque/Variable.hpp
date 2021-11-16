@@ -17,25 +17,20 @@ class Circuit;
 class Variable
 {
 private:
-	std::shared_ptr<VariableImpl> p_;
+	std::shared_ptr<VariableImpl> p_ {std::make_shared<VariableImpl>(0.0)};
 
 public:
 	Variable(const Variable& rhs) = default;
 	Variable(Variable&& rhs) = default;
 
 	Variable& operator=(const Variable& ) = delete;
-	Variable& operator=(Variable&& rhs)
+	Variable& operator=(Variable&& rhs) noexcept
 	{
 		p_ = std::move(rhs.p_);
 		return *this;
 	}
-	
-	Variable()
-		: p_{std::make_shared<VariableImpl>(0.0)}
-	{
-	}
 
-	Variable(double value)
+	explicit Variable(double value)
 		: p_{std::make_shared<VariableImpl>(value)}
 	{
 	}
@@ -60,17 +55,17 @@ public:
 	}
 
 
-	std::string name() const
+	[[nodiscard]] std::string name() const
 	{
 		return p_->name();
 	}
 
-	std::string desc() const
+	[[nodiscard]] std::string desc() const
 	{
 		return p_->desc();
 	}
 
-	double value() const
+	[[nodiscard]] double value() const
 	{
 		return p_->value();
 	}
@@ -156,7 +151,7 @@ public:
 		p_->add_grad(std::move(circ));
 	}
 
-	std::shared_ptr<const Eigen::VectorXcd> grad() const
+	[[nodiscard]] std::shared_ptr<const Eigen::VectorXcd> grad() const
 	{
 		return p_->grad();
 	}
@@ -165,6 +160,8 @@ public:
 	{
 		p_->zero_grad();
 	}
+
+	~Variable() = default;
 };
 
 } // namespace yavque

@@ -20,9 +20,11 @@ private:
 
 	void diagonalize() const
 	{
-		//add mutex
+		// Add mutex (future)
 		if(diagonalized_)
+		{
 			return ;
+		}
 
 		Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(ham_);
 		evals_ = es.eigenvalues();
@@ -31,57 +33,65 @@ private:
 	}
 
 public:
-	DenseHermitianMatrix(const Eigen::MatrixXcd& ham)
-		: ham_{ham}
+	explicit DenseHermitianMatrix(Eigen::MatrixXcd ham)
+		: ham_{std::move(ham)}
 	{
 		assert(ham_.rows() == ham_.cols()); //check diagonal
 		diagonalized_ = false;
 	}
 
-	uint32_t dim() const
+	[[nodiscard]] uint32_t dim() const
 	{
 		return ham_.rows();
 	}
 
-	const Eigen::MatrixXcd& get_ham() const&
+	[[nodiscard]] const Eigen::MatrixXcd& get_ham() const&
 	{
 		return ham_;
 	}
 
-	Eigen::MatrixXcd get_ham() &&
+	[[nodiscard]] Eigen::MatrixXcd get_ham() &&
 	{
 		return ham_;
 	}
 
-	const Eigen::MatrixXcd& evecs() const&
+	[[nodiscard]] const Eigen::MatrixXcd& evecs() const&
 	{
 		if(!diagonalized_)
+		{
 			diagonalize();
+		}
 		return evecs_;
 	}
 
-	Eigen::MatrixXcd evecs() &&
+	[[nodiscard]] Eigen::MatrixXcd evecs() &&
 	{
 		if(!diagonalized_)
+		{
 			diagonalize();
+		}
 		return evecs_;
 	}
 
-	const Eigen::VectorXd& evals() const&
+	[[nodiscard]] const Eigen::VectorXd& evals() const&
 	{
 		if(!diagonalized_)
+		{
 			diagonalize();
+		}
 		return evals_;
 	}
 
-	Eigen::VectorXd evals() &&
+	[[nodiscard]] Eigen::VectorXd evals() &&
 	{
 		if(!diagonalized_)
+		{
 			diagonalize();
+		}
 		return evals_;
 	}
 
-	Eigen::MatrixXcd ham_exp(cx_double x) const
+	[[nodiscard]] Eigen::MatrixXcd ham_exp(cx_double x) const
 	{
 		if(!diagonalized_)
 		{
