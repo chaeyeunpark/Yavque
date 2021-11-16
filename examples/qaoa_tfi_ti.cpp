@@ -80,10 +80,10 @@ int main()
 		circ.add_op_right(std::make_unique<HamEvol>(ham_x_all));
 	}
 
-	auto parameters = circ.parameters();
+	auto variables = circ.variables();
 
 	std::normal_distribution<double> ndist(0., sigma);
-	for(auto& p: parameters)
+	for(auto& p: variables)
 	{
 		p = ndist(re);
 	}
@@ -104,24 +104,24 @@ int main()
 	{
 		circ.clear_evaluated();
 		Eigen::VectorXcd output = *circ.output();
-		for(auto& p: parameters)
+		for(auto& p: variables)
 		{
 			p.zero_grad();
 		}
 
 		circ.derivs();
 
-		Eigen::MatrixXcd grads(basis.getDim(), parameters.size());
+		Eigen::MatrixXcd grads(basis.getDim(), variables.size());
 
-		for(uint32_t k = 0; k < parameters.size(); ++k)
+		for(uint32_t k = 0; k < variables.size(); ++k)
 		{
-			grads.col(k) = *parameters[k].grad();
+			grads.col(k) = *variables[k].grad();
 		}
 
 		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
 		Eigen::RowVectorXcd o = (output.adjoint()*grads);
 		fisher -= (o.adjoint()*o).real();
-		fisher += 1e-3*Eigen::MatrixXd::Identity(parameters.size(), parameters.size());
+		fisher += 1e-3*Eigen::MatrixXd::Identity(variables.size(), variables.size());
 
 		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
 		double energy = real(cx_double(output.adjoint()*ham*output));
@@ -130,9 +130,9 @@ int main()
 
 		Eigen::VectorXd opt = -learning_rate*fisher.inverse()*egrad;
 
-		for(uint32_t k = 0; k < parameters.size(); ++k)
+		for(uint32_t k = 0; k < variables.size(); ++k)
 		{
-			parameters[k] += opt(k);
+			variables[k] += opt(k);
 		}
 	}
 

@@ -94,9 +94,9 @@ int main(int argc, char* argv[])
 
 
 	// initialize paramerters
-	auto parameters = circuit.parameters();
+	auto variables = circuit.variables();
 	std::normal_distribution<double> ndist(0, sigma);
-	for(auto& param: parameters)
+	for(auto& param: variables)
 	{
 		param = ndist(re);
 	}
@@ -107,9 +107,9 @@ int main(int argc, char* argv[])
 		const auto [energy, grad] = value_and_grad(ham_mat, circuit);
 		const auto update = optimizer->getUpdate(grad);
 
-		for(uint32_t i = 0; i < parameters.size(); ++i)
+		for(uint32_t i = 0; i < variables.size(); ++i)
 		{
-			parameters[i] += update(i);
+			variables[i] += update(i);
 		}
 
 		printf("%d\t%f\n", epoch, energy);

@@ -52,7 +52,7 @@ void Circuit::derivs() const
 {
 	for(uint32_t idx = 0; idx < ops_.size(); ++idx)
 	{
-		if(auto diff_op = dynamic_cast<Univariate*>(ops_[idx].get()))//may change?
+		if(auto* diff_op = dynamic_cast<Univariate*>(ops_[idx].get()))//may change?
 		{
 			Circuit circuit_der = this->to(idx+1);
 			circuit_der.add_op_right(diff_op->log_deriv());

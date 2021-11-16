@@ -28,7 +28,7 @@ VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini,
 	{
 		circuit.add_op_right(std::make_unique<yavque::HamEvol>(pauli_strs[conf]));
 	}
-	auto params = circuit.parameters();
+	auto params = circuit.variables();
 
 	circuit.set_input(ini);
 
@@ -103,10 +103,10 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 		VectorXcd ini = VectorXcd::Random(1<<N);
 		ini.normalize();
 
-		for(auto& p: circuit1.parameters())
+		for(auto& p: circuit1.variables())
 			p = t;
 
-		for(auto& p: circuit2.parameters())
+		for(auto& p: circuit2.variables())
 			p = t;
 
 		circuit1.set_input(ini);

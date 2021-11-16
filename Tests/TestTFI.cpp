@@ -46,7 +46,7 @@ yavque::Circuit construct_diagonal_tfi(const uint32_t N)
 auto construct_bare_tfi(const uint32_t N)
 {
 	yavque::Circuit circ(1 << N);
-	std::vector<yavque::Variable> parameters(9);
+	std::vector<yavque::Variable> variables(9);
 
 	std::vector<yavque::Hamiltonian> zz_hams;
 	
@@ -62,16 +62,16 @@ auto construct_bare_tfi(const uint32_t N)
 	{
 		for(uint32_t k = 0; k < N; k++)
 		{
-			circ.add_op_right(std::make_unique<yavque::HamEvol>(zz_hams[k], parameters[2*p+0]));
+			circ.add_op_right(std::make_unique<yavque::HamEvol>(zz_hams[k], variables[2*p+0]));
 		}
-		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham, parameters[2*p+1]));
+		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham, variables[2*p+1]));
 	}
 	for(uint32_t k = 0; k < N; k++)
 	{
-		circ.add_op_right(std::make_unique<yavque::HamEvol>(zz_hams[k], parameters[8]));
+		circ.add_op_right(std::make_unique<yavque::HamEvol>(zz_hams[k], variables[8]));
 	}
 
-	return std::make_pair(std::move(circ), std::move(parameters));
+	return std::make_pair(std::move(circ), std::move(variables));
 }
 
 Eigen::VectorXcd analytic_twoqubit(double theta, double phi)
@@ -165,7 +165,7 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]") {
 			0, 0, 1, 0,
 			0, 0, 0, -1;
 
-	auto parameters = circ.parameters();
+	auto variables = circ.variables();
 
 	Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(4);
 	ini /= sqrt(4.0);
@@ -176,13 +176,13 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]") {
 	{
 		double theta = ndist(re);
 		double phi = ndist(re);
-		parameters[0] = theta;
-		parameters[1] = phi;
+		variables[0] = theta;
+		variables[1] = phi;
 
 		for(uint32_t epoch = 0; epoch < 100; ++epoch)
 		{ //learning loop
-			theta = parameters[0].value();
-			phi = parameters[1].value();
+			theta = variables[0].value();
+			phi = variables[1].value();
 
 			circ.clear_evaluated();
 			Eigen::VectorXcd output = *circ.output();
@@ -192,14 +192,14 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]") {
 
 
 			//test grad
-			for(auto& p: parameters)
+			for(auto& p: variables)
 			{
 				p.zero_grad();
 			}
 			circ.derivs();
 			Eigen::MatrixXcd grads(1<<N, 2);
-			grads.col(0) = *parameters[0].grad();
-			grads.col(1) = *parameters[1].grad();
+			grads.col(0) = *variables[0].grad();
+			grads.col(1) = *variables[1].grad();
 			Eigen::VectorXd egrad_circ = 2*(output.adjoint()*ham*grads).real();
 
 			Eigen::VectorXcd v1 = analytic_twoqubit(theta + eps, phi);
@@ -217,9 +217,9 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]") {
 
 			REQUIRE((egrad_circ - egrad_num).norm() < 1e-6);
 
-			for(uint32_t k = 0; k < parameters.size(); ++k)
+			for(uint32_t k = 0; k < variables.size(); ++k)
 			{
-				parameters[k] -= 0.02*egrad_circ(k);
+				variables[k] -= 0.02*egrad_circ(k);
 			}
 
 			std::cout << real(cx_double(output.adjoint()*ham*output)) << std::endl;
@@ -267,7 +267,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]") {
 
 	Eigen::MatrixXd ham = zz_all.asDiagonal();
 
-	auto parameters = circ.parameters();
+	auto variables = circ.variables();
 
 	Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(16);
 	ini /= 4.0;
@@ -281,17 +281,17 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]") {
 		double phi1 = ndist(re);
 		double phi2 = ndist(re);
 
-		parameters[0] = theta1;
-		parameters[1] = phi1;
-		parameters[2] = theta2;
-		parameters[3] = phi2;
+		variables[0] = theta1;
+		variables[1] = phi1;
+		variables[2] = theta2;
+		variables[3] = phi2;
 
 		for(uint32_t epoch = 0; epoch < 100; ++epoch)
 		{ //learning loop
-			theta1 = parameters[0].value();
-			phi1 = parameters[1].value();
-			theta2 = parameters[2].value();
-			phi2 = parameters[3].value();
+			theta1 = variables[0].value();
+			phi1 = variables[1].value();
+			theta2 = variables[2].value();
+			phi2 = variables[3].value();
 
 			circ.clear_evaluated();
 			Eigen::VectorXcd output = *circ.output();
@@ -301,7 +301,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]") {
 
 
 			//test grad
-			for(auto& p: parameters)
+			for(auto& p: variables)
 			{
 				p.zero_grad();
 			}
@@ -309,7 +309,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]") {
 			Eigen::MatrixXcd grads(1<<N, 4);
 			for(uint32_t k = 0; k < 4; k++)
 			{
-				grads.col(k) = *parameters[k].grad();
+				grads.col(k) = *variables[k].grad();
 			}
 			Eigen::VectorXd egrad_circ = 2*(output.adjoint()*ham*grads).real();
 
@@ -337,9 +337,9 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]") {
 
 			REQUIRE((egrad_circ - egrad_num).norm() < 1e-6);
 
-			for(uint32_t k = 0; k < parameters.size(); ++k)
+			for(uint32_t k = 0; k < variables.size(); ++k)
 			{
-				parameters[k] -= 0.02*egrad_circ(k);
+				variables[k] -= 0.02*egrad_circ(k);
 			}
 
 			std::cout << real(cx_double(output.adjoint()*ham*output)) << std::endl;
@@ -363,9 +363,9 @@ TEST_CASE("test tfi", "[tfi]") {
 	std::normal_distribution<> nd;
 
 	auto circ1 = construct_diagonal_tfi(N);
-    auto parameters1 = circ1.parameters();
+    auto variables1 = circ1.variables();
 
-	auto [circ2, parameters2] = construct_bare_tfi(N);
+	auto [circ2, variables2] = construct_bare_tfi(N);
 
     Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(1 << N);
     ini /= sqrt(1 << N);
@@ -375,8 +375,8 @@ TEST_CASE("test tfi", "[tfi]") {
 	for(uint32_t k = 0; k < 9; ++k)
 	{
 		double v = nd(re);
-		parameters1[k] = v;
-		parameters2[k] = v;
+		variables1[k] = v;
+		variables2[k] = v;
 	}
 
 
@@ -386,8 +386,8 @@ TEST_CASE("test tfi", "[tfi]") {
 
 		for(uint32_t k = 0; k < 9; ++k)
 		{
-			parameters1[k].zero_grad();
-			parameters2[k].zero_grad();
+			variables1[k].zero_grad();
+			variables2[k].zero_grad();
 		}
 
 		Eigen::VectorXcd output1 = *circ1.output();
@@ -401,15 +401,15 @@ TEST_CASE("test tfi", "[tfi]") {
 
 		for(uint32_t k = 0; k < 9; ++k)
 		{
-			Eigen::VectorXcd grad1 = *parameters1[k].grad();
-			Eigen::VectorXcd grad2 = *parameters1[k].grad();
+			Eigen::VectorXcd grad1 = *variables1[k].grad();
+			Eigen::VectorXcd grad2 = *variables1[k].grad();
 			REQUIRE((grad1 - grad2).norm() < 1e-6);
 		}
 
 		for(uint32_t k = 0; k < 9; ++k)
 		{
-			parameters1[k] -= 0.01;
-			parameters2[k] -= 0.01;
+			variables1[k] -= 0.01;
+			variables2[k] -= 0.01;
 		}
 	}
 }

@@ -1,7 +1,8 @@
 #include "yavque/backward_grad.hpp"
 
 std::pair<double, Eigen::VectorXd>
-yavque::value_and_grad(const Eigen::SparseMatrix<yavque::cx_double>& op, const Circuit& circuit)
+yavque::value_and_grad(const Eigen::SparseMatrix<yavque::cx_double>& op, 
+		const Circuit& circuit)
 {
 	/*
 	 * We use the notation in arXiv:2009.02823
@@ -18,7 +19,7 @@ yavque::value_and_grad(const Eigen::SparseMatrix<yavque::cx_double>& op, const C
 
 	for(size_t idx = 0; idx < op_size; ++idx)
 	{
-		if(auto diff_op = dynamic_cast<Univariate*>
+		if(auto* diff_op = dynamic_cast<Univariate*>
 				(circuit.operator_at(idx).get()))
 		{
 			Eigen::VectorXcd right = *circuit.state_at(idx);

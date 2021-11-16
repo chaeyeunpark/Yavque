@@ -27,9 +27,14 @@ option(CLANG_TIDY "Set Clang-Tidy" OFF)
 if(CLANG_TIDY)
 	message(STATUS "Use Clang-Tidy")
 	set(CMAKE_CXX_CLANG_TIDY 
-		clang-tidy;-header-filter=${PROJECT_SOURCE_DIR}/include;-extra-arg=-std=c++17;
-		-checks=*,-modernize-use-trailing-return-type,-fuchsia-overloaded-operator,-llvm-header-guard,-fuchsia-default-arguments-calls,-*-non-private-member-variables-in-classes,-fuchsia-multiple-inheritance,-fuchsia-default-arguments-declarations;
-		-warnings-as-errors=*,-hicpp-uppercase-literal-suffix,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers;)
+"clang-tidy;-header-filter=${PROJECT_SOURCE_DIR}/include;-extra-arg=-std=c++17;\
+-checks=*,-modernize-use-trailing-return-type,\
+-fuchsia-overloaded-operator,-fuchsia-multiple-inheritance,\
+-fuchsia-default-arguments-*,-llvm-header-guard,\
+-*-non-private-member-variables-in-classes;\
+-warnings-as-errors=*,-hicpp-uppercase-literal-suffix,-cppcoreguidelines-avoid-magic-numbers,\
+-readability-magic-numbers,-clang-analyzer-core.uninitialized.UndefReturn,\
+-clang-analyzer-optin.portability.UnixAPI")
 endif()
 
 # Download CATCH

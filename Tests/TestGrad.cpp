@@ -54,9 +54,9 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 		v.setRandom();
 		v.normalize();
 		circ.set_input(v);
-		auto parameters = circ.parameters();
+		auto variables = circ.variables();
 
-		for(auto p: parameters)
+		for(auto p: variables)
 		{
 			p = urd(re);
 		}
@@ -69,7 +69,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 			Eigen::VectorXcd der1 = hams[n].apply_right(circ_output);
 			der1 *= -I;
 
-			Eigen::VectorXcd der2 = *parameters[n].grad();
+			Eigen::VectorXcd der2 = *variables[n].grad();
 
 			REQUIRE((der1 - der2).norm() < 1e-6);
 		}
@@ -139,9 +139,9 @@ TEST_CASE("test grad for two-qubit paulis", "[two-qubit-pauli]") {
 		v.normalize();
 
 		circ.set_input(v);
-		auto parameters = circ.parameters();
+		auto variables = circ.variables();
 
-		for(auto p: parameters)
+		for(auto p: variables)
 		{
 			p = urd(re);
 		}
@@ -152,15 +152,15 @@ TEST_CASE("test grad for two-qubit paulis", "[two-qubit-pauli]") {
 
 		for(uint32_t n = 0; n < depth; ++n)
 		{
-			Eigen::VectorXcd der1 = *parameters[n].grad();
+			Eigen::VectorXcd der1 = *variables[n].grad();
 			auto circ_der = circ;
 
-			auto val = circ_der.parameters()[n].value();
-			circ_der.parameters()[n] = val + M_PI/2;
+			auto val = circ_der.variables()[n].value();
+			circ_der.variables()[n] = val + M_PI/2;
 			circ_der.clear_evaluated();
 			circ_der.evaluate();
 			Eigen::VectorXcd out1 = *circ_der.output();
-			circ_der.parameters()[n] = val - M_PI/2;
+			circ_der.variables()[n] = val - M_PI/2;
 			circ_der.clear_evaluated();
 			circ_der.evaluate();
 			Eigen::VectorXcd out2 = *circ_der.output();
@@ -355,8 +355,8 @@ TEST_CASE("test grad for qaoa for TFI", "[qaoa]") {
 		for(uint32_t k = 0; k < 3*depth; ++k)
 		{
 			variables1[k] = param_values[k];
-			circ2.parameters()[k] = param_values[k];
-			circ3.parameters()[k] = param_values[k];
+			circ2.variables()[k] = param_values[k];
+			circ3.variables()[k] = param_values[k];
 		}
 
 		circ1.evaluate();
@@ -371,8 +371,8 @@ TEST_CASE("test grad for qaoa for TFI", "[qaoa]") {
 		for(uint32_t k = 0; k < 3*depth; ++k)
 		{
 			auto grad1 = *variables1[k].grad();
-			auto grad2 = *circ2.parameters()[k].grad();
-			auto grad3 = *circ3.parameters()[k].grad();
+			auto grad2 = *circ2.variables()[k].grad();
+			auto grad3 = *circ3.variables()[k].grad();
 
 			REQUIRE((grad1 - grad2).norm() < 1e-6);
 			REQUIRE((grad2 - grad3).norm() < 1e-6);

@@ -129,9 +129,9 @@ TEST_CASE("Test gradients using a random circuit")
 			}
 		}
 
-		auto parameters = circuit.parameters();
+		auto variables = circuit.variables();
 		std::normal_distribution<double> ndist;
-		for(auto& param: parameters)
+		for(auto& param: variables)
 		{
 			param = ndist(re);
 		}
@@ -145,10 +145,10 @@ TEST_CASE("Test gradients using a random circuit")
 
 		circuit.derivs();
 		Eigen::VectorXcd output = *circuit.output();
-		Eigen::VectorXd egrad(parameters.size());
-		for(uint32_t k = 0; k < parameters.size(); ++k)
+		Eigen::VectorXd egrad(variables.size());
+		for(uint32_t k = 0; k < variables.size(); ++k)
 		{
-			Eigen::VectorXcd grad = *parameters[k].grad();
+			Eigen::VectorXcd grad = *variables[k].grad();
 			egrad(k) = 2*real(cx_double(grad.adjoint()*ham*output));
 		}
 
