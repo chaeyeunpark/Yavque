@@ -4,16 +4,16 @@
 
 #include "Optimizer.hpp"
 
+#include "AdaMax.hpp"
+#include "Adam.hpp"
 #include "SGD.hpp"
 #include "SGDMomentum.hpp"
-#include "Adam.hpp"
-#include "AdaMax.hpp"
 
 
 namespace yavque 
 {
 
-class OptimizerFactory
+class OptimizerFactory final
 {
 private:
 	std::unordered_map<std::string, 
@@ -40,6 +40,9 @@ public:
 	OptimizerFactory(const OptimizerFactory& ) = delete;
 	OptimizerFactory& operator=(const OptimizerFactory&) = delete;
 
+	OptimizerFactory(OptimizerFactory&& ) = delete;
+	OptimizerFactory& operator=(OptimizerFactory&& ) = delete;
+
 	static OptimizerFactory& getInstance()
 	{
 		static OptimizerFactory instance;
@@ -50,8 +53,12 @@ public:
 	{
 		auto iter = optCstr_.find(opt["name"]);
 		if (iter == optCstr_.end())
+		{
 			throw std::invalid_argument("Such an optimizer does not exist.");
+		}
 		return iter->second(opt);
 	}
+
+	~OptimizerFactory() = default;
 };
 } //namespace yavque

@@ -1,12 +1,12 @@
-#include <random>
-#include <iostream>
-#include <cmath>
+#include "yavque.hpp"
 
 #include "EDP/ConstructSparseMat.hpp"
 #include "EDP/LocalHamiltonian.hpp"
 
-#include "yavque.hpp"
-#include "yavque/Operators/SumPauliString.hpp"
+#include <cmath>
+#include <iostream>
+#include <random>
+
 
 Eigen::SparseMatrix<double> tfi_ham(const uint32_t N, double h)
 {
@@ -16,22 +16,27 @@ Eigen::SparseMatrix<double> tfi_ham(const uint32_t N, double h)
 		ham_ct.addTwoSiteTerm(std::make_pair(k, (k+1) % N), yavque::pauli_zz());
 		ham_ct.addOneSiteTerm(k, h*yavque::pauli_x());
 	}
-	return -edp::constructSparseMat<double>(1 << N, ham_ct);
+	return -edp::constructSparseMat<double>(1U << N, ham_ct);
 }
 
 int main()
 {
-	using namespace yavque;
+	using yavque::Circuit, yavque::cx_double, yavque::Pauli, yavque::SumPauliStringHamEvol,
+		  yavque::SumLocalHamEvol;
 	using std::sqrt;
+
 	const uint32_t N = 12;
 	const uint32_t depth = 6;
+	const uint32_t total_epochs = 1000;
+
 	const double sigma = 1.0e-3;
 	const double learning_rate = 1.0e-2;
+	const double lambda = 1.0e-3;
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
 
-	Circuit circ(1 << N);
+	Circuit circ(1U << N);
 
 
 	yavque::SumPauliString zz_even(N);
@@ -51,7 +56,7 @@ int main()
 	{
 		circ.add_op_right(std::make_unique<SumPauliStringHamEvol>(zz_even));
 		circ.add_op_right(std::make_unique<SumPauliStringHamEvol>(zz_odd));
-		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right(std::make_unique<SumLocalHamEvol>(x_all_ham));
 	}
 
 	auto variables = circ.variables();
@@ -62,13 +67,13 @@ int main()
 		p = ndist(re);
 	}
 
-	Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(1 << N);
-	ini /= sqrt(1 << N);
+	Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(1U << N);
+	ini /= sqrt(1U << N);
 	const auto ham = tfi_ham(N, 0.5);
 
 	circ.set_input(ini);
 
-	for(uint32_t epoch = 0; epoch < 1000; ++epoch)
+	for(uint32_t epoch = 0; epoch < total_epochs; ++epoch)
 	{
 		circ.clear_evaluated();
 		Eigen::VectorXcd output = *circ.output();
@@ -79,7 +84,7 @@ int main()
 
 		circ.derivs();
 
-		Eigen::MatrixXcd grads(1 << N, variables.size());
+		Eigen::MatrixXcd grads(1U << N, variables.size());
 
 		for(uint32_t k = 0; k < variables.size(); ++k)
 		{
@@ -89,7 +94,7 @@ int main()
 		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
 		Eigen::RowVectorXcd o = (output.adjoint()*grads);
 		fisher -= (o.adjoint()*o).real();
-		fisher += 1e-3*Eigen::MatrixXd::Identity(variables.size(), variables.size());
+		fisher += lambda*Eigen::MatrixXd::Identity(variables.size(), variables.size());
 
 		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
 		double energy = real(cx_double(output.adjoint()*ham*output));

@@ -1,6 +1,10 @@
 #pragma once
-#include <limits>
 #include "Optimizer.hpp"
+
+#include <Eigen/Dense>
+#include <array>
+#include <limits>
+#include <nlohmann/json.hpp>
 
 namespace yavque
 {
@@ -8,31 +12,30 @@ class AdaMax
 	: public Optimizer
 {
 public:
-	static constexpr double DEFAULT_PARAMS[] = {0.002, 0.9, 0.999};
+	static constexpr std::array<double, 3> DEFAULT_PARAMS = {0.002, 0.9, 0.999};
 
 private:
-	double alpha_;
-	double beta1_;
-	double beta2_;
+	const double alpha_;
+	const double beta1_;
+	const double beta2_;
 	
-	int t_;
+	int t_ = 0;
 
 	Eigen::VectorXd m_;
 	Eigen::VectorXd u_;
 
 public:
 
-	AdaMax(double alpha = DEFAULT_PARAMS[0], double beta1 = DEFAULT_PARAMS[1],
+	explicit AdaMax(double alpha = DEFAULT_PARAMS[0], double beta1 = DEFAULT_PARAMS[1],
 			double beta2 = DEFAULT_PARAMS[2])
-		: alpha_(alpha), beta1_(beta1), beta2_(beta2), t_{0}
+		: alpha_(alpha), beta1_(beta1), beta2_(beta2)
 	{
 	}
 
-	AdaMax(const nlohmann::json& params)
+	explicit AdaMax(const nlohmann::json& params)
 		: alpha_(params.value("alpha", DEFAULT_PARAMS[0])), 
 			beta1_(params.value("beta1", DEFAULT_PARAMS[1])),
-			beta2_(params.value("beta2", DEFAULT_PARAMS[2])),
-			t_{0}
+			beta2_(params.value("beta2", DEFAULT_PARAMS[2]))
 	{
 	}
 
@@ -47,7 +50,7 @@ public:
 		};
 	}
 
-	nlohmann::json desc() const override
+	[[nodiscard]] nlohmann::json desc() const override
 	{
 		return nlohmann::json
 		{

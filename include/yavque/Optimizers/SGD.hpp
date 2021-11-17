@@ -1,7 +1,10 @@
 #pragma once
-#include <Eigen/Dense>
-#include <nlohmann/json.hpp>
 #include "Optimizer.hpp"
+
+#include <Eigen/Dense>
+#include <array>
+#include <cmath>
+#include <nlohmann/json.hpp>
 
 namespace yavque
 {
@@ -9,33 +12,36 @@ class SGD
 	: public Optimizer
 {
 public:
-	static constexpr double DEFAULT_PARAMS[] = {0.01, 0.0};
+	static constexpr std::array<double, 3> DEFAULT_PARAMS = {0.01, 0.0, 1e-4};
 
 private:
-	double alpha_;
-	double p_;
-	int t_;
+	const double alpha_;
+	const double p_;
+	const double min_alpha_;
+	int t_ = 0;
 
 public:
-	SGD(double alpha = DEFAULT_PARAMS[0], double p = DEFAULT_PARAMS[1])
-		: alpha_{alpha}, p_{p}, t_{0}
+	explicit SGD(double alpha = DEFAULT_PARAMS[0], double p = DEFAULT_PARAMS[1],
+			double min_alpha = DEFAULT_PARAMS[2])
+		: alpha_{alpha}, p_{p}, min_alpha_{min_alpha}
 	{
 	}
 
-	SGD(const nlohmann::json& params)
+	explicit SGD(const nlohmann::json& params)
 		: alpha_{params.value("alpha", DEFAULT_PARAMS[0])}, 
-			p_{params.value("p", DEFAULT_PARAMS[1])},
-			t_{0}
+			p_{params.value("p", DEFAULT_PARAMS[1])}, 
+			min_alpha_{params.value("min_alpha", DEFAULT_PARAMS[2])}
 	{
 	}
 
-	nlohmann::json desc() const override
+	[[nodiscard]] nlohmann::json desc() const override
 	{
 		return nlohmann::json
 		{
 			{"name", "SGD"},
 			{"alhpa", alpha_},
-			{"p", p_}
+			{"p", p_},
+			{"min_alpha", min_alpha_}
 		};
 	}
 
@@ -43,7 +49,7 @@ public:
 	{
 		using std::pow;
 		++t_;
-		double eta = std::max((alpha_/pow(t_, p_)), 1e-4);
+		double eta = std::max((alpha_/pow(t_, p_)), min_alpha_);
 		return -eta*v;
 	}
 };

@@ -1,18 +1,18 @@
-#include <random>
-#include <iostream>
-#include <cmath>
-
-#include <stdlib.h>
-#include <tbb/global_control.h>
-
-#include <nlohmann/json.hpp>
+#include "yavque.hpp"
 
 #include "Basis/TIBasis.hpp"
 #include "EDP/ConstructSparseMat.hpp"
 #include "EDP/LocalHamiltonian.hpp"
-
 #include "Hamiltonians/TITFIsing.hpp"
-#include "yavque.hpp"
+
+#include <nlohmann/json.hpp>
+#include <tbb/global_control.h>
+
+#include <cstdlib>
+#include <cmath>
+#include <iostream>
+#include <random>
+
 
 /*
  * This code simulate the QAOA circuit within the translation invariant
@@ -43,25 +43,33 @@ Eigen::SparseMatrix<double> tfi_ham(double h, Basis&& basis)
 int get_num_threads()
 {
 	const char* p = getenv("TBB_NUM_THREADS");
-	if(!p)
+	if(p == nullptr)
+	{
 		return tbb::this_task_arena::max_concurrency();
-	return atoi(p);
+	}
+	char* end;
+
+	int num_threads = strtol(p, end, 10);
+	return num_threads;
 }
 
 int main()
 {
-	using namespace yavque;
 	using std::sqrt;
+	using yavque::Circuit, yavque::HamEvol, yavque::cx_double;
+
 	const uint32_t N = 12;
 	const uint32_t depth = 6;
+	const uint32_t total_epochs = 1000;
+
 	const double sigma = 1.0e-3;
 	const double learning_rate = 1.0e-2;
 	const double h = 0.5;
+	const double lambda = 1.0e-3;
 
 	const int num_threads = get_num_threads();
 	std::cerr << "Processing using " << num_threads << " threads." << std::endl;
-	tbb::global_control c(tbb::global_control::max_allowed_parallelism, 
-			num_threads);
+	tbb::global_control c(tbb::global_control::max_allowed_parallelism, num_threads);
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
@@ -91,7 +99,7 @@ int main()
 	Eigen::VectorXcd ini(basis.getDim());
 	for(uint32_t k = 0; k < basis.getDim(); ++k)
 	{
-		ini(k) = sqrt(basis.rotRpt(k))/sqrt(1<<N);
+		ini(k) = sqrt(basis.rotRpt(k)) / sqrt(1U << N);
 	}
 
 	std::cout << ini.norm() << std::endl;
@@ -100,7 +108,7 @@ int main()
 
 	circ.set_input(ini);
 
-	for(uint32_t epoch = 0; epoch < 1000; ++epoch)
+	for(uint32_t epoch = 0; epoch < total_epochs; ++epoch)
 	{
 		circ.clear_evaluated();
 		Eigen::VectorXcd output = *circ.output();
@@ -121,7 +129,7 @@ int main()
 		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
 		Eigen::RowVectorXcd o = (output.adjoint()*grads);
 		fisher -= (o.adjoint()*o).real();
-		fisher += 1e-3*Eigen::MatrixXd::Identity(variables.size(), variables.size());
+		fisher += lambda*Eigen::MatrixXd::Identity(variables.size(), variables.size());
 
 		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
 		double energy = real(cx_double(output.adjoint()*ham*output));
