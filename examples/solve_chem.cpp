@@ -1,12 +1,11 @@
-#include <random>
 #include <yavque.hpp>
-#include <filesystem>
+#include "PauliHamiltonian.hpp"
 
 #include <EDP/ConstructSparseMat.hpp>
 
-#include "PauliHamiltonian.hpp"
-#include "yavque/backward_grad.hpp"
 
+#include <filesystem>
+#include <random>
 
 /*
  * This program solves the chemical Hamiltonian using the hardware efficient Ansatz.

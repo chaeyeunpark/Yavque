@@ -31,6 +31,6 @@ yavque::value_and_grad(const Eigen::SparseMatrix<yavque::cx_double>& op,
 		}
 	}
 	return std::make_pair(value, Eigen::VectorXd{
-			Eigen::Map<Eigen::VectorXd>(derivs.data(), derivs.size())
-		});
+		Eigen::Map<Eigen::VectorXd>(derivs.data(), static_cast<Eigen::Index>(derivs.size()))
+	});
 }

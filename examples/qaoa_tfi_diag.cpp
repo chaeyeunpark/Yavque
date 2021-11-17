@@ -110,7 +110,9 @@ int main()
 		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
 		Eigen::RowVectorXcd o = (output.adjoint()*grads);
 		fisher -= (o.adjoint()*o).real();
-		fisher += lambda*Eigen::MatrixXd::Identity(variables.size(), variables.size());
+		fisher += lambda*Eigen::MatrixXd::Identity(
+				static_cast<Eigen::Index>(variables.size()),
+				static_cast<Eigen::Index>(variables.size()));
 
 		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
 		double energy = real(cx_double(output.adjoint()*ham*output));

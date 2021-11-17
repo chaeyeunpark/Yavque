@@ -1,32 +1,32 @@
-#include <random>
-#include <iostream>
-#include <cmath>
-
-#include <fstream>
-#include <tbb/tbb.h>
+#include "example_utils.hpp"
+#include "yavque.hpp"
 
 #include "EDP/ConstructSparseMat.hpp"
 #include "EDP/LocalHamiltonian.hpp"
 
-#include "yavque.hpp"
+#include <tbb/tbb.h>
 
+#include <cmath>
+#include <fstream>
+#include <iostream>
+#include <random>
 
 Eigen::SparseMatrix<yavque::cx_double> single_pauli(const uint32_t N, const uint32_t idx, 
 		const Eigen::SparseMatrix<yavque::cx_double>& m)
 {
 	edp::LocalHamiltonian<yavque::cx_double> lh(N, 2);
 	lh.addOneSiteTerm(idx, m);
-	return edp::constructSparseMat<yavque::cx_double>(1<<N, lh);
+	return edp::constructSparseMat<yavque::cx_double>(1U << N, lh);
 }
 
 Eigen::SparseMatrix<yavque::cx_double> identity(const uint32_t N)
 {
 	std::vector<Eigen::Triplet<yavque::cx_double>> triplets;
-	for(uint32_t n = 0; n < (1u<<N); ++n)
+	for(uint32_t n = 0; n < (1U << N); ++n)
 	{
 		triplets.emplace_back(n, n, 1.0);
 	}
-	Eigen::SparseMatrix<yavque::cx_double> m(1<<N,1<<N);
+	Eigen::SparseMatrix<yavque::cx_double> m(1U << N, 1U << N);
 	m.setFromTriplets(triplets.begin(), triplets.end());
 	return m;
 }
@@ -34,8 +34,9 @@ Eigen::SparseMatrix<yavque::cx_double> identity(const uint32_t N)
 
 Eigen::SparseMatrix<yavque::cx_double> cluster_ham(uint32_t N, double h)
 {
-	using namespace yavque;
-	Eigen::SparseMatrix<cx_double> ham(1<<N, 1<<N);
+	using yavque::pauli_x, yavque::pauli_y, yavque::pauli_z, yavque::cx_double;
+
+	Eigen::SparseMatrix<cx_double> ham(1U << N, 1U << N);
 	for(uint32_t k = 0; k < N; k++)
 	{
 		Eigen::SparseMatrix<cx_double> term = identity(N);
@@ -51,22 +52,14 @@ Eigen::SparseMatrix<yavque::cx_double> cluster_ham(uint32_t N, double h)
 	{
 		lh.addOneSiteTerm(k, pauli_x());
 	}
-	ham -= h*edp::constructSparseMat<cx_double>(1<<N, lh);
+	ham -= h*edp::constructSparseMat<cx_double>(1U << N, lh);
 
 	return ham;
 }
 
-int get_num_threads()
-{
-	const char* p = getenv("TBB_NUM_THREADS");
-	if(!p)
-		return tbb::this_task_arena::max_concurrency();
-	return atoi(p);
-}
-
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 {
-    using namespace yavque;
+	using yavque::cx_double, yavque::Pauli;
     using std::sqrt;
 
 	const uint32_t total_epochs = 10;
@@ -76,6 +69,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 	const uint32_t depth = 6;
 	const double sigma = 1.0e-2;
 	const double learning_rate = 1.0e-2;
+	const double lambda = 1.0e-3;
 
 	const int num_threads = get_num_threads();
 	std::cerr << "Processing using " << num_threads << " threads." << std::endl;
@@ -85,7 +79,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 	std::random_device rd;
 	std::default_random_engine re{rd()};
 
-	Circuit circ(1 << N);
+	yavque::Circuit circ(1U << N);
 
 	std::vector<std::map<uint32_t, Pauli>> ti_zxz;
 
@@ -116,8 +110,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 		p = ndist(re);
 	}
 
-	Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(1 << N);
-	ini /= sqrt(1 << N);
+	Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(1U << N);
+	ini /= sqrt(1U << N);
 	const auto ham = cluster_ham(N, h);
 
 	std::cout.precision(10);
@@ -135,7 +129,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
 		circ.derivs();
 
-		Eigen::MatrixXcd grads(1 << N, variables.size());
+		Eigen::MatrixXcd grads(1U << N, variables.size());
 
 		for(uint32_t k = 0; k < variables.size(); ++k)
 		{
@@ -143,8 +137,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 		}
 
 		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
-		double lambda = std::max(100.0*std::pow(0.9, epoch), 1e-3);
-		fisher += lambda*Eigen::MatrixXd::Identity(variables.size(), variables.size());
+		fisher += lambda*Eigen::MatrixXd::Identity(
+				static_cast<Eigen::Index>(variables.size()),
+				static_cast<Eigen::Index>(variables.size()));
 
 		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
 		double energy = real(cx_double(output.adjoint()*ham*output));

@@ -27,14 +27,15 @@ option(CLANG_TIDY "Set Clang-Tidy" OFF)
 if(CLANG_TIDY)
 	message(STATUS "Use Clang-Tidy")
 	set(CMAKE_CXX_CLANG_TIDY 
-"clang-tidy;-header-filter=include/yavque;-extra-arg=-std=c++17;\
+"clang-tidy-12;-header-filter=\"include/yavque/.*\";-extra-arg=-std=c++17;\
 -checks=*,-modernize-use-trailing-return-type,\
 -fuchsia-overloaded-operator,-fuchsia-multiple-inheritance,\
 -fuchsia-default-arguments-*,-llvm-header-guard,\
--*-non-private-member-variables-in-classes;\
+-*-non-private-member-variables-in-classes,-llvmlibc-*;\
 -warnings-as-errors=*,-cppcoreguidelines-avoid-magic-numbers,\
 -readability-magic-numbers,-clang-analyzer-core.uninitialized.UndefReturn,\
--clang-analyzer-optin.portability.UnixAPI,-modernize-use-default-member-init")
+-clang-analyzer-optin.portability.UnixAPI,-modernize-use-default-member-init,\
+-concurrency-mt-unsafe,-cppcoreguidelines-pro-type-vararg,-hicpp-vararg")
 endif()
 
 # Download CATCH
@@ -78,23 +79,23 @@ target_link_libraries(yavque PUBLIC Eigen3::Eigen external_dependency)
 target_include_directories(yavque PUBLIC "${PROJECT_SOURCE_DIR}/include")
 
 target_include_directories(yavque PUBLIC 
-	"${PROJECT_SOURCE_DIR}/externals/ExactDiagonalization/Include/"
+	"${PROJECT_SOURCE_DIR}/externals/ExactDiagonalization/include/edlib/"
 	"${PROJECT_SOURCE_DIR}/externals/nlohmann_json_cmake_fetchcontent/include/")
 
 if(BUILD_EXAMPLES)
-	add_executable(qaoa_tfi_diag "examples/qaoa_tfi_diag.cpp")
+	add_executable(qaoa_tfi_diag "examples/qaoa_tfi_diag.cpp" "examples/example_utils.cpp")
 	target_link_libraries(qaoa_tfi_diag PRIVATE yavque Eigen3::Eigen)
 
-	add_executable(qaoa_tfi_pauli "examples/qaoa_tfi_pauli.cpp")
+	add_executable(qaoa_tfi_pauli "examples/qaoa_tfi_pauli.cpp" "examples/example_utils.cpp")
 	target_link_libraries(qaoa_tfi_pauli PRIVATE yavque Eigen3::Eigen)
 
-	add_executable(qaoa_tfi_ti "examples/qaoa_tfi_ti.cpp")
+	add_executable(qaoa_tfi_ti "examples/qaoa_tfi_ti.cpp" "examples/example_utils.cpp")
 	target_link_libraries(qaoa_tfi_ti PRIVATE yavque Eigen3::Eigen)
 
-	add_executable(qaoa_cluster "examples/qaoa_cluster.cpp")
+	add_executable(qaoa_cluster "examples/qaoa_cluster.cpp" "examples/example_utils.cpp")
 	target_link_libraries(qaoa_cluster PRIVATE yavque Eigen3::Eigen)
 
-	add_executable(solve_chem "examples/solve_chem.cpp")
+	add_executable(solve_chem "examples/solve_chem.cpp" "examples/example_utils.cpp")
 	target_link_libraries(solve_chem PRIVATE yavque Eigen3::Eigen)
 endif()
 
