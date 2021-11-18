@@ -190,7 +190,7 @@ qaoa_shared_var(const uint32_t N, const uint32_t depth)
 		ss << "zz between " << i << " and " << (i+1)%N;
 
 		ham_zzs.emplace_back(
-			edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct),
+			edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct),
 			ss.str());
 	}
 
@@ -205,7 +205,7 @@ qaoa_shared_var(const uint32_t N, const uint32_t depth)
 		ss << "x on " << i;
 
 		ham_xs.emplace_back(
-			edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct),
+			edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct),
 			ss.str());
 	}
 

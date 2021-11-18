@@ -1,8 +1,8 @@
-#include <yavque.hpp>
 #include "PauliHamiltonian.hpp"
+#include "example_utils.hpp"
+#include "yavque.hpp"
 
 #include <EDP/ConstructSparseMat.hpp>
-
 
 #include <filesystem>
 #include <random>
@@ -12,7 +12,9 @@
  */
 int main(int argc, char* argv[])
 {
-	using namespace yavque;
+	using yavque::cx_double, yavque::pauli_x, yavque::pauli_y, yavque::pauli_z,
+		  yavque::DenseHermitianMatrix, yavque::SingleQubitHamEvol, yavque::TwoQubitOperator,
+		  yavque::OptimizerFactory;
 	namespace fs = std::filesystem;
 
 	if(argc != 3)
@@ -24,16 +26,17 @@ int main(int argc, char* argv[])
 	auto ham = PauliHamiltonian::fromFile(fs::path(argv[1]));
 	
 	const uint32_t N = ham.getN();
-	const uint32_t dim = 1u << N;
+	const uint32_t dim = 1U << N;
+	const uint32_t total_epochs = 1000;
 	const double sigma = 1.0e-3;
-	const uint32_t depth = atoi(argv[2]);
+	const auto depth = parse_int<uint32_t>(argv[2]);
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
-	auto ham_mat = edp::constructSparseMat<cx_double>(1u << N, ham);
+	auto ham_mat = edp::constructSparseMat<cx_double>(1U << N, ham);
 
 	// construct the hardward efficient Ansatz
-	Circuit circuit(1u << N);
+	yavque::Circuit circuit(1U << N);
 
 	auto pauli_x_ham = std::make_shared<DenseHermitianMatrix>(pauli_x());
 	auto pauli_y_ham = std::make_shared<DenseHermitianMatrix>(pauli_y());
@@ -78,12 +81,20 @@ int main(int argc, char* argv[])
 			std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, k)
 		);
 	}
-
-	auto optimizer = OptimizerFactory::getInstance().
-		createOptimizer(nlohmann::json{
-			{"name", "Adam"},
-			{"alpha", 1.0e-2}
-	});
+	
+	std::unique_ptr<yavque::Optimizer> optimizer = nullptr;
+	try{
+		optimizer = OptimizerFactory::getInstance().
+			createOptimizer(nlohmann::json{
+				{"name", "Adam"},
+				{"alpha", 1.0e-2}
+		});
+	}
+	catch(std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+		return 1;
+	}
 
 	// initial state is |0\rangle^{\otimes N}
 	Eigen::VectorXcd ini = Eigen::VectorXcd::Zero(dim);
@@ -100,7 +111,7 @@ int main(int argc, char* argv[])
 		param = ndist(re);
 	}
 
-	for(uint32_t epoch = 0; epoch < 1000; ++epoch)
+	for(uint32_t epoch = 0; epoch < total_epochs; ++epoch)
 	{
 		circuit.clear_evaluated();
 		const auto [energy, grad] = value_and_grad(ham_mat, circuit);

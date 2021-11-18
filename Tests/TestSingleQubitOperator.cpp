@@ -67,7 +67,7 @@ TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 		auto m2 = SingleQubitHamEvol(
 				std::make_shared<DenseHermitianMatrix>(I*matrix_log(op)),
 				N, idx);
-		m2.parameter() = 1.0;
+		m2.set_variable_value(1.0);
 
 		auto st = random_vector(dim, re);
 		REQUIRE((m1.apply_right(st) - m2.apply_right(st)).norm() < 1e-6);
@@ -98,16 +98,16 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			);
 
 			double val = ndist(re);
-			m.parameter() = val;
+			m.set_variable_value(val);
 
 			auto st = random_vector(dim, re);
 			Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(
 				m.apply_right(st));
 			
 			// from parameter shift rule
-			m.parameter() += M_PI/2;
+			m.get_variable() += M_PI/2;
 			Eigen::VectorXcd grad2 = m.apply_right(st);
-			m.parameter() = val - M_PI/2;
+			m.get_variable() = val - M_PI/2;
 			grad2 -= m.apply_right(st);
 			grad2 /= 2.0;
 
@@ -124,16 +124,16 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			);
 
 			double val = ndist(re);
-			m.parameter() = val;
+			m.set_variable_value(val);
 
 			auto st = random_vector(dim, re);
 			Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(
 				m.apply_right(st));
 			
 			// from parameter shift rule
-			m.parameter() += M_PI/2;
+			m.get_variable() += M_PI/2;
 			Eigen::VectorXcd grad2 = m.apply_right(st);
-			m.parameter() = val - M_PI/2;
+			m.get_variable() = val - M_PI/2;
 			grad2 -= m.apply_right(st);
 			grad2 /= 2.0;
 
@@ -150,16 +150,16 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			);
 
 			double val = ndist(re);
-			m.parameter() = val;
+			m.set_variable_value(val);
 
 			auto st = random_vector(dim, re);
 			Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(
 				m.apply_right(st));
 			
 			// from parameter shift rule
-			m.parameter() += M_PI/2;
+			m.get_variable() += M_PI/2;
 			Eigen::VectorXcd grad2 = m.apply_right(st);
-			m.parameter() = val - M_PI/2;
+			m.get_variable() = val - M_PI/2;
 			grad2 -= m.apply_right(st);
 			grad2 /= 2.0;
 
@@ -189,7 +189,7 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			);
 
 			double val = ndist(re);
-			m.parameter() = val;
+			m.set_variable_value(val);
 
 			auto st = random_vector(dim, re);
 			Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(
@@ -199,9 +199,9 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			Eigen::VectorXcd grad2;
 			{
 				double t = coeffs.norm();
-				m.parameter() += M_PI/2/t;
+				m.get_variable() += M_PI/2/t;
 				grad2 = m.apply_right(st);
-				m.parameter() = val - M_PI/2/t;
+				m.get_variable() = val - M_PI/2/t;
 				grad2 -= m.apply_right(st);
 
 				grad2 *= t / 2.0;

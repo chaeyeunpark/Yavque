@@ -18,3 +18,5 @@
 
 #include "Operators/SingleQubitHamEvol.hpp"
 #include "Operators/SingleQubitOperator.hpp"
+
+#include "Operators/TwoQubitOperator.hpp"

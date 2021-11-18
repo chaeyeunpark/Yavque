@@ -45,7 +45,7 @@ yavque::Circuit construct_diagonal_tfi(const uint32_t N)
 
 auto construct_bare_tfi(const uint32_t N)
 {
-	yavque::Circuit circ(1 << N);
+	yavque::Circuit circ(1U << N);
 	std::vector<yavque::Variable> variables(9);
 
 	std::vector<yavque::Hamiltonian> zz_hams;

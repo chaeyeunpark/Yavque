@@ -21,7 +21,7 @@ Eigen::Matrix2cd hadamard()
 		1.0/sqrt(2.0),-1.0/sqrt(2.0);
 
 	return h;
-};
+}
 
 Eigen::Matrix4cd cnot()
 {
@@ -35,7 +35,7 @@ Eigen::Matrix4cd cnot()
 	m(3, 2) = 1.0;
 
 	return m;
-};
+}
 
 enum class Gate
 {

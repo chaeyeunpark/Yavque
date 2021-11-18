@@ -70,8 +70,8 @@ TEST_CASE("test random ZZ", "[random-zz]") {
 
 		double t = ndist(re);
 
-		diag_ham_evol.parameter() = t;
-		sum_pauli_evol.parameter() = t;
+		diag_ham_evol.set_variable_value(t);
+		sum_pauli_evol.set_variable_value(t);
 
 		auto res1 = diag_ham_evol.apply_right(ini);
 		auto res2 = sum_pauli_evol.apply_right(ini);
@@ -139,8 +139,8 @@ TEST_CASE("test ZXZ", "[zxz]") {
 
 	double t = ndist(re);
 
-	ham_full_evol.parameter() = t;
-	sum_pauli_evol.parameter() = t;
+	ham_full_evol.set_variable_value(t);
+	sum_pauli_evol.set_variable_value(t);
 
 
 	for(uint32_t k = 0; k < 100; ++k) //instance

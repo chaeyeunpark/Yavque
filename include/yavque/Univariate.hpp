@@ -35,6 +35,16 @@ public:
 		var_ = std::move(var);
 	}
 
+	void set_variable_value(double val)
+	{
+		var_.set_value(val);
+	}
+
+	[[nodiscard]] double get_variable_value() const
+	{
+		return var_.value();
+	}
+
 	[[nodiscard]] virtual std::unique_ptr<Operator> log_deriv() const = 0;
 };
 } //namespace yavque

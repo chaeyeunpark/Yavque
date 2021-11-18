@@ -11,8 +11,6 @@ int get_num_threads()
 	{
 		return tbb::this_task_arena::max_concurrency();
 	}
-	char* end = nullptr;
-
-	int num_threads = static_cast<int>(strtol(p, &end, 10));
+	int num_threads = parse_int<int>(p);
 	return num_threads;
 }

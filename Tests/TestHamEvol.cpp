@@ -33,7 +33,7 @@ void test_single_qubit(const uint32_t N,
 
 	auto ham = yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct));
 	auto hamEvol = yavque::HamEvol(ham);
-	auto var = hamEvol.parameter();
+	auto var = hamEvol.get_variable();
 
 	for(int i = 0; i < 100; i++)
 	{
@@ -114,7 +114,7 @@ TEST_CASE("Test basic operations", "[basic]") {
 
 	auto copied = hamEvol.clone();
 
-	REQUIRE(hamEvol.parameter() != dynamic_cast<HamEvol*>(copied.get())->parameter());
+	REQUIRE(hamEvol.get_variable() != dynamic_cast<HamEvol*>(copied.get())->get_variable());
 
 	REQUIRE(hamEvol.hamiltonian().is_same_ham( dynamic_cast<HamEvol*>(copied.get())->hamiltonian()));
 }
@@ -151,13 +151,13 @@ TEST_CASE("Test gradient", "[log-deriv]") {
 		
 		double val = nd(re);
 
-		hamEvol.parameter() = val;
+		hamEvol.set_variable_value(val);
 		Eigen::VectorXcd grad1 = hamEvol.log_deriv()->apply_right(
 				hamEvol.apply_right(ini));
 
-		hamEvol.parameter() += M_PI/2;
+		hamEvol.get_variable() += M_PI/2;
 		Eigen::VectorXcd grad2 = hamEvol.apply_right(ini);
-		hamEvol.parameter() = val - M_PI/2;
+		hamEvol.get_variable() = val - M_PI/2;
 		grad2 -= hamEvol.apply_right(ini);
 		grad2 /= 2.0;
 

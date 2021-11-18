@@ -30,6 +30,11 @@ public:
 		return *this;
 	}
 
+	explicit Variable()
+		: p_{std::make_shared<VariableImpl>(0.0)}
+	{
+	}
+
 	explicit Variable(double value)
 		: p_{std::make_shared<VariableImpl>(value)}
 	{

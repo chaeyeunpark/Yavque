@@ -26,8 +26,13 @@ option(CLANG_TIDY "Set Clang-Tidy" OFF)
 
 if(CLANG_TIDY)
 	message(STATUS "Use Clang-Tidy")
+	execute_process(
+		COMMAND            ${PROJECT_SOURCE_DIR}/build_utils/yavque_files.py 
+		WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}
+		OUTPUT_VARIABLE    YAVQUE_SOURCE_FILES)
 	set(CMAKE_CXX_CLANG_TIDY 
-"clang-tidy-12;-header-filter=\"include/yavque/.*\";-extra-arg=-std=c++17;\
+"clang-tidy-12;-line-filter=${YAVQUE_SOURCE_FILES};\
+-extra-arg=-std=c++17;\
 -checks=*,-modernize-use-trailing-return-type,\
 -fuchsia-overloaded-operator,-fuchsia-multiple-inheritance,\
 -fuchsia-default-arguments-*,-llvm-header-guard,\
@@ -35,7 +40,8 @@ if(CLANG_TIDY)
 -warnings-as-errors=*,-cppcoreguidelines-avoid-magic-numbers,\
 -readability-magic-numbers,-clang-analyzer-core.uninitialized.UndefReturn,\
 -clang-analyzer-optin.portability.UnixAPI,-modernize-use-default-member-init,\
--concurrency-mt-unsafe,-cppcoreguidelines-pro-type-vararg,-hicpp-vararg")
+-concurrency-mt-unsafe,-cppcoreguidelines-pro-type-vararg,-hicpp-vararg,\
+-cppcoreguidelines-pro-bounds-pointer-arithmetic")
 endif()
 
 # Download CATCH

@@ -27,7 +27,7 @@ TEST_CASE("test sum of local hamiltonian", "[sum-local]") {
 	SparseMatrix<cx_double> m = pauli_x().cast<cx_double>();
 	SumLocalHam ham(N, m);
 	SumLocalHamEvol ham_evol(ham);
-	auto var = ham_evol.parameter();
+	auto var = ham_evol.get_variable();
 	
 	for(uint32_t k = 0; k < 100; ++k) //instance for loop
 	{

@@ -30,7 +30,7 @@ TEST_CASE("test random diagonal", "[random-diagonal]") {
 		vec.normalize();
 
 		double t = nd(re);
-		diag_ham_evol.parameter() = t;
+		diag_ham_evol.set_variable_value(t);
 		
 		Eigen::VectorXcd out1 = diag_ham_evol.apply_right(vec);
 		Eigen::VectorXcd out2 = exp(-I*ham.array()*t)*vec.array();
@@ -49,7 +49,7 @@ TEST_CASE("test random diagonal", "[random-diagonal]") {
 		vec.normalize();
 
 		double t = nd(re);
-		diag_ham_evol.parameter() = t;
+		diag_ham_evol.set_variable_value(t);
 		
 		Eigen::VectorXcd out1 = diag_ham_evol.apply_right(vec);
 		Eigen::VectorXcd out2 = exp(I*ham.array()*t)*vec.array();
@@ -72,13 +72,13 @@ TEST_CASE("test basic operations", "[basic-operation]") {
 	yavque::DiagonalOperator diag_op(ham);
 	yavque::DiagonalHamEvol diag_ham_evol(diag_op);
 
-	diag_ham_evol.parameter() = 1.0;
+	diag_ham_evol.set_variable_value(1.0);
 
 	auto clonned = diag_ham_evol.clone();
 
 	std::cout << clonned->desc() << std::endl;
-	auto p = dynamic_cast<yavque::Univariate*>(clonned.get());
-	p->parameter() = -1.0;
+	auto* p = dynamic_cast<yavque::Univariate*>(clonned.get());
+	p->set_variable_value(-1.0);
 
-	REQUIRE(diag_ham_evol.parameter().value() == 1.0);
+	REQUIRE(diag_ham_evol.get_variable_value() == 1.0);
 }
