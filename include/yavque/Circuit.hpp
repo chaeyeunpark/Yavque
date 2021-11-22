@@ -24,6 +24,14 @@ private:
 	mutable std::vector<std::shared_ptr<const Eigen::VectorXcd>> states_from_left_ = {};
 	mutable uint32_t states_updated_to_ = 0;
 
+	void add_op_right(std::unique_ptr<Operator> op) { ops_.emplace_back(std::move(op)); }
+
+	void add_op_left(std::unique_ptr<Operator> op)
+	{
+		states_updated_to_ = 0;
+		ops_.emplace(ops_.begin(), std::move(op));
+	}
+
 protected:
 	template<typename ConstIterator>
 	Circuit(uint32_t dim, const ConstIterator& begin, const ConstIterator& end)
@@ -87,12 +95,19 @@ public:
 		return ops_[idx];
 	}
 
-	void add_op_right(std::unique_ptr<Operator> op) { ops_.emplace_back(std::move(op)); }
-
-	void add_op_left(std::unique_ptr<Operator> op)
+	template<typename T, typename... Args> void add_op_right(Args&&... args)
 	{
+		static_assert(std::is_convertible_v<T*, Operator*>,
+		              "T must be a subclass of yavque::Operator.");
+		ops_.emplace_back(std::make_unique<T>(std::forward<Args>(args)...));
+	}
+
+	template<typename T, typename... Args> void add_op_left(Args&&... args)
+	{
+		static_assert(std::is_convertible_v<T*, Operator*>,
+		              "T must be a subclass of yavque::Operator.");
 		states_updated_to_ = 0;
-		ops_.emplace(ops_.begin(), std::move(op));
+		ops_.emplace(ops_.begin(), std::make_unique<T>(std::forward<Args>(args)...));
 	}
 
 	/**

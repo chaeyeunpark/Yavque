@@ -52,9 +52,9 @@ int main()
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<SumPauliStringHamEvol>(zz_even));
-		circ.add_op_right(std::make_unique<SumPauliStringHamEvol>(zz_odd));
-		circ.add_op_right(std::make_unique<SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right<SumPauliStringHamEvol>(zz_even);
+		circ.add_op_right<SumPauliStringHamEvol>(zz_odd);
+		circ.add_op_right<SumLocalHamEvol>(x_all_ham);
 	}
 
 	auto variables = circ.variables();

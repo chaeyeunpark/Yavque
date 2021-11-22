@@ -48,7 +48,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 
 			hams.push_back(ham);
 
-			circ.add_op_right(std::make_unique<yavque::HamEvol>(ham));
+			circ.add_op_right<yavque::HamEvol>(ham);
 		}
 
 		Eigen::VectorXcd v(1 << N);
@@ -136,7 +136,7 @@ TEST_CASE("test grad for two-qubit paulis", "[two-qubit-pauli]")
 			auto ham = yavque::Hamiltonian(
 				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct), ss.str());
 
-			circ.add_op_right(std::make_unique<yavque::HamEvol>(ham));
+			circ.add_op_right<yavque::HamEvol>(ham);
 		}
 
 		Eigen::VectorXcd v(1 << N);
@@ -215,16 +215,13 @@ qaoa_shared_var(const uint32_t N, const uint32_t depth)
 	for(uint32_t p = 0; p < depth; ++p)
 	{
 		for(uint32_t i = 0; i < N; i += 2) // add zz even
-			circ.add_op_right(
-				std::make_unique<yavque::HamEvol>(ham_zzs[i], variables[3 * p]));
+			circ.add_op_right<yavque::HamEvol>(ham_zzs[i], variables[3 * p]);
 
 		for(uint32_t i = 1; i < N; i += 2) // add zz odd
-			circ.add_op_right(
-				std::make_unique<yavque::HamEvol>(ham_zzs[i], variables[3 * p + 1]));
+			circ.add_op_right<yavque::HamEvol>(ham_zzs[i], variables[3 * p + 1]);
 
 		for(uint32_t i = 0; i < N; ++i)
-			circ.add_op_right(
-				std::make_unique<yavque::HamEvol>(ham_xs[i], variables[3 * p + 2]));
+			circ.add_op_right<yavque::HamEvol>(ham_xs[i], variables[3 * p + 2]);
 	}
 
 	return std::make_pair(std::move(circ), variables);
@@ -269,9 +266,9 @@ yavque::Circuit qaoa_sum_ham(const uint32_t N, const uint32_t depth)
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_zz_even));
-		circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_zz_odd));
-		circ.add_op_right(std::make_unique<yavque::HamEvol>(ham_x_all));
+		circ.add_op_right<yavque::HamEvol>(ham_zz_even);
+		circ.add_op_right<yavque::HamEvol>(ham_zz_odd);
+		circ.add_op_right<yavque::HamEvol>(ham_x_all);
 	}
 
 	return circ;
@@ -315,9 +312,9 @@ yavque::Circuit qaoa_diag_prod_ham(const uint32_t N, const uint32_t depth)
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_even_ham));
-		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_odd_ham));
-		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right<yavque::DiagonalHamEvol>(zz_even_ham);
+		circ.add_op_right<yavque::DiagonalHamEvol>(zz_odd_ham);
+		circ.add_op_right<yavque::SumLocalHamEvol>(x_all_ham);
 	}
 
 	return circ;

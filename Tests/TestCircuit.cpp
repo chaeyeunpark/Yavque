@@ -26,7 +26,7 @@ VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini,
 	yavque::Circuit circuit(N);
 	for(auto conf : confs)
 	{
-		circuit.add_op_right(std::make_unique<yavque::HamEvol>(pauli_strs[conf]));
+		circuit.add_op_right<yavque::HamEvol>(pauli_strs[conf]);
 	}
 	auto params = circuit.variables();
 
@@ -79,7 +79,7 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 			ham_ct.addTwoSiteTerm({i, (i + 1) % N}, ham);
 			auto ham = yavque::Hamiltonian(
 				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
-			circuit1.add_op_right(std::make_unique<yavque::HamEvol>(ham));
+			circuit1.add_op_right<yavque::HamEvol>(ham);
 		}
 	}
 
@@ -94,7 +94,7 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 		auto ham = yavque::Hamiltonian(
 			edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
 
-		circuit2.add_op_right(std::make_unique<yavque::HamEvol>(ham));
+		circuit2.add_op_right<yavque::HamEvol>(ham);
 	}
 
 	for(uint32_t instance_idx = 0; instance_idx < 10; ++instance_idx)

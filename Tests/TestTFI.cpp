@@ -37,10 +37,10 @@ yavque::Circuit construct_diagonal_tfi(const uint32_t N)
 
 	for(uint32_t p = 0; p < 4; ++p)
 	{
-		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right<yavque::DiagonalHamEvol>(zz_all_ham);
+		circ.add_op_right<yavque::SumLocalHamEvol>(x_all_ham);
 	}
-	circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_all_ham));
+	circ.add_op_right<yavque::DiagonalHamEvol>(zz_all_ham);
 	return circ;
 }
 
@@ -64,15 +64,13 @@ auto construct_bare_tfi(const uint32_t N)
 	{
 		for(uint32_t k = 0; k < N; k++)
 		{
-			circ.add_op_right(
-				std::make_unique<yavque::HamEvol>(zz_hams[k], variables[2 * p + 0]));
+			circ.add_op_right<yavque::HamEvol>(zz_hams[k], variables[2 * p + 0]);
 		}
-		circ.add_op_right(
-			std::make_unique<yavque::SumLocalHamEvol>(x_all_ham, variables[2 * p + 1]));
+		circ.add_op_right<yavque::SumLocalHamEvol>(x_all_ham, variables[2 * p + 1]);
 	}
 	for(uint32_t k = 0; k < N; k++)
 	{
-		circ.add_op_right(std::make_unique<yavque::HamEvol>(zz_hams[k], variables[8]));
+		circ.add_op_right<yavque::HamEvol>(zz_hams[k], variables[8]);
 	}
 
 	return std::make_pair(std::move(circ), std::move(variables));
@@ -160,8 +158,8 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]")
 
 	for(uint32_t p = 0; p < 1; ++p)
 	{
-		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right<yavque::DiagonalHamEvol>(zz_all_ham);
+		circ.add_op_right<yavque::SumLocalHamEvol>(x_all_ham);
 	}
 
 	Eigen::MatrixXd ham(4, 4);
@@ -265,8 +263,8 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]")
 
 	for(uint32_t p = 0; p < 2; ++p)
 	{
-		circ.add_op_right(std::make_unique<yavque::DiagonalHamEvol>(zz_all_ham));
-		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right<yavque::DiagonalHamEvol>(zz_all_ham);
+		circ.add_op_right<yavque::SumLocalHamEvol>(x_all_ham);
 	}
 
 	Eigen::MatrixXd ham = zz_all.asDiagonal();

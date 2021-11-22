@@ -86,29 +86,25 @@ TEST_CASE("Test gradients using a random circuit")
 			case Gate::RotX:
 			{
 				auto idx = qidx_dist(re);
-				circuit.add_op_right(
-					std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, idx));
+				circuit.add_op_right<SingleQubitHamEvol>(pauli_x_ham, N, idx);
 			}
 			break;
 			case Gate::RotY:
 			{
 				auto idx = qidx_dist(re);
-				circuit.add_op_right(
-					std::make_unique<SingleQubitHamEvol>(pauli_y_ham, N, idx));
+				circuit.add_op_right<SingleQubitHamEvol>(pauli_y_ham, N, idx);
 			}
 			break;
 			case Gate::RotZ:
 			{
 				auto idx = qidx_dist(re);
-				circuit.add_op_right(
-					std::make_unique<SingleQubitHamEvol>(pauli_z_ham, N, idx));
+				circuit.add_op_right<SingleQubitHamEvol>(pauli_z_ham, N, idx);
 			}
 			break;
 			case Gate::Hadamard:
 			{
 				auto idx = qidx_dist(re);
-				circuit.add_op_right(
-					std::make_unique<SingleQubitOperator>(hadamard(), N, idx));
+				circuit.add_op_right<SingleQubitOperator>(hadamard(), N, idx);
 			}
 			break;
 			case Gate::CNOT:
@@ -119,7 +115,7 @@ TEST_CASE("Test gradients using a random circuit")
 				{
 					j = qidx_dist(re);
 				}
-				circuit.add_op_right(std::make_unique<TwoQubitOperator>(cnot(), N, i, j));
+				circuit.add_op_right<TwoQubitOperator>(cnot(), N, i, j);
 			}
 			break;
 			}
