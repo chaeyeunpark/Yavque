@@ -9,22 +9,21 @@
 #include "SGD.hpp"
 #include "SGDMomentum.hpp"
 
-
-namespace yavque 
+namespace yavque
 {
 
 class OptimizerFactory final
 {
 private:
-	std::unordered_map<std::string, 
-		std::function<std::unique_ptr<Optimizer>(const nlohmann::json&)> > optCstr_;
+	std::unordered_map<std::string,
+	                   std::function<std::unique_ptr<Optimizer>(const nlohmann::json&)>>
+		optCstr_;
 
-	template<class OptimizerT>
-	void resiterOptimizer(const std::string& name)
+	template<class OptimizerT> void resiterOptimizer(const std::string& name)
 	{
 		optCstr_[name] = [](const nlohmann::json& param) -> std::unique_ptr<Optimizer>
 		{
-			return std::make_unique<OptimizerT>(param); 
+			return std::make_unique<OptimizerT>(param);
 		};
 	}
 
@@ -37,11 +36,11 @@ private:
 	}
 
 public:
-	OptimizerFactory(const OptimizerFactory& ) = delete;
+	OptimizerFactory(const OptimizerFactory&) = delete;
 	OptimizerFactory& operator=(const OptimizerFactory&) = delete;
 
-	OptimizerFactory(OptimizerFactory&& ) = delete;
-	OptimizerFactory& operator=(OptimizerFactory&& ) = delete;
+	OptimizerFactory(OptimizerFactory&&) = delete;
+	OptimizerFactory& operator=(OptimizerFactory&&) = delete;
 
 	static OptimizerFactory& getInstance()
 	{
@@ -52,7 +51,7 @@ public:
 	std::unique_ptr<Optimizer> createOptimizer(const nlohmann::json& opt) const
 	{
 		auto iter = optCstr_.find(opt["name"]);
-		if (iter == optCstr_.end())
+		if(iter == optCstr_.end())
 		{
 			throw std::invalid_argument("Such an optimizer does not exist.");
 		}
@@ -61,4 +60,4 @@ public:
 
 	~OptimizerFactory() = default;
 };
-} //namespace yavque
+} // namespace yavque

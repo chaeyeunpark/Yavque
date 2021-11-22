@@ -2,8 +2,7 @@
 #include <charconv>
 #include <cstring>
 
-template<typename T = int>
-auto parse_int(const char* cstr) -> T
+template<typename T = int> auto parse_int(const char* cstr) -> T
 {
 	static_assert(std::is_integral_v<T>, "Type T must be an integer.");
 	T val = 0;

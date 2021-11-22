@@ -3,7 +3,7 @@
 #include <vector>
 
 #include <Eigen/Dense>
-#include <Eigen/Eigenvalues> 
+#include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
 
 #include "operators.hpp"
@@ -16,9 +16,9 @@ class Circuit
 {
 private:
 	uint32_t dim_;
-	
+
 	// Operators
-	std::vector<std::unique_ptr<Operator> > ops_;
+	std::vector<std::unique_ptr<Operator>> ops_;
 
 	// States evaluated from the left
 	mutable std::vector<std::shared_ptr<const Eigen::VectorXcd>> states_from_left_ = {};
@@ -26,23 +26,18 @@ private:
 
 protected:
 	template<typename ConstIterator>
-	Circuit(uint32_t dim, 
-			const ConstIterator& begin,
-			const ConstIterator& end)
+	Circuit(uint32_t dim, const ConstIterator& begin, const ConstIterator& end)
 		: dim_{dim}
 	{
-		//check all ops has the same dim
-		for(auto iter = begin; iter != end;	++iter)
+		// check all ops has the same dim
+		for(auto iter = begin; iter != end; ++iter)
 		{
 			ops_.push_back((*iter)->clone());
 		}
 	}
 
 public:
-	explicit Circuit(uint32_t dim)
-		: dim_{dim}
-	{
-	}
+	explicit Circuit(uint32_t dim) : dim_{dim} { }
 
 	Circuit(const Circuit& rhs); // Defined in cpp
 	Circuit(Circuit&& rhs) = default;
@@ -52,35 +47,29 @@ public:
 
 	~Circuit() = default;
 
-	uint32_t get_dim() const
-	{
-		return dim_;
-	}
+	uint32_t get_dim() const { return dim_; }
 
-	bool is_evaluated() const
-	{
-		return (states_updated_to_ == ops_.size()+1);
-	}
+	bool is_evaluated() const { return (states_updated_to_ == ops_.size() + 1); }
 
-	//evaluate 
+	// evaluate
 	void evaluate() const
 	{
- 		// Initial state hasn't been set
+		// Initial state hasn't been set
 		if(states_updated_to_ == 0)
 		{
-			return ;
+			return;
 		}
- 		
+
 		// All states are evaluated
 		if(states_updated_to_ == ops_.size() + 1)
 		{
-			return ;
+			return;
 		}
 
-		for(auto d = states_from_left_.size()-1; d < ops_.size(); ++d)
+		for(auto d = states_from_left_.size() - 1; d < ops_.size(); ++d)
 		{
-			states_from_left_.emplace_back(std::make_shared<Eigen::VectorXcd>
-					(ops_[d]->apply_right(*states_from_left_[d])));
+			states_from_left_.emplace_back(std::make_shared<Eigen::VectorXcd>(
+				ops_[d]->apply_right(*states_from_left_[d])));
 		}
 		states_updated_to_ = ops_.size() + 1;
 	}
@@ -91,29 +80,21 @@ public:
 		states_from_left_.resize(1);
 	}
 
-	std::size_t num_operators() const
-	{
-		return ops_.size();
-	}
-
+	std::size_t num_operators() const { return ops_.size(); }
 
 	const std::unique_ptr<Operator>& operator_at(std::size_t idx) const
 	{
 		return ops_[idx];
 	}
 
-
-	void add_op_right(std::unique_ptr<Operator> op)
-	{
-		ops_.emplace_back(std::move(op));
-	}
+	void add_op_right(std::unique_ptr<Operator> op) { ops_.emplace_back(std::move(op)); }
 
 	void add_op_left(std::unique_ptr<Operator> op)
 	{
 		states_updated_to_ = 0;
 		ops_.emplace(ops_.begin(), std::move(op));
 	}
-	
+
 	/**
 	 * evaluate |st> - C
 	 * When C = U_N \cdots U_1, it computes U_N \cdots U_1 | st \rangle
@@ -124,7 +105,7 @@ public:
 		states_from_left_.clear();
 		states_from_left_.push_back(std::make_shared<Eigen::VectorXcd>(st));
 	}
-	
+
 	/**
 	 * subcircuit from 0 to d [0,d)
 	 */
@@ -133,10 +114,10 @@ public:
 		Circuit circ(dim_, ops_.begin(), ops_.begin() + d);
 		if(states_updated_to_ != 0)
 		{
-			circ.states_from_left_ = 
-				std::vector<std::shared_ptr<const Eigen::VectorXcd>>(states_from_left_.begin(),
-					states_from_left_.begin() + std::min(d+1, states_updated_to_));
-			circ.states_updated_to_ = std::min(d+1, states_updated_to_);
+			circ.states_from_left_ = std::vector<std::shared_ptr<const Eigen::VectorXcd>>(
+				states_from_left_.begin(),
+				states_from_left_.begin() + std::min(d + 1, states_updated_to_));
+			circ.states_updated_to_ = std::min(d + 1, states_updated_to_);
 		}
 		return circ;
 	}
@@ -146,12 +127,12 @@ public:
 	 */
 	Circuit from(uint32_t d) const
 	{
-		Circuit circ(dim_, ops_.begin()+d, ops_.end());
+		Circuit circ(dim_, ops_.begin() + d, ops_.end());
 		if(states_updated_to_ > d)
 		{
-			circ.states_from_left_ = 
-				std::vector<std::shared_ptr<const Eigen::VectorXcd>>(states_from_left_.begin() + d,
-					states_from_left_.begin() + states_updated_to_);
+			circ.states_from_left_ = std::vector<std::shared_ptr<const Eigen::VectorXcd>>(
+				states_from_left_.begin() + d,
+				states_from_left_.begin() + states_updated_to_);
 			circ.states_updated_to_ = states_updated_to_ - d;
 		}
 
@@ -163,7 +144,7 @@ public:
 		using std::begin;
 		using std::end;
 		assert(dim_ == b.dim_);
-		for(const auto& op: b.ops_)
+		for(const auto& op : b.ops_)
 		{
 			ops_.push_back(op->clone());
 		}
@@ -175,7 +156,7 @@ public:
 		using std::begin;
 		using std::end;
 		assert(dim_ == b.dim_);
-		for(auto&& op: b.ops_)
+		for(auto&& op : b.ops_)
 		{
 			ops_.emplace_back(std::move(op));
 		}
@@ -186,7 +167,7 @@ public:
 	}
 
 	Circuit dagger() const
-	{	
+	{
 		Circuit res(dim_, ops_.crbegin(), ops_.crend());
 		for(std::size_t idx = 0; idx < ops_.size(); ++idx)
 		{
@@ -227,12 +208,11 @@ public:
 
 	[[nodiscard]] std::string desc() const
 	{
-		//change to format in C++20
+		// change to format in C++20
 		std::ostringstream ss;
 		for(uint32_t d = 0; d < ops_.size(); ++d)
 		{
-			ss << "layer" << d << ": [" << ops_[d]->desc() <<
-				"]"<< std::endl;
+			ss << "layer" << d << ": [" << ops_[d]->desc() << "]" << std::endl;
 		}
 		return ss.str();
 	}

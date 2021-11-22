@@ -1,14 +1,15 @@
 #define CATCH_CONFIG_MAIN
+#include <Eigen/Dense>
 #include <catch.hpp>
 #include <random>
-#include <Eigen/Dense>
 
 #include "yavque/Operators/SumPauliString.hpp"
 #include "yavque/utils.hpp"
 
 #include "common.hpp"
 
-TEST_CASE("test commuting operators", "[test-commuting]") {
+TEST_CASE("test commuting operators", "[test-commuting]")
+{
 	using namespace yavque;
 	{
 		std::map<uint32_t, Pauli> pstr1;
@@ -64,13 +65,14 @@ TEST_CASE("test commuting operators", "[test-commuting]") {
 	}
 }
 
-TEST_CASE("test CompressedPauliString", "[pauli-string]") {
+TEST_CASE("test CompressedPauliString", "[pauli-string]")
+{
 	using namespace yavque;
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
 
-	std::uniform_int_distribution<uint32_t> uid(0,2);
+	std::uniform_int_distribution<uint32_t> uid(0, 2);
 	const uint32_t N = 12;
 
 	std::vector<uint32_t> sites;
@@ -83,7 +85,7 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]") {
 
 	for(uint32_t str_len = 2; str_len < 5; ++str_len)
 	{
-		for(uint32_t k = 0; k < 100; ++k) //instance
+		for(uint32_t k = 0; k < 100; ++k) // instance
 		{
 			std::random_shuffle(sites.begin(), sites.end());
 			std::vector<uint32_t> indices(sites.begin(), sites.begin() + str_len);
@@ -100,7 +102,8 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]") {
 
 			auto cps = detail::CompressedPauliString(pstr);
 
-			Eigen::VectorXcd res1 = cps.apply(indices, res); //apply pstr[0] to 0 and pstr[1] to 1
+			Eigen::VectorXcd res1
+				= cps.apply(indices, res); // apply pstr[0] to 0 and pstr[1] to 1
 			for(uint32_t k = 0; k < str_len; ++k)
 			{
 				switch(pstr[k])
@@ -109,7 +112,8 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]") {
 					res = apply_single_qubit(res, Eigen::MatrixXd(pauli_x()), indices[k]);
 					break;
 				case 'Y':
-					res = apply_single_qubit(res, Eigen::MatrixXcd(pauli_y()), indices[k]);
+					res = apply_single_qubit(res, Eigen::MatrixXcd(pauli_y()),
+					                         indices[k]);
 					break;
 				case 'Z':
 					res = apply_single_qubit(res, Eigen::MatrixXd(pauli_z()), indices[k]);
@@ -117,22 +121,22 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]") {
 				}
 			}
 
-
 			if((res - res1).norm() > 1e-6)
 			{
-			std::cout << input.transpose() << std::endl;
-			std::cout << res.transpose() << std::endl;
-			std::cout << res1.transpose() << std::endl;
+				std::cout << input.transpose() << std::endl;
+				std::cout << res.transpose() << std::endl;
+				std::cout << res1.transpose() << std::endl;
 				std::cout << pstr << std::endl;
-				for(auto idx: indices)
-					std::cout <<  idx << ", ";
+				for(auto idx : indices)
+					std::cout << idx << ", ";
 				std::cout << std::endl;
 			}
 			REQUIRE((res - res1).norm() < 1e-6);
 		}
 	}
 }
-TEST_CASE("test SumPauliString", "[sum-pauli-string]") {
+TEST_CASE("test SumPauliString", "[sum-pauli-string]")
+{
 	using namespace yavque;
 
 	std::random_device rd;
@@ -141,14 +145,15 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]") {
 	const uint32_t N = 10;
 	const uint32_t n_terms = 5;
 
-	std::uniform_int_distribution<uint32_t> uid(0,2);
-	std::uniform_int_distribution<uint32_t> string_len_dist(2,N-1);
+	std::uniform_int_distribution<uint32_t> uid(0, 2);
+	std::uniform_int_distribution<uint32_t> string_len_dist(2, N - 1);
 
 	std::vector<uint32_t> sites;
 	sites.reserve(N);
 
-	auto gen = [&uid, &re](){
-		return Pauli('X'+uid(re));
+	auto gen = [&uid, &re]()
+	{
+		return Pauli('X' + uid(re));
 	};
 
 	for(uint32_t k = 0; k < N; ++k)
@@ -158,8 +163,8 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]") {
 	{
 		SumPauliString sps(N);
 
-		std::vector<std::vector<uint32_t> > indices_v;
-		std::vector<std::vector<Pauli> > pstring_v;
+		std::vector<std::vector<uint32_t>> indices_v;
+		std::vector<std::vector<Pauli>> pstring_v;
 
 		for(uint32_t k = 0; k < n_terms; ++k)
 		{
@@ -175,11 +180,9 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]") {
 
 			std::map<uint32_t, Pauli> pstr;
 			std::transform(indices.begin(), indices.end(), pstring.begin(),
-				std::inserter(pstr, pstr.end()),
-				[](const auto& aa, const auto& bb)
-			{
-				return std::make_pair(aa, bb);
-			});
+			               std::inserter(pstr, pstr.end()),
+			               [](const auto& aa, const auto& bb)
+			               { return std::make_pair(aa, bb); });
 
 			sps += pstr;
 		}
@@ -189,7 +192,7 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]") {
 
 		Eigen::VectorXcd res1 = sps.apply_right(input);
 		Eigen::VectorXcd res2 = Eigen::VectorXcd::Zero(1u << N);
-		
+
 		for(uint32_t k = 0; k < n_terms; ++k)
 		{
 			auto cps = detail::CompressedPauliString(pstring_v[k]);
@@ -197,7 +200,5 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]") {
 		}
 
 		REQUIRE((res1 - res2).norm() < 1e-6);
-
 	}
 }
-

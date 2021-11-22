@@ -23,7 +23,7 @@ private:
 		// Add mutex (future)
 		if(diagonalized_)
 		{
-			return ;
+			return;
 		}
 
 		Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(ham_);
@@ -33,27 +33,17 @@ private:
 	}
 
 public:
-	explicit DenseHermitianMatrix(Eigen::MatrixXcd ham)
-		: ham_{std::move(ham)}
+	explicit DenseHermitianMatrix(Eigen::MatrixXcd ham) : ham_{std::move(ham)}
 	{
-		assert(ham_.rows() == ham_.cols()); //check diagonal
+		assert(ham_.rows() == ham_.cols()); // check diagonal
 		diagonalized_ = false;
 	}
 
-	[[nodiscard]] uint32_t dim() const
-	{
-		return ham_.rows();
-	}
+	[[nodiscard]] uint32_t dim() const { return ham_.rows(); }
 
-	[[nodiscard]] const Eigen::MatrixXcd& get_ham() const&
-	{
-		return ham_;
-	}
+	[[nodiscard]] const Eigen::MatrixXcd& get_ham() const& { return ham_; }
 
-	[[nodiscard]] Eigen::MatrixXcd get_ham() &&
-	{
-		return ham_;
-	}
+	[[nodiscard]] Eigen::MatrixXcd get_ham() && { return ham_; }
 
 	[[nodiscard]] const Eigen::MatrixXcd& evecs() const&
 	{
@@ -97,10 +87,10 @@ public:
 		{
 			diagonalize();
 		}
-		
-		Eigen::VectorXcd v = exp(x*evals_.array());
-		return evecs_*v.asDiagonal()*evecs_.adjoint();
+
+		Eigen::VectorXcd v = exp(x * evals_.array());
+		return evecs_ * v.asDiagonal() * evecs_.adjoint();
 	}
 };
 
-} //namespace yavque
+} // namespace yavque

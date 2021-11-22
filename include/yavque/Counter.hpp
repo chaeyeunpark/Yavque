@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 
-
 namespace yavque
 {
 class Counter
@@ -12,7 +11,7 @@ private:
 public:
 	Counter() = default;
 
-	static Counter& getInstance() 
+	static Counter& getInstance()
 	{
 		static Counter inst;
 		return inst;
@@ -20,7 +19,7 @@ public:
 
 	uint32_t count()
 	{
-		//add thread safety
+		// add thread safety
 		return counter_++;
 	}
 };

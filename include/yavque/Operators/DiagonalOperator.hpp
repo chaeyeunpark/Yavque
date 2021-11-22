@@ -8,46 +8,36 @@ namespace yavque
 
 namespace detail
 {
-class DiagonalOperatorImpl
-{
-private:
-	Eigen::VectorXcd diag_op_;
-
-public:
-	explicit DiagonalOperatorImpl(Eigen::VectorXcd diag_op)
-		: diag_op_{std::move(diag_op)}
+	class DiagonalOperatorImpl
 	{
-	}
+	private:
+		Eigen::VectorXcd diag_op_;
 
-	explicit DiagonalOperatorImpl(Eigen::VectorXcd&& diag_op)
-		: diag_op_{std::move(diag_op)}
-	{
-	}
+	public:
+		explicit DiagonalOperatorImpl(Eigen::VectorXcd diag_op)
+			: diag_op_{std::move(diag_op)}
+		{
+		}
 
-	[[nodiscard]] const Eigen::VectorXcd& get_diag_op() const&
-	{
-		return diag_op_;
-	}
+		explicit DiagonalOperatorImpl(Eigen::VectorXcd&& diag_op)
+			: diag_op_{std::move(diag_op)}
+		{
+		}
 
-	[[nodiscard]] Eigen::VectorXcd get_diag_op() &&
-	{
-		return diag_op_;
-	}
+		[[nodiscard]] const Eigen::VectorXcd& get_diag_op() const& { return diag_op_; }
 
-	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const 
-	{
-		return diag_op_.cwiseProduct(st);
-	}
+		[[nodiscard]] Eigen::VectorXcd get_diag_op() && { return diag_op_; }
 
-	void conjugate()
-	{
-		diag_op_ = diag_op_.conjugate().eval();
-	}
-};
-} //namespace detail
+		[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const
+		{
+			return diag_op_.cwiseProduct(st);
+		}
 
-class DiagonalOperator final
-	: public Operator
+		void conjugate() { diag_op_ = diag_op_.conjugate().eval(); }
+	};
+} // namespace detail
+
+class DiagonalOperator final : public Operator
 {
 private:
 	std::shared_ptr<const detail::DiagonalOperatorImpl> p_;
@@ -63,33 +53,31 @@ private:
 	}
 
 public:
-	explicit DiagonalOperator(const Eigen::VectorXcd& diag_op, 
-			const std::string& name = {})
-		: Operator(diag_op.size(), name), 
-		p_{std::make_shared<detail::DiagonalOperatorImpl>(diag_op)}
+	explicit DiagonalOperator(const Eigen::VectorXcd& diag_op,
+	                          const std::string& name = {})
+		: Operator(diag_op.size(), name),
+		  p_{std::make_shared<detail::DiagonalOperatorImpl>(diag_op)}
 	{
 	}
 
 	explicit DiagonalOperator(std::shared_ptr<const detail::DiagonalOperatorImpl> p,
-			const std::string& name = {},
-			cx_double constant = 1.0)
+	                          const std::string& name = {}, cx_double constant = 1.0)
 		: Operator(p->get_diag_op().size(), name), p_{std::move(p)}, constant_{constant}
 	{
 	}
 
 	~DiagonalOperator() override = default;
 
-
 	[[nodiscard]] std::shared_ptr<const detail::DiagonalOperatorImpl> get_impl() const
 	{
 		return p_;
 	}
 
-	DiagonalOperator(const DiagonalOperator& ) = default;
-	DiagonalOperator(DiagonalOperator&& ) = default;
+	DiagonalOperator(const DiagonalOperator&) = default;
+	DiagonalOperator(DiagonalOperator&&) = default;
 
-	DiagonalOperator& operator=(const DiagonalOperator& ) = delete;
-	DiagonalOperator& operator=(DiagonalOperator&& ) = delete;
+	DiagonalOperator& operator=(const DiagonalOperator&) = delete;
+	DiagonalOperator& operator=(DiagonalOperator&&) = delete;
 
 	[[nodiscard]] std::unique_ptr<Operator> clone() const override
 	{
@@ -97,16 +85,12 @@ public:
 		return cloned;
 	}
 
-	[[nodiscard]] Eigen::VectorXcd get_diag_op() const
-	{
-		return p_->get_diag_op();
-	}
+	[[nodiscard]] Eigen::VectorXcd get_diag_op() const { return p_->get_diag_op(); }
 
 	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
-		return constant_*p_->apply_right(st);
+		return constant_ * p_->apply_right(st);
 	}
-
 };
 
-} //namespace yavque
+} // namespace yavque
