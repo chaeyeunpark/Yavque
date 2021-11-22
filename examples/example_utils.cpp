@@ -6,7 +6,7 @@
 
 int get_num_threads()
 {
-	const char* p = getenv("TBB_NUM_THREADS"); //NOLINT(concurrency-mt-unsafe)
+	const char* p = getenv("TBB_NUM_THREADS"); // NOLINT(concurrency-mt-unsafe)
 	if(p == nullptr)
 	{
 		return tbb::this_task_arena::max_concurrency();

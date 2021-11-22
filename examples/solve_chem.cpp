@@ -13,8 +13,8 @@
 int main(int argc, char* argv[])
 {
 	using yavque::cx_double, yavque::pauli_x, yavque::pauli_y, yavque::pauli_z,
-		  yavque::DenseHermitianMatrix, yavque::SingleQubitHamEvol, yavque::TwoQubitOperator,
-		  yavque::OptimizerFactory;
+		yavque::DenseHermitianMatrix, yavque::SingleQubitHamEvol,
+		yavque::TwoQubitOperator, yavque::OptimizerFactory;
 	namespace fs = std::filesystem;
 
 	if(argc != 3)
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 	}
 
 	auto ham = PauliHamiltonian::fromFile(fs::path(argv[1]));
-	
+
 	const uint32_t N = ham.getN();
 	const uint32_t dim = 1U << N;
 	const uint32_t total_epochs = 1000;
@@ -42,53 +42,41 @@ int main(int argc, char* argv[])
 	auto pauli_y_ham = std::make_shared<DenseHermitianMatrix>(pauli_y());
 	auto pauli_z_ham = std::make_shared<DenseHermitianMatrix>(pauli_z());
 
-	Eigen::MatrixXcd cz = Eigen::MatrixXcd::Zero(4,4);
+	Eigen::MatrixXcd cz = Eigen::MatrixXcd::Zero(4, 4);
 	cz(0, 0) = 1.0;
 	cz(1, 1) = 1.0;
 	cz(2, 2) = 1.0;
 	cz(3, 3) = -1.0;
 
-	for(uint32_t i = 0; i < depth-1; ++i)
+	for(uint32_t i = 0; i < depth - 1; ++i)
 	{
 		for(uint32_t k = 0; k < N; ++k)
 		{
-			circuit.add_op_right(
-				std::make_unique<SingleQubitHamEvol>(pauli_y_ham, N, k)
-			);
+			circuit.add_op_right(std::make_unique<SingleQubitHamEvol>(pauli_y_ham, N, k));
 		}
 		for(uint32_t k = 0; k < N; ++k)
 		{
-			circuit.add_op_right(
-				std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, k)
-			);
+			circuit.add_op_right(std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, k));
 		}
-		for(uint32_t k = 0; k < N-1; ++k)
+		for(uint32_t k = 0; k < N - 1; ++k)
 		{
-			circuit.add_op_right(
-				std::make_unique<TwoQubitOperator>(cz, N, k, k+1)
-			);
+			circuit.add_op_right(std::make_unique<TwoQubitOperator>(cz, N, k, k + 1));
 		}
 	}
 	for(uint32_t k = 0; k < N; ++k)
 	{
-		circuit.add_op_right(
-			std::make_unique<SingleQubitHamEvol>(pauli_y_ham, N, k)
-		);
+		circuit.add_op_right(std::make_unique<SingleQubitHamEvol>(pauli_y_ham, N, k));
 	}
 	for(uint32_t k = 0; k < N; ++k)
 	{
-		circuit.add_op_right(
-			std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, k)
-		);
+		circuit.add_op_right(std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, k));
 	}
-	
+
 	std::unique_ptr<yavque::Optimizer> optimizer = nullptr;
-	try{
-		optimizer = OptimizerFactory::getInstance().
-			createOptimizer(nlohmann::json{
-				{"name", "Adam"},
-				{"alpha", 1.0e-2}
-		});
+	try
+	{
+		optimizer = OptimizerFactory::getInstance().createOptimizer(
+			nlohmann::json{{"name", "Adam"}, {"alpha", 1.0e-2}});
 	}
 	catch(std::exception& e)
 	{
@@ -102,11 +90,10 @@ int main(int argc, char* argv[])
 
 	circuit.set_input(ini);
 
-
 	// initialize paramerters
 	auto variables = circuit.variables();
 	std::normal_distribution<double> ndist(0, sigma);
-	for(auto& param: variables)
+	for(auto& param : variables)
 	{
 		param = ndist(re);
 	}

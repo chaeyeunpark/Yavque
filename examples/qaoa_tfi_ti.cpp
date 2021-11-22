@@ -1,4 +1,5 @@
 #include "yavque.hpp"
+#include "example_utils.hpp"
 
 #include "Basis/Basis1D.hpp"
 #include "EDP/ConstructSparseMat.hpp"
@@ -13,37 +14,40 @@
 #include <iostream>
 #include <random>
 
-
 /*
  * This code simulate the QAOA circuit within the translation invariant
  * subspace.
  * */
 
-template<typename Basis>
-Eigen::SparseMatrix<double> ti_zz(Basis&& basis)
+template<typename Basis> Eigen::SparseMatrix<double> ti_zz(Basis&& basis)
 {
 	TITFIsing<uint32_t> tfi(basis, -1.0, 0.0);
-    return edp::constructSparseMat<double>(basis.getDim(), 
-			[&tfi](uint32_t n){ return tfi.getCol(n); }); //NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
+	return edp::constructSparseMat<double>(
+		basis.getDim(),
+		[&tfi](uint32_t n) {
+			return tfi.getCol(n);
+		}); // NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
 }
 
-template<typename Basis>
-Eigen::SparseMatrix<double> ti_x_all(Basis&& basis)
+template<typename Basis> Eigen::SparseMatrix<double> ti_x_all(Basis&& basis)
 {
 	TITFIsing<uint32_t> tfi(basis, 0.0, -1.0);
-    return edp::constructSparseMat<double>(basis.getDim(),
-			[&tfi](uint32_t n){ return tfi.getCol(n); }); //NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
-
+	return edp::constructSparseMat<double>(
+		basis.getDim(),
+		[&tfi](uint32_t n) {
+			return tfi.getCol(n);
+		}); // NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
 }
 
-template<typename Basis>
-Eigen::SparseMatrix<double> tfi_ham(double h, Basis&& basis)
+template<typename Basis> Eigen::SparseMatrix<double> tfi_ham(double h, Basis&& basis)
 {
 	TITFIsing<uint32_t> tfi(basis, 1.0, h);
-    return edp::constructSparseMat<double>(basis.getDim(),
-			[&tfi](uint32_t n){ return tfi.getCol(n); }); //NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
+	return edp::constructSparseMat<double>(
+		basis.getDim(),
+		[&tfi](uint32_t n) {
+			return tfi.getCol(n);
+		}); // NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
 }
-
 
 int main()
 {
@@ -70,9 +74,12 @@ int main()
 
 	Circuit circ(basis.getDim());
 
-	yavque::Hamiltonian ham_ti_zz(ti_zz(basis).cast<cx_double>());     //NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
-	yavque::Hamiltonian ham_x_all(ti_x_all(basis).cast<cx_double>());  //NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
-
+	yavque::Hamiltonian ham_ti_zz(
+		ti_zz(basis)
+			.cast<cx_double>()); // NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
+	yavque::Hamiltonian ham_x_all(
+		ti_x_all(basis)
+			.cast<cx_double>()); // NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
@@ -83,7 +90,7 @@ int main()
 	auto variables = circ.variables();
 
 	std::normal_distribution<double> ndist(0., sigma);
-	for(auto& p: variables)
+	for(auto& p : variables)
 	{
 		p = ndist(re);
 	}
@@ -104,7 +111,7 @@ int main()
 	{
 		circ.clear_evaluated();
 		Eigen::VectorXcd output = *circ.output();
-		for(auto& p: variables)
+		for(auto& p : variables)
 		{
 			p.zero_grad();
 		}
@@ -118,19 +125,20 @@ int main()
 			grads.col(k) = *variables[k].grad();
 		}
 
-		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
-		Eigen::RowVectorXcd o = (output.adjoint()*grads);
-		fisher -= (o.adjoint()*o).real();
-		fisher += lambda*Eigen::MatrixXd::Identity(
-				static_cast<Eigen::Index>(variables.size()),
-				static_cast<Eigen::Index>(variables.size()));
+		Eigen::MatrixXd fisher = (grads.adjoint() * grads).real();
+		Eigen::RowVectorXcd o = (output.adjoint() * grads);
+		fisher -= (o.adjoint() * o).real();
+		fisher
+			+= lambda
+		       * Eigen::MatrixXd::Identity(static_cast<Eigen::Index>(variables.size()),
+		                                   static_cast<Eigen::Index>(variables.size()));
 
-		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
-		double energy = real(cx_double(output.adjoint()*ham*output));
+		Eigen::VectorXd egrad = (output.adjoint() * ham * grads).real();
+		double energy = real(cx_double(output.adjoint() * ham * output));
 
 		std::cout << energy << "\t" << egrad.norm() << "\t" << output.norm() << std::endl;
 
-		Eigen::VectorXd opt = -learning_rate*fisher.inverse()*egrad;
+		Eigen::VectorXd opt = -learning_rate * fisher.inverse() * egrad;
 
 		for(uint32_t k = 0; k < variables.size(); ++k)
 		{

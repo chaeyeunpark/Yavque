@@ -6,23 +6,18 @@
 
 #include "SumPauliString.hpp"
 
-
 namespace yavque
 {
-class SumPauliStringHamEvol final
-	: public Operator, public Univariate
+class SumPauliStringHamEvol final : public Operator, public Univariate
 {
 private:
 	bool conjugate_ = false;
 	std::shared_ptr<const detail::SumPauliStringImpl> ham_;
 
-	void dagger_in_place_impl() override
-	{
-		conjugate_ = !conjugate_;
-	}
+	void dagger_in_place_impl() override { conjugate_ = !conjugate_; }
 
-	SumPauliStringHamEvol(SumPauliStringHamEvol&& ) = default;
-	SumPauliStringHamEvol(const SumPauliStringHamEvol& ) = default;
+	SumPauliStringHamEvol(SumPauliStringHamEvol&&) = default;
+	SumPauliStringHamEvol(const SumPauliStringHamEvol&) = default;
 
 public:
 	explicit SumPauliStringHamEvol(const SumPauliString& pstr)
@@ -33,14 +28,13 @@ public:
 
 	explicit SumPauliStringHamEvol(const SumPauliString& pstr, Variable var)
 		: Operator(pstr.dim(), "HamEvol of " + pstr.name()),
-		Univariate(std::move(var)),
-		ham_{pstr.get_impl()}
+		  Univariate(std::move(var)), ham_{pstr.get_impl()}
 	{
 		assert(pstr.mutually_commuting());
 	}
 
-	SumPauliStringHamEvol& operator=(const SumPauliStringHamEvol& ) = delete;
-	SumPauliStringHamEvol& operator=(SumPauliStringHamEvol&& ) = delete;
+	SumPauliStringHamEvol& operator=(const SumPauliStringHamEvol&) = delete;
+	SumPauliStringHamEvol& operator=(SumPauliStringHamEvol&&) = delete;
 
 	~SumPauliStringHamEvol() override = default;
 
@@ -53,17 +47,16 @@ public:
 
 	[[nodiscard]] std::unique_ptr<Operator> log_deriv() const override
 	{
-		constexpr std::complex<double> I(0.,1.0);
-		std::string op_name = std::string("derivative of ") + name(); //change to fmt
-		cx_double constant = conjugate_?I:-I;
+		constexpr std::complex<double> I(0., 1.0);
+		std::string op_name = std::string("derivative of ") + name(); // change to fmt
+		cx_double constant = conjugate_ ? I : -I;
 		return std::make_unique<SumPauliString>(ham_, op_name, constant);
 	}
 
-
 	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
-		constexpr std::complex<double> I(0.,1.0);
-		cx_double t = -I*var_.value();
+		constexpr std::complex<double> I(0., 1.0);
+		cx_double t = -I * var_.value();
 		if(conjugate_)
 		{
 			t = -t;
@@ -74,10 +67,10 @@ public:
 	[[nodiscard]] std::string desc() const override
 	{
 		std::ostringstream ss;
-		ss << "[" << name() << ", variable name: " << var_.name() << ", " 
-			<< "variable value: " << var_.value() << "]";
+		ss << "[" << name() << ", variable name: " << var_.name() << ", "
+		   << "variable value: " << var_.value() << "]";
 		return ss.str();
 	}
 };
 
-} //namespace yavque
+} // namespace yavque

@@ -3,11 +3,11 @@
 #include <tbb/tbb.h>
 
 #include "common.hpp"
-#include "yavque/operators.hpp"
 #include "yavque/Circuit.hpp"
+#include "yavque/operators.hpp"
 
-#include "EDP/LocalHamiltonian.hpp"
 #include "EDP/ConstructSparseMat.hpp"
+#include "EDP/LocalHamiltonian.hpp"
 
 using namespace Eigen;
 using std::cos;
@@ -17,14 +17,14 @@ using Catch::Matchers::Floating::WithinAbsMatcher;
 
 tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
 
-VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini, 
-		const std::vector<yavque::Hamiltonian>& pauli_strs,
-		const std::vector<uint32_t>& confs,
-		const std::vector<double>& ts)
+VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini,
+                             const std::vector<yavque::Hamiltonian>& pauli_strs,
+                             const std::vector<uint32_t>& confs,
+                             const std::vector<double>& ts)
 {
 	assert(confs.size() == ts.size());
 	yavque::Circuit circuit(N);
-	for(auto conf: confs)
+	for(auto conf : confs)
 	{
 		circuit.add_op_right(std::make_unique<yavque::HamEvol>(pauli_strs[conf]));
 	}
@@ -40,19 +40,19 @@ VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini,
 	return *circuit.output();
 }
 
-VectorXcd eval_using_ham(VectorXcd ini, 
-		const std::vector<yavque::Hamiltonian>& pauli_strs,
-		const std::vector<uint32_t>& confs,
-		const std::vector<double>& ts)
+VectorXcd eval_using_ham(VectorXcd ini,
+                         const std::vector<yavque::Hamiltonian>& pauli_strs,
+                         const std::vector<uint32_t>& confs,
+                         const std::vector<double>& ts)
 {
 	assert(confs.size() == ts.size());
 
-	constexpr yavque::cx_double I(0.,1.);
+	constexpr yavque::cx_double I(0., 1.);
 
 	for(uint32_t p = 0; p < confs.size(); ++p)
 	{
 		double t = ts[p];
-		ini = cos(t)*ini - I*sin(t)*pauli_strs[confs[p]].apply_right(ini);
+		ini = cos(t) * ini - I * sin(t) * pauli_strs[confs[p]].apply_right(ini);
 	}
 
 	return ini;
@@ -60,8 +60,7 @@ VectorXcd eval_using_ham(VectorXcd ini,
 
 template<typename RandomEngine>
 void test_twoqubit(const uint32_t N, RandomEngine& re,
-		const Eigen::SparseMatrix<double>& ham,
-		bool odd)
+                   const Eigen::SparseMatrix<double>& ham, bool odd)
 {
 	std::normal_distribution<> nd;
 	yavque::Circuit circuit1(N);
@@ -72,26 +71,28 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 	if(odd)
 		offset = 1u;
 
-	{ //construct circuit1
+	{ // construct circuit1
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
 		for(uint32_t i = offset; i < N; i += 2)
 		{
 			ham_ct.clearTerms();
-			ham_ct.addTwoSiteTerm({i, (i+1) % N}, ham);
-			auto ham = yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct));
+			ham_ct.addTwoSiteTerm({i, (i + 1) % N}, ham);
+			auto ham = yavque::Hamiltonian(
+				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
 			circuit1.add_op_right(std::make_unique<yavque::HamEvol>(ham));
 		}
 	}
 
-	{ //construct circuit2
+	{ // construct circuit2
 		std::vector<std::shared_ptr<yavque::Hamiltonian>> hams1;
 
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
 		for(uint32_t i = offset; i < N; i += 2)
 		{
-			ham_ct.addTwoSiteTerm({i, (i+1) % N}, ham);
+			ham_ct.addTwoSiteTerm({i, (i + 1) % N}, ham);
 		}
-		auto ham = yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct));
+		auto ham = yavque::Hamiltonian(
+			edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
 
 		circuit2.add_op_right(std::make_unique<yavque::HamEvol>(ham));
 	}
@@ -100,13 +101,13 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 	{
 		double t = nd(re);
 
-		VectorXcd ini = VectorXcd::Random(1<<N);
+		VectorXcd ini = VectorXcd::Random(1 << N);
 		ini.normalize();
 
-		for(auto& p: circuit1.variables())
+		for(auto& p : circuit1.variables())
 			p = t;
 
-		for(auto& p: circuit2.variables())
+		for(auto& p : circuit2.variables())
 			p = t;
 
 		circuit1.set_input(ini);
@@ -115,13 +116,13 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 		auto output1 = *circuit1.output();
 		auto output2 = *circuit2.output();
 
-		REQUIRE_THAT( (output1 - output2).norm(),
-				WithinAbsMatcher( 0., 1e-6 ));
+		REQUIRE_THAT((output1 - output2).norm(), WithinAbsMatcher(0., 1e-6));
 	}
 }
 
-TEST_CASE("Random XYZ circuit", "[random-circuit]") {
-	constexpr uint32_t N = 8;//number of qubits
+TEST_CASE("Random XYZ circuit", "[random-circuit]")
+{
+	constexpr uint32_t N = 8; // number of qubits
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
@@ -129,30 +130,30 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]") {
 
 	std::vector<yavque::Hamiltonian> hams;
 
-	//Add xx
+	// Add xx
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
 	for(uint32_t i = 0; i < N; i++)
 	{
-		for(uint32_t j = i+1; j < N; j++)
+		for(uint32_t j = i + 1; j < N; j++)
 		{
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_xx());
 			hams.emplace_back(yavque::Hamiltonian(
-						edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct)));
+				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct)));
 
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_yy());
 			hams.emplace_back(yavque::Hamiltonian(
-						edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct)));
+				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct)));
 
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_zz());
 			hams.emplace_back(yavque::Hamiltonian(
-						edp::constructSparseMat<yavque::cx_double>(1<<N, ham_ct)));
+				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct)));
 		}
 	}
 
-	std::uniform_int_distribution<uint32_t> uid(0u, hams.size()-1);
+	std::uniform_int_distribution<uint32_t> uid(0u, hams.size() - 1);
 
 	for(uint32_t depth = 1; depth < 100; ++depth)
 	{
@@ -167,62 +168,45 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]") {
 				ts.emplace_back(nd(re));
 			}
 
-			VectorXcd ini = VectorXcd::Random(1<<N);
+			VectorXcd ini = VectorXcd::Random(1 << N);
 			ini.normalize();
 
 			auto res1 = eval_using_circuit(N, ini, hams, confs, ts);
 			auto res2 = eval_using_ham(ini, hams, confs, ts);
 
-			REQUIRE_THAT( (res1 - res2).norm(),
-					WithinAbsMatcher( 0., 1e-6 ));
+			REQUIRE_THAT((res1 - res2).norm(), WithinAbsMatcher(0., 1e-6));
 		}
 	}
 }
 
-TEST_CASE("Test QAOA XX layers", "[qaoa-layer]") {
-	constexpr uint32_t N = 8;//number of qubits
+TEST_CASE("Test QAOA XX layers", "[qaoa-layer]")
+{
+	constexpr uint32_t N = 8; // number of qubits
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
 	std::normal_distribution<> nd;
 
+	SECTION("test XX even layer") { test_twoqubit(N, re, yavque::pauli_xx(), false); }
+	SECTION("test XX odd layer") { test_twoqubit(N, re, yavque::pauli_xx(), true); }
 
-	SECTION( "test XX even layer" ) {
-		test_twoqubit(N, re, yavque::pauli_xx(), false);
-	}
-	SECTION( "test XX odd layer" ) {
-		test_twoqubit(N, re, yavque::pauli_xx(), true);
-	}
+	SECTION("test YY even layer") { test_twoqubit(N, re, yavque::pauli_yy(), false); }
+	SECTION("test YY odd layer") { test_twoqubit(N, re, yavque::pauli_yy(), true); }
 
-	SECTION( "test YY even layer" ) {
-		test_twoqubit(N, re, yavque::pauli_yy(), false);
-	}
-	SECTION( "test YY odd layer" ) {
-		test_twoqubit(N, re, yavque::pauli_yy(), true);
-	}
-
-	SECTION( "test ZZ even layer" ) {
-		test_twoqubit(N, re, yavque::pauli_zz(), false);
-	}
-	SECTION( "test ZZ odd layer" ) {
-		test_twoqubit(N, re, yavque::pauli_zz(), true);
-	}
+	SECTION("test ZZ even layer") { test_twoqubit(N, re, yavque::pauli_zz(), false); }
+	SECTION("test ZZ odd layer") { test_twoqubit(N, re, yavque::pauli_zz(), true); }
 }
 
-TEST_CASE("Test QAOA XX+YY layers", "[qaoa-layer]") {
-	constexpr uint32_t N = 8;//number of qubits
+TEST_CASE("Test QAOA XX+YY layers", "[qaoa-layer]")
+{
+	constexpr uint32_t N = 8; // number of qubits
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
 	std::normal_distribution<> nd;
 
 	SparseMatrix<double> m = yavque::pauli_xx() + yavque::pauli_yy();
-	SECTION( "test XX+YY even layer" ) {
-		test_twoqubit(N, re, m, false);
-	}
+	SECTION("test XX+YY even layer") { test_twoqubit(N, re, m, false); }
 
-	SECTION( "test XX+YY odd layer" ) {
-		test_twoqubit(N, re, m, true);
-	}
+	SECTION("test XX+YY odd layer") { test_twoqubit(N, re, m, true); }
 }
-

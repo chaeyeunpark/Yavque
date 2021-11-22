@@ -12,8 +12,8 @@ Eigen::SparseMatrix<double> tfi_ham(const uint32_t N, double h)
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
 	for(uint32_t k = 0; k < N; ++k)
 	{
-		ham_ct.addTwoSiteTerm(std::make_pair(k, (k+1) % N), yavque::pauli_zz());
-		ham_ct.addOneSiteTerm(k, h*yavque::pauli_x());
+		ham_ct.addTwoSiteTerm(std::make_pair(k, (k + 1) % N), yavque::pauli_zz());
+		ham_ct.addOneSiteTerm(k, h * yavque::pauli_x());
 	}
 	return -edp::constructSparseMat<double>(1U << N, ham_ct);
 }
@@ -45,9 +45,9 @@ int main()
 		int elt = 0;
 		for(uint32_t k = 0; k < N; k += 2)
 		{
-			int z0 = 1 - 2*int((n >> k) & 1U);
-			int z1 = 1 - 2*int((n >> ((k+1)%N)) & 1U);
-			elt += z0*z1;
+			int z0 = 1 - 2 * int((n >> k) & 1U);
+			int z1 = 1 - 2 * int((n >> ((k + 1) % N)) & 1U);
+			elt += z0 * z1;
 		}
 		zz_even(n) = elt;
 	}
@@ -57,9 +57,9 @@ int main()
 		int elt = 0;
 		for(uint32_t k = 1; k < N; k += 2)
 		{
-			int z0 = 1 - 2*int((n >> k) & 1U);
-			int z1 = 1 - 2*int((n >> ((k+1) % N)) & 1U);
-			elt += z0*z1;
+			int z0 = 1 - 2 * int((n >> k) & 1U);
+			int z1 = 1 - 2 * int((n >> ((k + 1) % N)) & 1U);
+			elt += z0 * z1;
 		}
 		zz_odd(n) = elt;
 	}
@@ -78,7 +78,7 @@ int main()
 	auto variables = circ.variables();
 
 	std::normal_distribution<double> ndist(0., sigma);
-	for(auto& p: variables)
+	for(auto& p : variables)
 	{
 		p = ndist(re);
 	}
@@ -93,7 +93,7 @@ int main()
 	{
 		circ.clear_evaluated();
 		Eigen::VectorXcd output = *circ.output();
-		for(auto& p: variables)
+		for(auto& p : variables)
 		{
 			p.zero_grad();
 		}
@@ -107,19 +107,20 @@ int main()
 			grads.col(k) = *variables[k].grad();
 		}
 
-		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
-		Eigen::RowVectorXcd o = (output.adjoint()*grads);
-		fisher -= (o.adjoint()*o).real();
-		fisher += lambda*Eigen::MatrixXd::Identity(
-				static_cast<Eigen::Index>(variables.size()),
-				static_cast<Eigen::Index>(variables.size()));
+		Eigen::MatrixXd fisher = (grads.adjoint() * grads).real();
+		Eigen::RowVectorXcd o = (output.adjoint() * grads);
+		fisher -= (o.adjoint() * o).real();
+		fisher
+			+= lambda
+		       * Eigen::MatrixXd::Identity(static_cast<Eigen::Index>(variables.size()),
+		                                   static_cast<Eigen::Index>(variables.size()));
 
-		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
-		double energy = real(cx_double(output.adjoint()*ham*output));
+		Eigen::VectorXd egrad = (output.adjoint() * ham * grads).real();
+		double energy = real(cx_double(output.adjoint() * ham * output));
 
 		std::cout << energy << "\t" << egrad.norm() << "\t" << output.norm() << std::endl;
 
-		Eigen::VectorXd opt = -learning_rate*fisher.inverse()*egrad;
+		Eigen::VectorXd opt = -learning_rate * fisher.inverse() * egrad;
 
 		for(uint32_t k = 0; k < variables.size(); ++k)
 		{

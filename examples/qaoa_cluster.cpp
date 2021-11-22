@@ -11,8 +11,9 @@
 #include <iostream>
 #include <random>
 
-Eigen::SparseMatrix<yavque::cx_double> single_pauli(const uint32_t N, const uint32_t idx, 
-		const Eigen::SparseMatrix<yavque::cx_double>& m)
+Eigen::SparseMatrix<yavque::cx_double>
+single_pauli(const uint32_t N, const uint32_t idx,
+             const Eigen::SparseMatrix<yavque::cx_double>& m)
 {
 	edp::LocalHamiltonian<yavque::cx_double> lh(N, 2);
 	lh.addOneSiteTerm(idx, m);
@@ -31,7 +32,6 @@ Eigen::SparseMatrix<yavque::cx_double> identity(const uint32_t N)
 	return m;
 }
 
-
 Eigen::SparseMatrix<yavque::cx_double> cluster_ham(uint32_t N, double h)
 {
 	using yavque::pauli_x, yavque::pauli_y, yavque::pauli_z, yavque::cx_double;
@@ -40,9 +40,9 @@ Eigen::SparseMatrix<yavque::cx_double> cluster_ham(uint32_t N, double h)
 	for(uint32_t k = 0; k < N; k++)
 	{
 		Eigen::SparseMatrix<cx_double> term = identity(N);
-		term = term*single_pauli(N, k, pauli_z().cast<cx_double>());
-		term = term*single_pauli(N, (k+1)%N, pauli_x().cast<cx_double>());
-		term = term*single_pauli(N, (k+2)%N, pauli_z().cast<cx_double>());
+		term = term * single_pauli(N, k, pauli_z().cast<cx_double>());
+		term = term * single_pauli(N, (k + 1) % N, pauli_x().cast<cx_double>());
+		term = term * single_pauli(N, (k + 2) % N, pauli_z().cast<cx_double>());
 
 		ham += -term;
 	}
@@ -52,15 +52,15 @@ Eigen::SparseMatrix<yavque::cx_double> cluster_ham(uint32_t N, double h)
 	{
 		lh.addOneSiteTerm(k, pauli_x());
 	}
-	ham -= h*edp::constructSparseMat<cx_double>(1U << N, lh);
+	ham -= h * edp::constructSparseMat<cx_double>(1U << N, lh);
 
 	return ham;
 }
 
-int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
+int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 {
+	using std::sqrt;
 	using yavque::cx_double, yavque::Pauli;
-    using std::sqrt;
 
 	const uint32_t total_epochs = 10;
 	const double h = 0.5;
@@ -73,8 +73,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
 	const int num_threads = get_num_threads();
 	std::cerr << "Processing using " << num_threads << " threads." << std::endl;
-	tbb::global_control c(tbb::global_control::max_allowed_parallelism, 
-			num_threads);
+	tbb::global_control c(tbb::global_control::max_allowed_parallelism, num_threads);
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};
@@ -87,8 +86,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 	{
 		std::map<uint32_t, Pauli> term;
 		term[k] = Pauli('Z');
-		term[(k+1)%N] = Pauli('X');
-		term[(k+2)%N] = Pauli('Z');
+		term[(k + 1) % N] = Pauli('X');
+		term[(k + 2) % N] = Pauli('Z');
 
 		ti_zxz.emplace_back(std::move(term));
 	}
@@ -105,7 +104,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 	auto variables = circ.variables();
 
 	std::normal_distribution<double> ndist(0., sigma);
-	for(auto& p: variables)
+	for(auto& p : variables)
 	{
 		p = ndist(re);
 	}
@@ -122,7 +121,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 	{
 		circ.clear_evaluated();
 		Eigen::VectorXcd output = *circ.output();
-		for(auto& p: variables)
+		for(auto& p : variables)
 		{
 			p.zero_grad();
 		}
@@ -136,17 +135,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 			grads.col(k) = *variables[k].grad();
 		}
 
-		Eigen::MatrixXd fisher = (grads.adjoint()*grads).real();
-		fisher += lambda*Eigen::MatrixXd::Identity(
-				static_cast<Eigen::Index>(variables.size()),
-				static_cast<Eigen::Index>(variables.size()));
+		Eigen::MatrixXd fisher = (grads.adjoint() * grads).real();
+		fisher
+			+= lambda
+		       * Eigen::MatrixXd::Identity(static_cast<Eigen::Index>(variables.size()),
+		                                   static_cast<Eigen::Index>(variables.size()));
 
-		Eigen::VectorXd egrad = (output.adjoint()*ham*grads).real();
-		double energy = real(cx_double(output.adjoint()*ham*output));
+		Eigen::VectorXd egrad = (output.adjoint() * ham * grads).real();
+		double energy = real(cx_double(output.adjoint() * ham * output));
 
 		std::cout << energy << "\t" << egrad.norm() << "\t" << output.norm() << std::endl;
 
-		Eigen::VectorXd opt = -learning_rate*fisher.inverse()*egrad;
+		Eigen::VectorXd opt = -learning_rate * fisher.inverse() * egrad;
 
 		for(uint32_t k = 0; k < variables.size(); ++k)
 		{

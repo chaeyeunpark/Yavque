@@ -4,4 +4,4 @@
 namespace yavque
 {
 using cx_double = std::complex<double>;
-}// namespace yavque
+} // namespace yavque

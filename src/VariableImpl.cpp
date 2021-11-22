@@ -9,9 +9,10 @@ namespace yavque
 std::string VariableImpl::desc() const
 {
 	std::ostringstream ss;
-	ss << "[" << name_ << "]" << "\n";
-	ss << "Derivatives: " ;
-	for(const auto& circ: deriv_circuits_)
+	ss << "[" << name_ << "]"
+	   << "\n";
+	ss << "Derivatives: ";
+	for(const auto& circ : deriv_circuits_)
 	{
 		ss << circ->desc() << "\n";
 	}
@@ -39,7 +40,7 @@ std::shared_ptr<const Eigen::VectorXcd> VariableImpl::grad() const
 
 	if(deriv_circuits_.empty())
 	{
-		return nullptr; //or raise exception
+		return nullptr; // or raise exception
 	}
 
 	grad_ = std::make_shared<Eigen::VectorXcd>(*(deriv_circuits_[0]->output()));
@@ -55,7 +56,7 @@ std::shared_ptr<const Eigen::VectorXcd> VariableImpl::grad() const
 
 void VariableImpl::zero_grad()
 {
-	std::vector<std::shared_ptr<Circuit> >{}.swap(deriv_circuits_);
+	std::vector<std::shared_ptr<Circuit>>{}.swap(deriv_circuits_);
 	grad_updated_ = false;
 }
-}// namespace yavque
+} // namespace yavque
