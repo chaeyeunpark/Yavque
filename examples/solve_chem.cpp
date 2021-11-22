@@ -52,24 +52,24 @@ int main(int argc, char* argv[])
 	{
 		for(uint32_t k = 0; k < N; ++k)
 		{
-			circuit.add_op_right(std::make_unique<SingleQubitHamEvol>(pauli_y_ham, N, k));
+			circuit.add_op_right<SingleQubitHamEvol>(pauli_y_ham, N, k);
 		}
 		for(uint32_t k = 0; k < N; ++k)
 		{
-			circuit.add_op_right(std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, k));
+			circuit.add_op_right<SingleQubitHamEvol>(pauli_x_ham, N, k);
 		}
 		for(uint32_t k = 0; k < N - 1; ++k)
 		{
-			circuit.add_op_right(std::make_unique<TwoQubitOperator>(cz, N, k, k + 1));
+			circuit.add_op_right<TwoQubitOperator>(cz, N, k, k + 1);
 		}
 	}
 	for(uint32_t k = 0; k < N; ++k)
 	{
-		circuit.add_op_right(std::make_unique<SingleQubitHamEvol>(pauli_y_ham, N, k));
+		circuit.add_op_right<SingleQubitHamEvol>(pauli_y_ham, N, k);
 	}
 	for(uint32_t k = 0; k < N; ++k)
 	{
-		circuit.add_op_right(std::make_unique<SingleQubitHamEvol>(pauli_x_ham, N, k));
+		circuit.add_op_right<SingleQubitHamEvol>(pauli_x_ham, N, k);
 	}
 
 	std::unique_ptr<yavque::Optimizer> optimizer = nullptr;

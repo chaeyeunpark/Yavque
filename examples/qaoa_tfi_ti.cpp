@@ -1,5 +1,5 @@
-#include "yavque.hpp"
 #include "example_utils.hpp"
+#include "yavque.hpp"
 
 #include "Basis/Basis1D.hpp"
 #include "EDP/ConstructSparseMat.hpp"
@@ -83,8 +83,8 @@ int main()
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<HamEvol>(ham_ti_zz));
-		circ.add_op_right(std::make_unique<HamEvol>(ham_x_all));
+		circ.add_op_right<HamEvol>(ham_ti_zz);
+		circ.add_op_right<HamEvol>(ham_x_all);
 	}
 
 	auto variables = circ.variables();

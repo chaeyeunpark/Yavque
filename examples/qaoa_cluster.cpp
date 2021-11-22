@@ -97,8 +97,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char* argv[])
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		circ.add_op_right(std::make_unique<yavque::SumPauliStringHamEvol>(zxz_ham));
-		circ.add_op_right(std::make_unique<yavque::SumLocalHamEvol>(x_all_ham));
+		circ.add_op_right<yavque::SumPauliStringHamEvol>(zxz_ham);
+		circ.add_op_right<yavque::SumLocalHamEvol>(x_all_ham);
 	}
 
 	auto variables = circ.variables();
