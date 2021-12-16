@@ -1,3 +1,5 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/chaeyeunpark/yavque/badge)](https://www.codefactor.io/repository/github/chaeyeunpark/yavque)
+
 # Yavque
 Yet another variational quantum (eigensolver) library. 
 
