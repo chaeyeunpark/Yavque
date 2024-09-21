@@ -128,7 +128,7 @@ public:
 		constexpr std::complex<int> I(0, 1);
 		std::complex<int> r = 1;
 		std::vector<int> toFlip;
-		for(const auto p : string_)
+		for(const auto& p : string_)
 		{
 			switch(p.second)
 			{
@@ -153,7 +153,7 @@ public:
 		constexpr std::complex<int> I(0, 1);
 		std::complex<int> r = 1;
 		std::vector<int> toFlip;
-		for(const auto p : string_)
+		for(const auto& p : string_)
 		{
 			int sgn = 1 - 2 * ((col >> p.first) & 1);
 			switch(p.second)

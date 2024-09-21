@@ -1,8 +1,8 @@
 #include "example_utils.hpp"
 #include "yavque.hpp"
 
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
+#include <edlib/EDP/ConstructSparseMat.hpp>
+#include <edlib/EDP/LocalHamiltonian.hpp>
 
 #include <tbb/tbb.h>
 

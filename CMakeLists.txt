@@ -2,93 +2,75 @@ cmake_minimum_required(VERSION 3.14)
 
 project(yavque)
 
-
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
-find_package(Eigen3 3.3 REQUIRED NO_MODULE)
-find_package(BLAS REQUIRED)
+############################################################
+#                  Setup Dependencies
+############################################################
+add_library(yavque_dependency INTERFACE)
 
-message(STATUS "Using BLAS library with ${BLAS_LIBRARIES}.\n"
-	"To use another BLAS implementation, set BLA_VENDOR variable in CMake.")
+# Load edlib
+include(FetchContent)
+FetchContent_Declare(
+    edlib
+    GIT_REPOSITORY https://github.com/chaeyeunpark/ExactDiagonalization.git
+    GIT_TAG        master
+)
+FetchContent_MakeAvailable(edlib)
+target_link_libraries(yavque_dependency INTERFACE EDLIB::edlib)
 
+# Load json
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_MakeAvailable(json)
+target_link_libraries(yavque_dependency INTERFACE nlohmann_json::nlohmann_json)
 
-# Build executables
-option(BUILD_TESTS "Build tests" OFF)
-option(BUILD_EXAMPLES "Build examples" OFF)
-
-# Clang-tidy
-option(CLANG_TIDY "Set Clang-Tidy" OFF)
-
-
-if(CLANG_TIDY)
-	message(STATUS "Use Clang-Tidy")
-	execute_process(
-		COMMAND            ${PROJECT_SOURCE_DIR}/build_utils/yavque_files.py 
-		WORKING_DIRECTORY  ${PROJECT_SOURCE_DIR}
-		OUTPUT_VARIABLE    YAVQUE_SOURCE_FILES)
-	set(CMAKE_CXX_CLANG_TIDY 
-"clang-tidy-12;-line-filter=${YAVQUE_SOURCE_FILES};\
--extra-arg=-std=c++17;\
--checks=*,-modernize-use-trailing-return-type,\
--fuchsia-overloaded-operator,-fuchsia-multiple-inheritance,\
--fuchsia-default-arguments-*,-llvm-header-guard,\
--*-non-private-member-variables-in-classes,-llvmlibc-*;\
--warnings-as-errors=*,-cppcoreguidelines-avoid-magic-numbers,\
--readability-magic-numbers,-clang-analyzer-core.uninitialized.UndefReturn,\
--clang-analyzer-optin.portability.UnixAPI,-modernize-use-default-member-init,\
--concurrency-mt-unsafe,-cppcoreguidelines-pro-type-vararg,-hicpp-vararg,\
--cppcoreguidelines-pro-bounds-pointer-arithmetic")
-endif()
-
-# Download CATCH
-set(CATCH_URL "https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp")
-set(CATCH_DOWNLOAD_PATH "${PROJECT_SOURCE_DIR}/externals/catch.hpp")
-
-if (NOT EXISTS "${CATCH_DOWNLOAD_PATH}")
-	file(DOWNLOAD "${CATCH_URL}" "${CATCH_DOWNLOAD_PATH}")
-endif()
-
-
-if(NOT DEFINED ENV{TBBROOT})
-	message(FATAL_ERROR "OneTBB or IntelTBB must be installed for this library. \
-	If you have already installed TBB, check wheter the environment varialbles are corretly loaded.")
-endif()
-
-add_library(external_dependency INTERFACE)
-target_include_directories(external_dependency INTERFACE "$ENV{MKLROOT}/include")
+# Load eigen
+find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
 # Setup BLAS
-if ((CMAKE_CXX_COMPILER_ID STREQUAL "Intel") AND ($"{BLA_VENDOR}" MATCHES "Intel.*"))
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 	message(STATUS "Use Intel Compiler with natural mkl support")
-	target_compile_options(external_dependency INTERFACE "-mkl=parallel -tbb")
-	target_link_libraries(external_dependency INTERFACE tbb stdc++ pthread m dl)
-	target_compile_options(external_dependency INTERFACE "-DEIGEN_USE_MKL_ALL") # For Eigen
+	target_compile_options(yavque_dependency INTERFACE "-mkl=parallel -tbb")
+	target_link_libraries(yavque_dependency INTERFACE tbb stdc++ pthread m dl)
+	target_compile_options(yavque_dependency INTERFACE "-DEIGEN_USE_MKL_ALL") # For Eigen
 else ()
-	target_link_libraries(external_dependency INTERFACE	"${BLAS_LIBRARIES}")
-	target_link_options(external_dependency INTERFACE "${BLAS_LINKER_FLAGS}")
-	target_link_libraries(external_dependency INTERFACE tbb stdc++ pthread m dl)
-	target_compile_options(external_dependency INTERFACE "-DEIGEN_USE_BLAS") # For Eigen
+    message(STATUS "For non Intel compiler, system BLAS will be used.")
+    find_package(BLAS REQUIRED)
+
+    message(STATUS "Using BLAS library with ${BLAS_LIBRARIES}.\n"
+        "To use another BLAS implementation, set BLA_VENDOR variable in CMake.")
+
+	target_link_libraries(yavque_dependency INTERFACE "${BLAS_LIBRARIES}")
+	target_link_options(yavque_dependency INTERFACE "${BLAS_LINKER_FLAGS}")
+	target_link_libraries(yavque_dependency INTERFACE tbb stdc++ pthread m dl)
+	target_compile_options(yavque_dependency INTERFACE "-DEIGEN_USE_BLAS") # For Eigen
 endif()
 
-# Always set -Wall -Wextra -Werror -Wpedantic
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wpedantic")
+# Build executables
+option(YAVQUE_BUILD_TESTS "Build tests" OFF)
+option(YAVQUE_BUILD_EXAMPLES "Build examples" OFF)
+option(YAVQUE_ENABLE_WARNINGS "Enable warnings" ON)
 
+if(YAVQUE_ENABLE_WARNINGS)
+    #Set -Wall -Wextra -Werror -Wpedantic
+    target_compile_options(yavque_dependency INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror>)
+endif()
 
 add_library(yavque STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" 
 	"src/Operators/SumPauliString.cpp" "src/Utilities/pauli_operators.cpp" 
 	"src/backward_grad.cpp")
-target_link_libraries(yavque PUBLIC Eigen3::Eigen external_dependency)
+target_link_libraries(yavque PUBLIC Eigen3::Eigen yavque_dependency)
 target_include_directories(yavque PUBLIC "${PROJECT_SOURCE_DIR}/include")
 
 target_include_directories(yavque PUBLIC 
 	"${PROJECT_SOURCE_DIR}/externals/ExactDiagonalization/include/edlib/"
 	"${PROJECT_SOURCE_DIR}/externals/nlohmann_json_cmake_fetchcontent/include/")
 
-if(BUILD_EXAMPLES)
+if(YAVQUE_BUILD_EXAMPLES)
 	add_executable(qaoa_tfi_diag "examples/qaoa_tfi_diag.cpp" "examples/example_utils.cpp")
 	target_link_libraries(qaoa_tfi_diag PRIVATE yavque Eigen3::Eigen)
 
@@ -105,7 +87,7 @@ if(BUILD_EXAMPLES)
 	target_link_libraries(solve_chem PRIVATE yavque Eigen3::Eigen)
 endif()
 
-if(BUILD_TESTS)
+if(YAVQUE_BUILD_TESTS)
 	enable_testing()
 	add_subdirectory("${PROJECT_SOURCE_DIR}/Tests")
 endif()
