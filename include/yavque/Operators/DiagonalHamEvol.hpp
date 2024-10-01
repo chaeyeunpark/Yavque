@@ -55,15 +55,16 @@ public:
 	[[nodiscard]] std::unique_ptr<Operator> log_deriv() const override
 	{
 		constexpr std::complex<double> I(0., 1.0);
-		std::string op_name = std::string("derivative of ") + name(); // change to fmt
-		cx_double constant = conjugate_ ? I : -I;
+		const std::string op_name
+			= std::string("derivative of ") + name(); // change to fmt
+		const cx_double constant = conjugate_ ? I : -I;
 		return std::make_unique<DiagonalOperator>(ham_, op_name, constant);
 	}
 
 	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
 		constexpr std::complex<double> I(0., 1.0);
-		double t = conjugate_ ? -var_.value() : var_.value();
+		const double t = conjugate_ ? -var_.value() : var_.value();
 		return exp(-I * ham_->get_diag_op().array() * t) * st.array();
 	}
 

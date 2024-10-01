@@ -1,12 +1,12 @@
-#define CATCH_CONFIG_MAIN
-#include <Eigen/Dense>
-#include <catch.hpp>
-#include <random>
+#include "common.hpp"
 
 #include "yavque/Operators/SumPauliString.hpp"
 #include "yavque/utils.hpp"
 
-#include "common.hpp"
+#include <Eigen/Dense>
+#include <catch2/catch_all.hpp>
+
+#include <random>
 
 TEST_CASE("test commuting operators", "[test-commuting]")
 {
@@ -121,16 +121,6 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]")
 				}
 			}
 
-			if((res - res1).norm() > 1e-6)
-			{
-				std::cout << input.transpose() << std::endl;
-				std::cout << res.transpose() << std::endl;
-				std::cout << res1.transpose() << std::endl;
-				std::cout << pstr << std::endl;
-				for(auto idx : indices)
-					std::cout << idx << ", ";
-				std::cout << std::endl;
-			}
 			REQUIRE((res - res1).norm() < 1e-6);
 		}
 	}

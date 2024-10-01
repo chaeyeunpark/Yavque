@@ -29,7 +29,7 @@ public:
 		return *this;
 	}
 
-	explicit Variable() : p_{std::make_shared<VariableImpl>(0.0)} { }
+	explicit Variable() = default;
 
 	explicit Variable(double value) : p_{std::make_shared<VariableImpl>(value)} { }
 
@@ -117,6 +117,7 @@ public:
 
 	void add_grad(const Circuit& circ) { p_->add_grad(circ); }
 
+	// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 	void add_grad(Circuit&& circ) { p_->add_grad(std::move(circ)); }
 
 	[[nodiscard]] std::shared_ptr<const Eigen::VectorXcd> grad() const

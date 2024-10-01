@@ -12,11 +12,11 @@ class Circuit;
 class VariableImpl
 {
 private:
-	double value_;
-	std::string name_;
+	double value_{};
+	std::string name_{};
 
-	std::vector<std::shared_ptr<Circuit>> deriv_circuits_ = {};
-	mutable std::shared_ptr<Eigen::VectorXcd> grad_ = {};
+	std::vector<std::shared_ptr<Circuit>> deriv_circuits_{};
+	mutable std::shared_ptr<Eigen::VectorXcd> grad_{nullptr};
 	mutable bool grad_updated_ = false;
 
 public:

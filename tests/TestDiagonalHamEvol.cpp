@@ -1,16 +1,18 @@
-#define CATCH_CONFIG_MAIN
-#include <Eigen/Dense>
-#include <catch.hpp>
-#include <memory>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
+#include "common.hpp"
 
 #include "yavque/Operators/DiagonalHamEvol.hpp"
 #include "yavque/utils.hpp"
 
-#include "common.hpp"
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <catch2/catch_all.hpp>
+
+#include <Eigen/Dense>
+
+#include <iostream>
+#include <memory>
+#include <random>
 
 TEST_CASE("test random diagonal", "[random-diagonal]")
 {
@@ -78,7 +80,7 @@ TEST_CASE("test basic operations", "[basic-operation]")
 
 	auto clonned = diag_ham_evol.clone();
 
-	std::cout << clonned->desc() << std::endl;
+	// std::cout << clonned->desc() << std::endl;
 	auto* p = dynamic_cast<yavque::Univariate*>(clonned.get());
 	p->set_variable_value(-1.0);
 

@@ -31,8 +31,8 @@ public:
 
 	explicit SGDMomentum(const nlohmann::json& params)
 		: alpha_{params.value("alpha", DEFAULT_PARAMS[0])},
-		  p_{params.value("p", DEFAULT_PARAMS[1])}, gamma_{params.value(
-														"gamma", DEFAULT_PARAMS[2])},
+		  p_{params.value("p", DEFAULT_PARAMS[1])},
+		  gamma_{params.value("gamma", DEFAULT_PARAMS[2])},
 		  min_alpha_{params.value("min_alpha", DEFAULT_PARAMS[3])}
 	{
 	}

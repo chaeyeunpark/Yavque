@@ -16,7 +16,7 @@ private:
 	Eigen::MatrixXcd op_;
 
 	// const uint32_t n_qubits_;
-	const uint32_t qubit_idx_;
+	uint32_t qubit_idx_;
 
 	void dagger_in_place_impl() override { op_.adjointInPlace(); }
 

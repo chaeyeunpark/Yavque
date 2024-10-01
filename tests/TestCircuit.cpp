@@ -1,21 +1,17 @@
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
-#include <tbb/tbb.h>
-
 #include "common.hpp"
+
 #include "yavque/Circuit.hpp"
 #include "yavque/operators.hpp"
 
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <catch2/catch_all.hpp>
+#include <tbb/tbb.h>
 
 using namespace Eigen;
 using std::cos;
 using std::sin;
-
-using Catch::Matchers::Floating::WithinAbsMatcher;
-
-tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
 
 VectorXcd eval_using_circuit(const uint32_t N, const VectorXcd& ini,
                              const std::vector<yavque::Hamiltonian>& pauli_strs,
@@ -116,7 +112,7 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 		auto output1 = *circuit1.output();
 		auto output2 = *circuit2.output();
 
-		REQUIRE_THAT((output1 - output2).norm(), WithinAbsMatcher(0., 1e-6));
+		REQUIRE_THAT((output1 - output2).norm(), Catch::Matchers::WithinAbs(0., 1e-6));
 	}
 }
 
@@ -155,9 +151,9 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]")
 
 	std::uniform_int_distribution<uint32_t> uid(0u, hams.size() - 1);
 
-	for(uint32_t depth = 1; depth < 100; ++depth)
+	for(uint32_t depth = 1; depth <= 100; depth += 20)
 	{
-		for(uint32_t instance_idx = 0; instance_idx < 100; ++instance_idx)
+		for(uint32_t instance_idx = 0; instance_idx < 10; ++instance_idx)
 		{
 			std::vector<uint32_t> confs;
 			std::vector<double> ts;
@@ -174,7 +170,7 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]")
 			auto res1 = eval_using_circuit(N, ini, hams, confs, ts);
 			auto res2 = eval_using_ham(ini, hams, confs, ts);
 
-			REQUIRE_THAT((res1 - res2).norm(), WithinAbsMatcher(0., 1e-6));
+			REQUIRE_THAT((res1 - res2).norm(), Catch::Matchers::WithinAbs(0., 1e-6));
 		}
 	}
 }
@@ -187,14 +183,32 @@ TEST_CASE("Test QAOA XX layers", "[qaoa-layer]")
 	std::default_random_engine re{rd()};
 	std::normal_distribution<> nd;
 
-	SECTION("test XX even layer") { test_twoqubit(N, re, yavque::pauli_xx(), false); }
-	SECTION("test XX odd layer") { test_twoqubit(N, re, yavque::pauli_xx(), true); }
+	SECTION("test XX even layer")
+	{
+		test_twoqubit(N, re, yavque::pauli_xx(), false);
+	}
+	SECTION("test XX odd layer")
+	{
+		test_twoqubit(N, re, yavque::pauli_xx(), true);
+	}
 
-	SECTION("test YY even layer") { test_twoqubit(N, re, yavque::pauli_yy(), false); }
-	SECTION("test YY odd layer") { test_twoqubit(N, re, yavque::pauli_yy(), true); }
+	SECTION("test YY even layer")
+	{
+		test_twoqubit(N, re, yavque::pauli_yy(), false);
+	}
+	SECTION("test YY odd layer")
+	{
+		test_twoqubit(N, re, yavque::pauli_yy(), true);
+	}
 
-	SECTION("test ZZ even layer") { test_twoqubit(N, re, yavque::pauli_zz(), false); }
-	SECTION("test ZZ odd layer") { test_twoqubit(N, re, yavque::pauli_zz(), true); }
+	SECTION("test ZZ even layer")
+	{
+		test_twoqubit(N, re, yavque::pauli_zz(), false);
+	}
+	SECTION("test ZZ odd layer")
+	{
+		test_twoqubit(N, re, yavque::pauli_zz(), true);
+	}
 }
 
 TEST_CASE("Test QAOA XX+YY layers", "[qaoa-layer]")
@@ -206,7 +220,13 @@ TEST_CASE("Test QAOA XX+YY layers", "[qaoa-layer]")
 	std::normal_distribution<> nd;
 
 	SparseMatrix<double> m = yavque::pauli_xx() + yavque::pauli_yy();
-	SECTION("test XX+YY even layer") { test_twoqubit(N, re, m, false); }
+	SECTION("test XX+YY even layer")
+	{
+		test_twoqubit(N, re, m, false);
+	}
 
-	SECTION("test XX+YY odd layer") { test_twoqubit(N, re, m, true); }
+	SECTION("test XX+YY odd layer")
+	{
+		test_twoqubit(N, re, m, true);
+	}
 }

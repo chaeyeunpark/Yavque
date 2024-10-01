@@ -3,7 +3,8 @@
 #include <unsupported/Eigen/KroneckerProduct>
 
 #include "yavque/utils.hpp"
-Eigen::VectorXcd product_state(uint32_t n, const Eigen::VectorXcd& s)
+
+inline Eigen::VectorXcd product_state(uint32_t n, const Eigen::VectorXcd& s)
 {
 	Eigen::VectorXcd res(1);
 	res(0) = 1.0;
@@ -43,7 +44,7 @@ std::pair<uint32_t, uint32_t> random_connection(const int N, RandomEngine& re)
 }
 
 template<typename RandomEngine>
-Eigen::MatrixXcd random_unitary(uint32_t dim, RandomEngine&& re)
+Eigen::MatrixXcd random_unitary(uint32_t dim, RandomEngine& re)
 {
 	constexpr yavque::cx_double I(0.0, 1.0);
 	std::normal_distribution<double> ndist;
@@ -61,7 +62,7 @@ Eigen::MatrixXcd random_unitary(uint32_t dim, RandomEngine&& re)
 }
 
 template<typename RandomEngine>
-Eigen::VectorXcd random_vector(uint32_t dim, RandomEngine&& re)
+Eigen::VectorXcd random_vector(uint32_t dim, RandomEngine& re)
 {
 	constexpr yavque::cx_double I(0.0, 1.0);
 	std::normal_distribution<double> ndist;

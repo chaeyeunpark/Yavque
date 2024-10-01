@@ -77,12 +77,12 @@ namespace detail
 		{
 			if(!diagonalized_)
 			{
-				Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(local_ham_);
+				const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(local_ham_);
 				evecs_ = es.eigenvectors();
 				evals_ = es.eigenvalues();
 				diagonalized_ = true;
 			}
-			Eigen::VectorXcd v = exp(x * evals_.array());
+			const Eigen::VectorXcd v = exp(x * evals_.array());
 			return evecs_ * v.asDiagonal() * evecs_.adjoint();
 		}
 	};
@@ -97,8 +97,8 @@ private:
 public:
 	explicit SumLocalHam(uint32_t num_qubits, const Eigen::SparseMatrix<cx_double>& ham,
 	                     const std::string& name = {})
-		: Operator(ham.rows(), name), p_{std::make_shared<const detail::SumLocalHamImpl>(
-										  num_qubits, ham)}
+		: Operator(ham.rows(), name),
+		  p_{std::make_shared<const detail::SumLocalHamImpl>(num_qubits, ham)}
 	{
 		assert(ham.rows() == ham.cols()); // check diagonal
 	}

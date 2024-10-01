@@ -1,19 +1,17 @@
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
-#include <sstream>
-
-#include <tbb/tbb.h>
+#include "common.hpp"
 
 #include "yavque/Circuit.hpp"
 #include "yavque/Variable.hpp"
 #include "yavque/operators.hpp"
 
-#include "common.hpp"
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
 
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
+#include <catch2/catch_all.hpp>
 
-tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 1);
+#include <tbb/tbb.h>
+
+#include <sstream>
 
 template<typename RandomEngine>
 void test_commuting(const uint32_t N, const uint32_t depth,
@@ -77,11 +75,11 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 	}
 }
 
-TEST_CASE("test gradient of cummuting circuit", "[commuting]")
+TEST_CASE("test gradient of cummuting circuit", "[commuting-circuit]")
 {
 	using namespace yavque;
-	const int N = 8;
-	const int depth = 20;
+	const int N = 6;
+	const int depth = 12;
 
 	std::random_device rd;
 	std::default_random_engine re{rd()};

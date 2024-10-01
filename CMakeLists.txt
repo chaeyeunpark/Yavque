@@ -21,6 +21,8 @@ FetchContent_Declare(
     GIT_TAG        master
 )
 FetchContent_MakeAvailable(edlib)
+get_target_property(edlib_IID edlib INTERFACE_INCLUDE_DIRECTORIES)
+set_target_properties(edlib PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${edlib_IID}")
 target_link_libraries(yavque_dependency INTERFACE EDLIB::edlib)
 
 # Load json
@@ -46,7 +48,6 @@ else ()
 
 	target_link_libraries(yavque_dependency INTERFACE "${BLAS_LIBRARIES}")
 	target_link_options(yavque_dependency INTERFACE "${BLAS_LINKER_FLAGS}")
-	target_link_libraries(yavque_dependency INTERFACE tbb stdc++ pthread m dl)
 	target_compile_options(yavque_dependency INTERFACE "-DEIGEN_USE_BLAS") # For Eigen
 endif()
 
@@ -54,10 +55,21 @@ endif()
 option(YAVQUE_BUILD_TESTS "Build tests" OFF)
 option(YAVQUE_BUILD_EXAMPLES "Build examples" OFF)
 option(YAVQUE_ENABLE_WARNINGS "Enable warnings" ON)
+option(ENABLE_CLANG_TIDY "Enable clang-tidy" OFF)
 
 if(YAVQUE_ENABLE_WARNINGS)
     #Set -Wall -Wextra -Werror -Wpedantic
     target_compile_options(yavque_dependency INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wall;-Wextra;-Wpedantic;-Werror>)
+endif()
+
+if(ENABLE_CLANG_TIDY)
+    if(NOT DEFINED CLANG_TIDY_BINARY)
+        set(CLANG_TIDY_BINARY clang-tidy-18)
+    endif()
+    message(STATUS "Using CLANG_TIDY_BINARY=${CLANG_TIDY_BINARY}")
+    set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_BINARY};
+                             -extra-arg=-std=c++20;
+    )
 endif()
 
 add_library(yavque STATIC "src/VariableImpl.cpp" "src/Circuit.cpp" 
@@ -65,10 +77,6 @@ add_library(yavque STATIC "src/VariableImpl.cpp" "src/Circuit.cpp"
 	"src/backward_grad.cpp")
 target_link_libraries(yavque PUBLIC Eigen3::Eigen yavque_dependency)
 target_include_directories(yavque PUBLIC "${PROJECT_SOURCE_DIR}/include")
-
-target_include_directories(yavque PUBLIC 
-	"${PROJECT_SOURCE_DIR}/externals/ExactDiagonalization/include/edlib/"
-	"${PROJECT_SOURCE_DIR}/externals/nlohmann_json_cmake_fetchcontent/include/")
 
 if(YAVQUE_BUILD_EXAMPLES)
 	add_executable(qaoa_tfi_diag "examples/qaoa_tfi_diag.cpp" "examples/example_utils.cpp")
@@ -89,5 +97,5 @@ endif()
 
 if(YAVQUE_BUILD_TESTS)
 	enable_testing()
-	add_subdirectory("${PROJECT_SOURCE_DIR}/Tests")
+	add_subdirectory("${PROJECT_SOURCE_DIR}/tests")
 endif()

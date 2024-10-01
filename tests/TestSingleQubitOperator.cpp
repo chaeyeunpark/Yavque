@@ -1,22 +1,20 @@
-#include <memory>
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
-#include <tbb/tbb.h>
-
-#include <Eigen/Dense>
-#include <Eigen/src/Eigenvalues/ComplexEigenSolver.h>
-#include <Eigen/src/QR/HouseholderQR.h>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
-
 #include "common.hpp"
 
 #include "yavque/Circuit.hpp"
 #include "yavque/operators.hpp"
 
-tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <catch2/catch_all.hpp>
+#include <tbb/tbb.h>
+
+#include <Eigen/Dense>
+#include <Eigen/src/Eigenvalues/ComplexEigenSolver.h>
+#include <Eigen/src/QR/HouseholderQR.h>
+
+#include <memory>
+#include <random>
 
 Eigen::MatrixXcd matrix_log(const Eigen::MatrixXcd& m)
 {

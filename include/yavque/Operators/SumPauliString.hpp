@@ -25,7 +25,7 @@ namespace detail
 		using PauliString = std::map<uint32_t, Pauli>;
 
 	private:
-		const uint32_t num_qubits_;
+		uint32_t num_qubits_;
 		std::vector<PauliString> pauli_strings_;
 		mutable std::vector<std::shared_ptr<detail::CompressedPauliString>> cps_;
 

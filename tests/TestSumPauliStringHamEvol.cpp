@@ -1,16 +1,16 @@
-#define CATCH_CONFIG_MAIN
-#include <Eigen/Dense>
-#include <catch.hpp>
-#include <memory>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
+#include "common.hpp"
 
 #include "yavque/operators.hpp"
 #include "yavque/utils.hpp"
 
-#include "common.hpp"
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <Eigen/Dense>
+#include <catch2/catch_all.hpp>
+
+#include <memory>
+#include <random>
 
 TEST_CASE("test random ZZ", "[random-zz]")
 {

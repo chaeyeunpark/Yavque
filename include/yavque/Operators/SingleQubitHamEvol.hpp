@@ -30,8 +30,8 @@ public:
 	explicit SingleQubitHamEvol(const std::shared_ptr<const DenseHermitianMatrix>& ham,
 	                            uint32_t n_qubits, uint32_t qubit_idx,
 	                            const std::string& name = {})
-		: Operator(1U << n_qubits, name), ham_{ham}, n_qubits_{n_qubits}, qubit_idx_{
-																			  qubit_idx}
+		: Operator(1U << n_qubits, name), ham_{ham}, n_qubits_{n_qubits},
+		  qubit_idx_{qubit_idx}
 	{
 		if(ham->dim() != 2)
 		{
@@ -56,7 +56,7 @@ public:
 	[[nodiscard]] std::unique_ptr<Operator> log_deriv() const override
 	{
 		constexpr std::complex<double> I(0., 1.0);
-		cx_double constant = conjugate_ ? I : -I;
+		const cx_double constant = conjugate_ ? I : -I;
 
 		std::ostringstream os;
 		os << "derivative of (" << name() << ")";
@@ -73,7 +73,7 @@ public:
 		{
 			x = -x;
 		}
-		Eigen::MatrixXcd expm = ham_->ham_exp(x);
+		const Eigen::MatrixXcd expm = ham_->ham_exp(x);
 
 		return apply_single_qubit(st, expm, qubit_idx_);
 	}

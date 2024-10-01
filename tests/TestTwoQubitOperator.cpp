@@ -1,26 +1,24 @@
-#include <memory>
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
-#include <tbb/tbb.h>
-
-#include <Eigen/Dense>
-#include <Eigen/src/Eigenvalues/ComplexEigenSolver.h>
-#include <Eigen/src/QR/HouseholderQR.h>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
-
 #include "common.hpp"
 
 #include "yavque/Circuit.hpp"
 #include "yavque/operators.hpp"
 
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <catch2/catch_all.hpp>
+#include <tbb/tbb.h>
+
+#include <Eigen/Dense>
+#include <Eigen/src/Eigenvalues/ComplexEigenSolver.h>
+#include <Eigen/src/QR/HouseholderQR.h>
+
+#include <memory>
+#include <random>
+
 using namespace Eigen;
 
-tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
-
-TEST_CASE("test single qubit operator", "[single-qubit-operator]")
+TEST_CASE("test two qubit operator", "[two-qubit-operator]")
 {
 	using namespace yavque;
 	constexpr uint32_t N = 3;

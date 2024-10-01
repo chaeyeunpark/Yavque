@@ -1,15 +1,15 @@
-#define CATCH_CONFIG_MAIN
-#include <Eigen/Dense>
-#include <catch.hpp>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
+#include "common.hpp"
 
 #include "yavque/Operators/SumLocalHamEvol.hpp"
 #include "yavque/utils.hpp"
 
-#include "common.hpp"
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <Eigen/Dense>
+#include <catch2/catch_all.hpp>
+
+#include <random>
 
 TEST_CASE("test sum of local hamiltonian", "[sum-local]")
 {

@@ -10,11 +10,11 @@ namespace detail
 	class HamiltonianImpl
 	{
 	private:
-		const Eigen::SparseMatrix<cx_double> ham_;
+		Eigen::SparseMatrix<cx_double> ham_;
 
 		mutable bool diagonalized_;
-		mutable Eigen::VectorXd evals_;
-		mutable Eigen::MatrixXcd evecs_;
+		mutable Eigen::VectorXd evals_{};
+		mutable Eigen::MatrixXcd evecs_{};
 
 		void diagonalize() const
 		{
@@ -24,7 +24,8 @@ namespace detail
 				return;
 			}
 
-			Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(Eigen::MatrixXcd{ham_});
+			const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(
+				Eigen::MatrixXcd{ham_});
 			evals_ = es.eigenvalues();
 			evecs_ = es.eigenvectors();
 			diagonalized_ = true;
@@ -32,12 +33,6 @@ namespace detail
 
 	public:
 		explicit HamiltonianImpl(const Eigen::SparseMatrix<cx_double>& ham) : ham_{ham}
-		{
-			assert(ham_.rows() == ham_.cols()); // check diagonal
-			diagonalized_ = false;
-		}
-
-		explicit HamiltonianImpl(Eigen::SparseMatrix<cx_double>&& ham) : ham_{ham}
 		{
 			assert(ham_.rows() == ham_.cols()); // check diagonal
 			diagonalized_ = false;

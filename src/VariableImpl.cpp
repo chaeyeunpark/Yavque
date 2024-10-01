@@ -1,7 +1,14 @@
+#include <cstdlib>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <Eigen/Dense>
 
 #include "yavque/Circuit.hpp"
-#include "yavque/Variable.hpp"
+#include "yavque/VariableImpl.hpp"
 
 namespace yavque
 {

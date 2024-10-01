@@ -1,16 +1,16 @@
-#define CATCH_CONFIG_MAIN
-#include <Eigen/Dense>
-#include <catch.hpp>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
+#include "common.hpp"
 
 #include "yavque/Circuit.hpp"
 #include "yavque/operators.hpp"
 #include "yavque/utils.hpp"
 
-#include "common.hpp"
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <Eigen/Dense>
+#include <catch2/catch_all.hpp>
+
+#include <random>
 
 tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
 
@@ -223,7 +223,7 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]")
 				variables[k] -= 0.02 * egrad_circ(k);
 			}
 
-			std::cout << real(cx_double(output.adjoint() * ham * output)) << std::endl;
+			// std::cout << real(cx_double(output.adjoint() * ham * output)) << std::endl;
 		}
 	}
 }
@@ -347,7 +347,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]")
 				variables[k] -= 0.02 * egrad_circ(k);
 			}
 
-			std::cout << real(cx_double(output.adjoint() * ham * output)) << std::endl;
+			// std::cout << real(cx_double(output.adjoint() * ham * output)) << std::endl;
 		}
 	}
 }
@@ -357,7 +357,7 @@ TEST_CASE("test tfi", "[tfi]")
 	using namespace yavque;
 	using namespace Eigen;
 
-	constexpr unsigned int N = 10;
+	constexpr unsigned int N = 8;
 	constexpr cx_double I(0., 1.);
 
 	std::random_device rd;

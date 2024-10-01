@@ -1,17 +1,15 @@
-#include <random>
-#include <sstream>
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
-#include <tbb/tbb.h>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
-
 #include "yavque/Circuit.hpp"
 #include "yavque/backward_grad.hpp"
 #include "yavque/operators.hpp"
 
-tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <catch2/catch_all.hpp>
+#include <tbb/tbb.h>
+
+#include <random>
+#include <sstream>
 
 Eigen::Matrix2cd hadamard()
 {

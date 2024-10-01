@@ -1,15 +1,15 @@
-#define CATCH_CONFIG_MAIN
-#include <Eigen/Dense>
-#include <catch.hpp>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
+#include "common.hpp"
 
 #include "yavque/Operators/HamEvol.hpp"
 #include "yavque/utils.hpp"
 
-#include "common.hpp"
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <Eigen/Dense>
+#include <catch2/catch_all.hpp>
+
+#include <random>
 
 template<typename RandomEngine>
 void test_single_qubit(const uint32_t N, const Eigen::SparseMatrix<double>& m,
@@ -74,9 +74,15 @@ TEST_CASE("test single qubit Hamiltonian", "[one-site]")
 	std::random_device rd;
 	std::default_random_engine re{rd()};
 
-	SECTION("test using pauli X") { test_single_qubit(N, yavque::pauli_x(), re); }
+	SECTION("test using pauli X")
+	{
+		test_single_qubit(N, yavque::pauli_x(), re);
+	}
 
-	SECTION("test using pauli Z") { test_single_qubit(N, yavque::pauli_z(), re); }
+	SECTION("test using pauli Z")
+	{
+		test_single_qubit(N, yavque::pauli_z(), re);
+	}
 }
 
 TEST_CASE("Test basic operations", "[basic]")

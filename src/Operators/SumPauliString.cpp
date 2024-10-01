@@ -7,7 +7,7 @@ bool commute(const std::map<uint32_t, Pauli>& p1, const std::map<uint32_t, Pauli
 	std::vector<uint32_t> intersection;
 	for(auto iter : p1)
 	{
-		uint32_t key = iter.first;
+		const uint32_t key = iter.first;
 		if(p2.find(key) != p2.end())
 		{
 			intersection.push_back(key);
@@ -15,7 +15,7 @@ bool commute(const std::map<uint32_t, Pauli>& p1, const std::map<uint32_t, Pauli
 	}
 
 	uint32_t parity = 0;
-	for(uint32_t idx : intersection)
+	for(const uint32_t idx : intersection)
 	{
 		if(p1.at(idx) != p2.at(idx))
 		{
@@ -34,6 +34,7 @@ std::string extract_pauli_string(const std::map<uint32_t, Pauli>& pmap)
 	{
 		pstr.push_back(static_cast<char>(p));
 	}
+	// NOLINTNEXTLINE(modernize-return-braced-init-list)
 	return std::string(pstr.begin(), pstr.end());
 }
 
