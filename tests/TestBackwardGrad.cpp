@@ -10,14 +10,14 @@
 
 #include <random>
 #include <sstream>
+#include <cstdlib>
 
 Eigen::Matrix2cd hadamard()
 {
-	using std::sqrt;
-	Eigen::Matrix2cd h;
-	h << 1.0 / sqrt(2.0), 1.0 / sqrt(2.0), 1.0 / sqrt(2.0), -1.0 / sqrt(2.0);
-
-	return h;
+	return Eigen::Matrix2cd{
+		{1.0 / std::numbers::sqrt2, 1.0 / std::numbers::sqrt2},
+		{1.0 / std::numbers::sqrt2, -1.0 / std::numbers::sqrt2}
+	};
 }
 
 Eigen::Matrix4cd cnot()
@@ -34,7 +34,7 @@ Eigen::Matrix4cd cnot()
 	return m;
 }
 
-enum class Gate
+enum class Gate: uint8_t
 {
 	RotX = 0,
 	RotY = 1,
@@ -52,21 +52,20 @@ Eigen::SparseMatrix<double> tfi_ham(uint32_t N, double h)
 		lh.addOneSiteTerm(k, -h * yavque::pauli_x());
 	}
 
-	return edp::constructSparseMat<double>(1u << N, lh);
+	return edp::constructSparseMat<double>(1U << N, lh);
 }
 
 TEST_CASE("Test gradients using a random circuit")
 {
 	using namespace yavque;
 	constexpr uint32_t N = 14;
-	constexpr uint32_t dim = 1 << N; // dimension of the total Hilbert space
+	constexpr uint32_t dim = 1U << N; // dimension of the total Hilbert space
 
 	const uint32_t depth = 40;
 	std::uniform_int_distribution<uint32_t> gate_dist(0, 4);
 	std::uniform_int_distribution<uint32_t> qidx_dist(0, N - 1);
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	std::mt19937_64 re{1557U};
 
 	for(uint32_t instance_idx = 0; instance_idx < 10; ++instance_idx)
 	{
@@ -134,11 +133,11 @@ TEST_CASE("Test gradients using a random circuit")
 		auto ham = tfi_ham(N, 1.0);
 
 		circuit.derivs();
-		Eigen::VectorXcd output = *circuit.output();
+		const Eigen::VectorXcd output = *circuit.output();
 		Eigen::VectorXd egrad(variables.size());
 		for(uint32_t k = 0; k < variables.size(); ++k)
 		{
-			Eigen::VectorXcd grad = *variables[k].grad();
+			const Eigen::VectorXcd grad = *variables[k].grad();
 			egrad(k) = 2 * real(cx_double(grad.adjoint() * ham * output));
 		}
 

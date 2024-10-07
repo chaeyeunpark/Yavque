@@ -19,14 +19,14 @@ TEST_CASE("test random ZZ", "[random-zz]")
 
 	using namespace yavque;
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	std::mt19937_64 re{1557U};
 	std::normal_distribution<double> ndist;
 
 	std::vector<uint32_t> sites;
 
-	for(uint32_t k = 0; k < N; ++k)
+	for(uint32_t k = 0; k < N; ++k) {
 		sites.push_back(k);
+	}
 
 	for(uint32_t k = 0; k < 100; ++k) // instance
 	{
@@ -38,14 +38,14 @@ TEST_CASE("test random ZZ", "[random-zz]")
 		}
 
 		// construct diagonal
-		Eigen::VectorXd ham_diag(1u << N);
-		for(uint32_t n = 0; n < (1u << N); ++n)
+		Eigen::VectorXd ham_diag(1U << N);
+		for(uint32_t n = 0; n < (1U << N); ++n)
 		{
 			int elt = 0;
 			for(auto [i, j] : interactions)
 			{
-				int z0 = 1 - 2 * ((n >> i) & 1);
-				int z1 = 1 - 2 * ((n >> j) & 1);
+				const int z0 = 1 - 2 * static_cast<int>((n >> i) & 1U);
+				const int z1 = 1 - 2 * static_cast<int>((n >> j) & 1U);
 				elt += z0 * z1;
 			}
 			ham_diag(n) = elt;
@@ -65,16 +65,16 @@ TEST_CASE("test random ZZ", "[random-zz]")
 		auto sum_pauli = SumPauliString(N, pauli_strings);
 		auto sum_pauli_evol = SumPauliStringHamEvol(sum_pauli);
 
-		Eigen::VectorXcd ini = Eigen::VectorXcd::Random(1u << N);
+		Eigen::VectorXcd ini = Eigen::VectorXcd::Random(1U << N);
 		ini.normalize();
 
-		double t = ndist(re);
+		const double t = ndist(re);
 
 		diag_ham_evol.set_variable_value(t);
 		sum_pauli_evol.set_variable_value(t);
 
-		auto res1 = diag_ham_evol.apply_right(ini);
-		auto res2 = sum_pauli_evol.apply_right(ini);
+		const auto res1 = diag_ham_evol.apply_right(ini);
+		const auto res2 = sum_pauli_evol.apply_right(ini);
 
 		REQUIRE((res1 - res2).norm() < 1e-6);
 	}
@@ -86,16 +86,16 @@ single_pauli(const uint32_t N, const uint32_t idx,
 {
 	edp::LocalHamiltonian<yavque::cx_double> lh(N, 2);
 	lh.addOneSiteTerm(idx, m);
-	return edp::constructSparseMat<yavque::cx_double>(1 << N, lh);
+	return edp::constructSparseMat<yavque::cx_double>(1U << N, lh);
 }
 Eigen::SparseMatrix<yavque::cx_double> identity(const uint32_t N)
 {
 	std::vector<Eigen::Triplet<yavque::cx_double>> triplets;
-	for(uint32_t n = 0; n < (1u << N); ++n)
+	for(uint32_t n = 0; n < (1U << N); ++n)
 	{
 		triplets.emplace_back(n, n, 1.0);
 	}
-	Eigen::SparseMatrix<yavque::cx_double> m(1 << N, 1 << N);
+	Eigen::SparseMatrix<yavque::cx_double> m(1U << N, 1U << N);
 	m.setFromTriplets(triplets.begin(), triplets.end());
 	return m;
 }
@@ -106,9 +106,8 @@ TEST_CASE("test ZXZ", "[zxz]")
 
 	using namespace yavque;
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
-	std::normal_distribution<> ndist;
+	std::mt19937_64 re{1557U};
+	std::normal_distribution<double> ndist;
 
 	std::vector<std::map<uint32_t, Pauli>> pauli_strings;
 
@@ -125,7 +124,7 @@ TEST_CASE("test ZXZ", "[zxz]")
 	auto sum_pauli = SumPauliString(N, pauli_strings);
 	auto sum_pauli_evol = SumPauliStringHamEvol(sum_pauli);
 
-	Eigen::SparseMatrix<cx_double> ham(1 << N, 1 << N);
+	Eigen::SparseMatrix<cx_double> ham(1U << N, 1U << N);
 	for(uint32_t k = 0; k < N; k++)
 	{
 		Eigen::SparseMatrix<cx_double> term = identity(N);
@@ -139,18 +138,18 @@ TEST_CASE("test ZXZ", "[zxz]")
 	auto ham_full = Hamiltonian(ham);
 	auto ham_full_evol = HamEvol(ham_full);
 
-	double t = ndist(re);
+	const double t = ndist(re);
 
 	ham_full_evol.set_variable_value(t);
 	sum_pauli_evol.set_variable_value(t);
 
 	for(uint32_t k = 0; k < 100; ++k) // instance
 	{
-		Eigen::VectorXcd ini = Eigen::VectorXcd::Random(1u << N);
+		Eigen::VectorXcd ini = Eigen::VectorXcd::Random(1U << N);
 		ini.normalize();
 
-		auto res1 = ham_full_evol.apply_right(ini);
-		auto res2 = sum_pauli_evol.apply_right(ini);
+		const auto res1 = ham_full_evol.apply_right(ini);
+		const auto res2 = sum_pauli_evol.apply_right(ini);
 
 		REQUIRE((res1 - res2).norm() < 1e-6);
 	}

@@ -47,7 +47,7 @@ VectorXcd eval_using_ham(VectorXcd ini,
 
 	for(uint32_t p = 0; p < confs.size(); ++p)
 	{
-		double t = ts[p];
+		const double t = ts[p];
 		ini = cos(t) * ini - I * sin(t) * pauli_strs[confs[p]].apply_right(ini);
 	}
 
@@ -58,14 +58,19 @@ template<typename RandomEngine>
 void test_twoqubit(const uint32_t N, RandomEngine& re,
                    const Eigen::SparseMatrix<double>& ham, bool odd)
 {
-	std::normal_distribution<> nd;
+	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
+	// NOLINTNEXTLINE(misc-const-correctness)
+	std::normal_distribution<double> nd{};
 	yavque::Circuit circuit1(N);
 	yavque::Circuit circuit2(N);
 
-	uint32_t offset = 0u;
+	const uint32_t offset = [odd]() {
+		if(odd) {
+			return 1U;
+		}
+		return 0U;
+	}();
 
-	if(odd)
-		offset = 1u;
 
 	{ // construct circuit1
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
@@ -73,44 +78,44 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 		{
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, (i + 1) % N}, ham);
-			auto ham = yavque::Hamiltonian(
-				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
+			const auto ham = yavque::Hamiltonian(
+				edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 			circuit1.add_op_right<yavque::HamEvol>(ham);
 		}
 	}
 
 	{ // construct circuit2
-		std::vector<std::shared_ptr<yavque::Hamiltonian>> hams1;
-
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
 		for(uint32_t i = offset; i < N; i += 2)
 		{
 			ham_ct.addTwoSiteTerm({i, (i + 1) % N}, ham);
 		}
-		auto ham = yavque::Hamiltonian(
-			edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
+		const auto ham = yavque::Hamiltonian(
+			edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 
 		circuit2.add_op_right<yavque::HamEvol>(ham);
 	}
 
 	for(uint32_t instance_idx = 0; instance_idx < 10; ++instance_idx)
 	{
-		double t = nd(re);
+		const double t = nd(re);
 
-		VectorXcd ini = VectorXcd::Random(1 << N);
+		VectorXcd ini = VectorXcd::Random(1U << N);
 		ini.normalize();
 
-		for(auto& p : circuit1.variables())
+		for(auto& p : circuit1.variables()) {
 			p = t;
+		}
 
-		for(auto& p : circuit2.variables())
+		for(auto& p : circuit2.variables()) {
 			p = t;
+		}
 
 		circuit1.set_input(ini);
 		circuit2.set_input(ini);
 
-		auto output1 = *circuit1.output();
-		auto output2 = *circuit2.output();
+		const auto output1 = *circuit1.output();
+		const auto output2 = *circuit2.output();
 
 		REQUIRE_THAT((output1 - output2).norm(), Catch::Matchers::WithinAbs(0., 1e-6));
 	}
@@ -120,9 +125,10 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]")
 {
 	constexpr uint32_t N = 8; // number of qubits
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
-	std::normal_distribution<> nd;
+	std::default_random_engine re{1557U};
+	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
+	// NOLINTNEXTLINE(misc-const-correctness)
+	std::normal_distribution<double> nd{};
 
 	std::vector<yavque::Hamiltonian> hams;
 
@@ -134,22 +140,19 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]")
 		{
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_xx());
-			hams.emplace_back(yavque::Hamiltonian(
-				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct)));
+			hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_yy());
-			hams.emplace_back(yavque::Hamiltonian(
-				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct)));
+			hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_zz());
-			hams.emplace_back(yavque::Hamiltonian(
-				edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct)));
+			hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 		}
 	}
 
-	std::uniform_int_distribution<uint32_t> uid(0u, hams.size() - 1);
+	std::uniform_int_distribution<uint32_t> uid(0U, hams.size() - 1);
 
 	for(uint32_t depth = 1; depth <= 100; depth += 20)
 	{
@@ -164,7 +167,7 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]")
 				ts.emplace_back(nd(re));
 			}
 
-			VectorXcd ini = VectorXcd::Random(1 << N);
+			VectorXcd ini = VectorXcd::Random(1U << N);
 			ini.normalize();
 
 			auto res1 = eval_using_circuit(N, ini, hams, confs, ts);
@@ -179,9 +182,10 @@ TEST_CASE("Test QAOA XX layers", "[qaoa-layer]")
 {
 	constexpr uint32_t N = 8; // number of qubits
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
-	std::normal_distribution<> nd;
+	std::default_random_engine re{1557U};
+	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
+	// NOLINTNEXTLINE(misc-const-correctness)
+	std::normal_distribution<double> nd{};
 
 	SECTION("test XX even layer")
 	{
@@ -215,11 +219,12 @@ TEST_CASE("Test QAOA XX+YY layers", "[qaoa-layer]")
 {
 	constexpr uint32_t N = 8; // number of qubits
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
-	std::normal_distribution<> nd;
+	std::default_random_engine re{1557U};
+	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
+	// NOLINTNEXTLINE(misc-const-correctness)
+	std::normal_distribution<double> nd{};
 
-	SparseMatrix<double> m = yavque::pauli_xx() + yavque::pauli_yy();
+	const SparseMatrix<double> m = yavque::pauli_xx() + yavque::pauli_yy();
 	SECTION("test XX+YY even layer")
 	{
 		test_twoqubit(N, re, m, false);

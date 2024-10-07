@@ -12,20 +12,18 @@
 
 #include <random>
 
-tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
-
 yavque::Circuit construct_diagonal_tfi(const uint32_t N)
 {
-	yavque::Circuit circ(1 << N);
-	Eigen::VectorXd zz_all(1 << N);
+	yavque::Circuit circ(1U << N);
+	Eigen::VectorXd zz_all(1U << N);
 
-	for(uint32_t n = 0; n < (1u << N); ++n)
+	for(uint32_t n = 0; n < (1U << N); ++n)
 	{
 		int elt = 0;
 		for(uint32_t k = 0; k < N; ++k)
 		{
-			int z0 = 1 - 2 * ((n >> k) & 1);
-			int z1 = 1 - 2 * ((n >> ((k + 1) % N)) & 1);
+			const int z0 = 1 - 2 * static_cast<int>((n >> k) & 1U);
+			const int z1 = 1 - 2 * static_cast<int>((n >> ((k + 1) % N)) & 1U);
 			elt += z0 * z1;
 		}
 		zz_all(n) = elt;
@@ -55,7 +53,7 @@ auto construct_bare_tfi(const uint32_t N)
 	{
 		edp::LocalHamiltonian<double> lh(N, 2);
 		lh.addTwoSiteTerm({k, (k + 1) % N}, yavque::pauli_zz());
-		zz_hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1 << N, lh));
+		zz_hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1U << N, lh));
 	}
 	auto x_all_ham
 		= yavque::SumLocalHam(N, yavque::pauli_x().cast<yavque::cx_double>(), "x all");
@@ -111,7 +109,6 @@ Eigen::MatrixXcd kron_n(const Eigen::MatrixXcd& m, uint32_t n)
 
 Eigen::VectorXcd product_fourqubit(double theta1, double phi1, double theta2, double phi2)
 {
-	Eigen::VectorXcd res(16);
 	constexpr yavque::cx_double I(0., 1.);
 
 	Eigen::VectorXd zz(16);
@@ -128,25 +125,26 @@ Eigen::VectorXcd product_fourqubit(double theta1, double phi1, double theta2, do
 	return v;
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TEST_CASE("test two qubit", "[tfi-twoqubit]")
 {
 	using namespace yavque;
 	using namespace Eigen;
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	// NOLINTNEXTLINE(misc-const-correctness)
+	std::default_random_engine re{1557U};
 
 	std::normal_distribution<> ndist(0., 1.);
 
 	constexpr unsigned int N = 2;
 	const double eps = 1e-6;
 
-	Eigen::VectorXcd zz(1 << N);
+	Eigen::VectorXcd zz(1U << N);
 
-	for(uint32_t n = 0; n < (1u << N); ++n)
+	for(uint32_t n = 0; n < (1U << N); ++n)
 	{
-		int z0 = 1 - 2 * ((n >> 0) & 1);
-		int z1 = 1 - 2 * ((n >> 1) & 1);
+		const int z0 = 1 - 2 * static_cast<int>(n & 1U);
+		const int z1 = 1 - 2 * static_cast<int>((n >> 1U) & 1U);
 		zz(n) = z0 * z1;
 	}
 
@@ -154,7 +152,7 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]")
 	auto x_all_ham
 		= yavque::SumLocalHam(N, yavque::pauli_x().cast<yavque::cx_double>(), "x all");
 
-	auto circ = yavque::Circuit(1 << N);
+	auto circ = yavque::Circuit(1U << N);
 
 	for(uint32_t p = 0; p < 1; ++p)
 	{
@@ -185,8 +183,8 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]")
 			phi = variables[1].value();
 
 			circ.clear_evaluated();
-			Eigen::VectorXcd output = *circ.output();
-			Eigen::VectorXcd analytic = analytic_twoqubit(theta, phi);
+			const Eigen::VectorXcd output = *circ.output();
+			const Eigen::VectorXcd analytic = analytic_twoqubit(theta, phi);
 
 			REQUIRE((output - analytic).norm() < 1e-6);
 
@@ -196,7 +194,8 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]")
 				p.zero_grad();
 			}
 			circ.derivs();
-			Eigen::MatrixXcd grads(1 << N, 2);
+
+			Eigen::MatrixXcd grads(1U << N, 2);
 			grads.col(0) = *variables[0].grad();
 			grads.col(1) = *variables[1].grad();
 			Eigen::VectorXd egrad_circ = 2 * (output.adjoint() * ham * grads).real();
@@ -228,28 +227,27 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]")
 	}
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TEST_CASE("test four qubit", "[tfi-fourqubit]")
 {
 	using namespace yavque;
 	using namespace Eigen;
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
-
-	std::normal_distribution<> ndist(0., 1.);
+	std::mt19937_64 re{1557U};
+	std::normal_distribution<double> ndist{};
 
 	constexpr unsigned int N = 4;
 	const double eps = 1e-6;
 
-	Eigen::VectorXd zz_all(1 << N);
+	Eigen::VectorXd zz_all(1U << N);
 
-	for(uint32_t n = 0; n < (1u << N); ++n)
+	for(uint32_t n = 0; n < (1U << N); ++n)
 	{
 		int elt = 0;
 		for(uint32_t k = 0; k < N; ++k)
 		{
-			int z0 = 1 - 2 * ((n >> k) & 1);
-			int z1 = 1 - 2 * ((n >> ((k + 1) % N)) & 1);
+			const int z0 = 1 - 2 * static_cast<int>((n >> k) & 1U);
+			const int z1 = 1 - 2 * static_cast<int>((n >> ((k + 1) % N)) & 1U);
 			elt += z0 * z1;
 		}
 		zz_all(n) = elt;
@@ -259,7 +257,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]")
 	auto x_all_ham
 		= yavque::SumLocalHam(N, yavque::pauli_x().cast<yavque::cx_double>(), "x all");
 
-	auto circ = yavque::Circuit(1 << N);
+	auto circ = yavque::Circuit(1U << N);
 
 	for(uint32_t p = 0; p < 2; ++p)
 	{
@@ -267,7 +265,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]")
 		circ.add_op_right<yavque::SumLocalHamEvol>(x_all_ham);
 	}
 
-	Eigen::MatrixXd ham = zz_all.asDiagonal();
+	const Eigen::MatrixXd ham = zz_all.asDiagonal();
 
 	auto variables = circ.variables();
 
@@ -296,8 +294,8 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]")
 			phi2 = variables[3].value();
 
 			circ.clear_evaluated();
-			Eigen::VectorXcd output = *circ.output();
-			Eigen::VectorXcd analytic = product_fourqubit(theta1, phi1, theta2, phi2);
+			const Eigen::VectorXcd output = *circ.output();
+			const Eigen::VectorXcd analytic = product_fourqubit(theta1, phi1, theta2, phi2);
 
 			REQUIRE((output - analytic).norm() < 1e-6);
 
@@ -307,7 +305,7 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]")
 				p.zero_grad();
 			}
 			circ.derivs();
-			Eigen::MatrixXcd grads(1 << N, 4);
+			Eigen::MatrixXcd grads(1U << N, 4);
 			for(uint32_t k = 0; k < 4; k++)
 			{
 				grads.col(k) = *variables[k].grad();
@@ -358,25 +356,25 @@ TEST_CASE("test tfi", "[tfi]")
 	using namespace Eigen;
 
 	constexpr unsigned int N = 8;
-	constexpr cx_double I(0., 1.);
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
-	std::normal_distribution<> nd;
+	// NOLINTBEGIN(mist-const-correctness)
+	std::default_random_engine re{1557};
+	std::normal_distribution<double> nd{};
+	// NOLINTEND(mist-const-correctness)
 
 	auto circ1 = construct_diagonal_tfi(N);
 	auto variables1 = circ1.variables();
 
 	auto [circ2, variables2] = construct_bare_tfi(N);
 
-	Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(1 << N);
-	ini /= sqrt(1 << N);
+	Eigen::VectorXcd ini = Eigen::VectorXcd::Ones(1U << N);
+	ini /= sqrt(1U << N);
 	circ1.set_input(ini);
 	circ2.set_input(ini);
 
 	for(uint32_t k = 0; k < 9; ++k)
 	{
-		double v = nd(re);
+		const double v = nd(re);
 		variables1[k] = v;
 		variables2[k] = v;
 	}
@@ -392,8 +390,8 @@ TEST_CASE("test tfi", "[tfi]")
 			variables2[k].zero_grad();
 		}
 
-		Eigen::VectorXcd output1 = *circ1.output();
-		Eigen::VectorXcd output2 = *circ2.output();
+		const Eigen::VectorXcd output1 = *circ1.output();
+		const Eigen::VectorXcd output2 = *circ2.output();
 
 		REQUIRE((output1 - output2).norm() < 1e-6);
 
@@ -402,8 +400,8 @@ TEST_CASE("test tfi", "[tfi]")
 
 		for(uint32_t k = 0; k < 9; ++k)
 		{
-			Eigen::VectorXcd grad1 = *variables1[k].grad();
-			Eigen::VectorXcd grad2 = *variables1[k].grad();
+			const Eigen::VectorXcd grad1 = *variables1[k].grad();
+			const Eigen::VectorXcd grad2 = *variables1[k].grad();
 			REQUIRE((grad1 - grad2).norm() < 1e-6);
 		}
 

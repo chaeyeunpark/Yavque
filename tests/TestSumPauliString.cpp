@@ -69,25 +69,26 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]")
 {
 	using namespace yavque;
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	std::default_random_engine re{1557U};
 
+	// NOLINTNEXTLINE(misc-const-correctness)
 	std::uniform_int_distribution<uint32_t> uid(0, 2);
 	const uint32_t N = 12;
 
 	std::vector<uint32_t> sites;
 	sites.reserve(N);
 
-	char pauli_names[3] = {'X', 'Y', 'Z'};
+	const std::array<char, 3> pauli_names = {'X', 'Y', 'Z'};
 
-	for(uint32_t k = 0; k < N; ++k)
+	for(uint32_t k = 0; k < N; ++k) {
 		sites.push_back(k);
+	}
 
 	for(uint32_t str_len = 2; str_len < 5; ++str_len)
 	{
 		for(uint32_t k = 0; k < 100; ++k) // instance
 		{
-			std::random_shuffle(sites.begin(), sites.end());
+			std::shuffle(sites.begin(), sites.end(), re);
 			std::vector<uint32_t> indices(sites.begin(), sites.begin() + str_len);
 			std::string pstr;
 			for(uint32_t m = 0; m < str_len; ++m)
@@ -95,14 +96,14 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]")
 				pstr.push_back(pauli_names[uid(re)]);
 			}
 
-			Eigen::VectorXcd input = Eigen::VectorXcd::Random(1u << N);
+			Eigen::VectorXcd input = Eigen::VectorXcd::Random(1U << N);
 			input.normalize();
 
 			Eigen::VectorXcd res = input;
 
 			auto cps = detail::CompressedPauliString(pstr);
 
-			Eigen::VectorXcd res1
+			const Eigen::VectorXcd res1
 				= cps.apply(indices, res); // apply pstr[0] to 0 and pstr[1] to 1
 			for(uint32_t k = 0; k < str_len; ++k)
 			{
@@ -118,6 +119,10 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]")
 				case 'Z':
 					res = apply_single_qubit(res, Eigen::MatrixXd(pauli_z()), indices[k]);
 					break;
+				default:
+					// this should not be reached
+					__builtin_unreachable();
+					break;
 				}
 			}
 
@@ -129,14 +134,15 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]")
 {
 	using namespace yavque;
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	std::mt19937_64 re{1557U};
 
 	const uint32_t N = 10;
 	const uint32_t n_terms = 5;
 
+	// NOLINTBEGIN(misc-const-correctness)
 	std::uniform_int_distribution<uint32_t> uid(0, 2);
 	std::uniform_int_distribution<uint32_t> string_len_dist(2, N - 1);
+	// NOLINTEND(misc-const-correctness)
 
 	std::vector<uint32_t> sites;
 	sites.reserve(N);
@@ -146,8 +152,9 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]")
 		return Pauli('X' + uid(re));
 	};
 
-	for(uint32_t k = 0; k < N; ++k)
+	for(uint32_t k = 0; k < N; ++k) {
 		sites.push_back(k);
+	}
 
 	for(uint32_t instance = 0; instance < 100; ++instance)
 	{
@@ -158,7 +165,7 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]")
 
 		for(uint32_t k = 0; k < n_terms; ++k)
 		{
-			uint32_t string_len = string_len_dist(re);
+			const uint32_t string_len = string_len_dist(re);
 			std::shuffle(begin(sites), end(sites), re);
 			std::vector<uint32_t> indices(sites.begin(), sites.begin() + string_len);
 
@@ -177,11 +184,11 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]")
 			sps += pstr;
 		}
 
-		Eigen::VectorXcd input = Eigen::VectorXcd::Random(1u << N);
+		Eigen::VectorXcd input = Eigen::VectorXcd::Random(1U << N);
 		input.normalize();
 
-		Eigen::VectorXcd res1 = sps.apply_right(input);
-		Eigen::VectorXcd res2 = Eigen::VectorXcd::Zero(1u << N);
+		const Eigen::VectorXcd res1 = sps.apply_right(input);
+		Eigen::VectorXcd res2 = Eigen::VectorXcd::Zero(1U << N);
 
 		for(uint32_t k = 0; k < n_terms; ++k)
 		{

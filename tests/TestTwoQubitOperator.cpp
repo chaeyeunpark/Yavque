@@ -22,10 +22,9 @@ TEST_CASE("test two qubit operator", "[two-qubit-operator]")
 {
 	using namespace yavque;
 	constexpr uint32_t N = 3;
-	constexpr uint32_t dim = 1u << N;
-	constexpr cx_double I(0, 1.0);
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	constexpr uint32_t dim = 1U << N;
+
+	std::mt19937_64 re{1557U};
 	std::uniform_int_distribution<uint32_t> index_dist(0, N - 1);
 
 	// test using sparse matrix construction

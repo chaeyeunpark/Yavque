@@ -22,7 +22,8 @@ void test_single_qubit(const uint32_t N, const Eigen::SparseMatrix<double>& m,
 	using std::sqrt;
 
 	constexpr yavque::cx_double I(0., 1.);
-	std::normal_distribution<> nd;
+	// NOLINTNEXTLINE(misc-const-correctness)
+	std::normal_distribution<double> nd{};
 
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
 	for(uint32_t i = 0; i < N; i++)
@@ -31,20 +32,20 @@ void test_single_qubit(const uint32_t N, const Eigen::SparseMatrix<double>& m,
 	}
 
 	auto ham
-		= yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
+		= yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 	auto hamEvol = yavque::HamEvol(ham);
 	auto var = hamEvol.get_variable();
 
 	for(int i = 0; i < 100; i++)
 	{
-		VectorXcd ini = VectorXcd::Random(1 << N);
+		VectorXcd ini = VectorXcd::Random(1U << N);
 		ini.normalize();
-		double t = nd(re);
+		const double t = nd(re);
 		var = t;
-		VectorXcd out_test = hamEvol * ini;
+		const VectorXcd out_test = hamEvol * ini;
 
-		MatrixXcd mevol = (cos(t) * MatrixXcd::Identity(2, 2) - I * sin(t) * m);
-		VectorXcd out = apply_kronecker(N, mevol, ini);
+		const MatrixXcd mevol = (cos(t) * MatrixXcd::Identity(2, 2) - I * sin(t) * m);
+		const VectorXcd out = apply_kronecker(N, mevol, ini);
 
 		REQUIRE((out - out_test).norm() < 1e-6);
 	}
@@ -52,15 +53,15 @@ void test_single_qubit(const uint32_t N, const Eigen::SparseMatrix<double>& m,
 	hamEvol.dagger_in_place();
 	for(int i = 0; i < 100; i++)
 	{
-		VectorXcd ini = VectorXcd::Random(1 << N);
+		VectorXcd ini = VectorXcd::Random(1U << N);
 		ini.normalize();
 
-		double t = nd(re);
+		const double t = nd(re);
 		var = t;
-		VectorXcd out_test = hamEvol * ini;
+		const VectorXcd out_test = hamEvol * ini;
 
-		MatrixXcd mevol = (cos(t) * MatrixXcd::Identity(2, 2) + I * sin(t) * m);
-		VectorXcd out = apply_kronecker(N, mevol, ini);
+		const MatrixXcd mevol = (cos(t) * MatrixXcd::Identity(2, 2) + I * sin(t) * m);
+		const VectorXcd out = apply_kronecker(N, mevol, ini);
 
 		REQUIRE((out - out_test).norm() < 1e-6);
 	}
@@ -71,8 +72,7 @@ TEST_CASE("test single qubit Hamiltonian", "[one-site]")
 	constexpr uint32_t N = 8; // number of qubits
 
 	// ini is |+>^N
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	std::mt19937_64 re{1557U};
 
 	SECTION("test using pauli X")
 	{
@@ -96,14 +96,8 @@ TEST_CASE("Test basic operations", "[basic]")
 	constexpr uint32_t N = 8; // number of qubits
 
 	// ini is |+>^N
-	VectorXcd ini = VectorXcd::Ones(1 << N);
-	ini /= sqrt(1 << N);
-
-	std::random_device rd;
-	std::default_random_engine re{rd()};
-	std::normal_distribution<> nd;
-
-	constexpr yavque::cx_double I(0., 1.);
+	VectorXcd ini = VectorXcd::Ones(1U << N);
+	ini /= sqrt(1U << N);
 
 	edp::LocalHamiltonian<double> ham_ct(N, 2);
 	for(uint32_t i = 0; i < N; i++)
@@ -112,7 +106,7 @@ TEST_CASE("Test basic operations", "[basic]")
 	}
 
 	auto ham
-		= yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
+		= yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 	auto hamEvol = HamEvol(ham);
 
 	auto copied = hamEvol.clone();
@@ -134,32 +128,33 @@ TEST_CASE("Test gradient", "[log-deriv]")
 	using std::sqrt;
 	constexpr uint32_t N = 8; // number of qubits
 
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	std::mt19937_64 re{1557U};
 
 	std::vector<Eigen::SparseMatrix<double>> pauli_ops
 		= {yavque::pauli_xx(), yavque::pauli_yy(), yavque::pauli_zz()};
 
-	std::uniform_int_distribution<> uid(0, 2);
-	std::normal_distribution<> nd;
+	// NOLINTBEGIN(misc-const-correctness)
+	std::uniform_int_distribution<int> uid(0, 2);
+	std::normal_distribution<double> nd;
+	// NOLINTEND(misc-const-correctness)
 
 	for(uint32_t k = 0; k < 100; ++k) // instances
 	{
 		// ini is random
-		VectorXcd ini = VectorXcd::Random(1 << N);
+		VectorXcd ini = VectorXcd::Random(1U << N);
 		ini.normalize();
 
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
 		ham_ct.addTwoSiteTerm(random_connection(N, re), pauli_ops[uid(re)]);
 
 		auto ham = yavque::Hamiltonian(
-			edp::constructSparseMat<yavque::cx_double>(1 << N, ham_ct));
+			edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 		auto hamEvol = HamEvol(ham);
 
-		double val = nd(re);
+		const double val = nd(re);
 
 		hamEvol.set_variable_value(val);
-		Eigen::VectorXcd grad1
+		const Eigen::VectorXcd grad1
 			= hamEvol.log_deriv()->apply_right(hamEvol.apply_right(ini));
 
 		hamEvol.get_variable() += M_PI / 2;

@@ -22,8 +22,11 @@ Checks: "*,
         -cert-dcl58-cpp,
         -readability-redundant-member-init,
         -readability-convert-member-functions-to-static,
+        -cppcoreguidelines-pro-bounds-constant-array-index,
         -hicpp-member-init,
-        -cppcoreguidelines-pro-bounds-constant-array-index
+        -cert-msc32-c,
+        -cert-msc51-cpp,
+        -readability-magic-numbers
 "
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
