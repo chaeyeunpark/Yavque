@@ -131,10 +131,9 @@ TEST_CASE("test two qubit", "[tfi-twoqubit]")
 	using namespace yavque;
 	using namespace Eigen;
 
-	// NOLINTNEXTLINE(misc-const-correctness)
-	std::default_random_engine re{1557U};
+	std::mt19937_64 re{1557U};
 
-	std::normal_distribution<> ndist(0., 1.);
+	std::normal_distribution<double> ndist{};
 
 	constexpr unsigned int N = 2;
 	const double eps = 1e-6;
@@ -357,10 +356,8 @@ TEST_CASE("test tfi", "[tfi]")
 
 	constexpr unsigned int N = 8;
 
-	// NOLINTBEGIN(mist-const-correctness)
-	std::default_random_engine re{1557};
+	std::mt19937_64 re{1557U};
 	std::normal_distribution<double> nd{};
-	// NOLINTEND(mist-const-correctness)
 
 	auto circ1 = construct_diagonal_tfi(N);
 	auto variables1 = circ1.variables();

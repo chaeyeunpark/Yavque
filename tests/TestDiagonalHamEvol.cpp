@@ -19,7 +19,7 @@ TEST_CASE("test random diagonal", "[random-diagonal]")
 {
 	constexpr uint32_t N = 8;
 	constexpr yavque::cx_double I(0., 1.);
-	std::default_random_engine re{1557U};
+	std::mt19937_64 re{1557U};
 
 	// NOLINTNEXTLINE(misc-const-correctness)
 	std::normal_distribution<double> nd{};

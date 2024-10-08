@@ -33,8 +33,7 @@ TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 	constexpr uint32_t N = 10U;
 	constexpr uint32_t dim = 1U << N;
 	constexpr cx_double I(0, 1.0);
-	std::default_random_engine re{1557};
-	// NOLINTNEXTLINE(misc-const-correctness)
+	std::mt19937_64 re{1557U};
 	std::uniform_int_distribution<uint32_t> index_dist(0, N - 1);
 
 	// test using sparse matrix construction
@@ -82,7 +81,7 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 	constexpr uint32_t N = 10;
 	constexpr uint32_t dim = 1U << N;
 
-	std::default_random_engine re{1557U};
+	std::mt19937_64 re{1557U};
 	// NOLINTBEGIN(misc-const-correctness)
 	std::normal_distribution<double> ndist;
 	std::uniform_int_distribution<uint32_t> index_dist(0, N - 1);

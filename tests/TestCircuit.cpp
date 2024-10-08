@@ -58,9 +58,6 @@ template<typename RandomEngine>
 void test_twoqubit(const uint32_t N, RandomEngine& re,
                    const Eigen::SparseMatrix<double>& ham, bool odd)
 {
-	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
-	// NOLINTNEXTLINE(misc-const-correctness)
-	std::normal_distribution<double> nd{};
 	yavque::Circuit circuit1(N);
 	yavque::Circuit circuit2(N);
 
@@ -70,7 +67,6 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 		}
 		return 0U;
 	}();
-
 
 	{ // construct circuit1
 		edp::LocalHamiltonian<double> ham_ct(N, 2);
@@ -96,6 +92,8 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 		circuit2.add_op_right<yavque::HamEvol>(ham);
 	}
 
+	// NOLINTNEXTLINE(misc-const-correctness)
+	std::normal_distribution<double> nd{};
 	for(uint32_t instance_idx = 0; instance_idx < 10; ++instance_idx)
 	{
 		const double t = nd(re);
@@ -125,9 +123,7 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]")
 {
 	constexpr uint32_t N = 8; // number of qubits
 
-	std::default_random_engine re{1557U};
-	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
-	// NOLINTNEXTLINE(misc-const-correctness)
+	std::mt19937_64 re{1557U};
 	std::normal_distribution<double> nd{};
 
 	std::vector<yavque::Hamiltonian> hams;
@@ -182,10 +178,7 @@ TEST_CASE("Test QAOA XX layers", "[qaoa-layer]")
 {
 	constexpr uint32_t N = 8; // number of qubits
 
-	std::default_random_engine re{1557U};
-	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
-	// NOLINTNEXTLINE(misc-const-correctness)
-	std::normal_distribution<double> nd{};
+	std::mt19937_64 re{1557U};
 
 	SECTION("test XX even layer")
 	{
@@ -219,10 +212,7 @@ TEST_CASE("Test QAOA XX+YY layers", "[qaoa-layer]")
 {
 	constexpr uint32_t N = 8; // number of qubits
 
-	std::default_random_engine re{1557U};
-	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
-	// NOLINTNEXTLINE(misc-const-correctness)
-	std::normal_distribution<double> nd{};
+	std::mt19937_64 re{1557U};
 
 	const SparseMatrix<double> m = yavque::pauli_xx() + yavque::pauli_yy();
 	SECTION("test XX+YY even layer")

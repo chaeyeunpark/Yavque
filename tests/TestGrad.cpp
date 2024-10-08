@@ -20,7 +20,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 	using namespace yavque;
 	constexpr std::complex<double> I(0., 1.);
 
-	// NOLINTNEXTLINE(misc-const-correctness)
+	// NOLINTNEXTLINT(misc-const-correctness)
 	std::uniform_real_distribution<double> urd(-M_PI, M_PI);
 	std::vector<int> indices;
 
@@ -102,7 +102,7 @@ TEST_CASE("test grad for two-qubit paulis", "[two-qubit-pauli]")
 	const uint32_t N = 8;
 	const uint32_t depth = 20;
 
-	std::default_random_engine re{1557U};
+	std::mt19937_64 re{1557U};
 
 	// NOLINTBEGIN(misc-const-correctness)
 	std::uniform_int_distribution<int> ham_gen(0, 2);
@@ -329,10 +329,9 @@ TEST_CASE("test grad for qaoa for TFI", "[qaoa]")
 	const uint32_t N = 8U;
 	const uint32_t depth = 10U;
 
-	// NOLINTNEXTLINE(misc-const-correctness)
-	std::default_random_engine re{1557U};
+	std::mt19937_64 re{1557U};
 
-	std::uniform_real_distribution<> urd(-M_PI, M_PI);
+	std::uniform_real_distribution<double> urd(-M_PI, M_PI);
 
 	for(int k = 0; k < 10; ++k) // instance iteration
 	{

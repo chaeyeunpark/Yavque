@@ -69,7 +69,7 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]")
 {
 	using namespace yavque;
 
-	std::default_random_engine re{1557U};
+	std::mt19937_64 re{1557U};
 
 	// NOLINTNEXTLINE(misc-const-correctness)
 	std::uniform_int_distribution<uint32_t> uid(0, 2);
