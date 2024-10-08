@@ -27,8 +27,8 @@ public:
 	}
 
 	explicit SGD(const nlohmann::json& params)
-		: alpha_{params.value("alpha", DEFAULT_PARAMS[0])}, p_{params.value(
-																"p", DEFAULT_PARAMS[1])},
+		: alpha_{params.value("alpha", DEFAULT_PARAMS[0])},
+		  p_{params.value("p", DEFAULT_PARAMS[1])},
 		  min_alpha_{params.value("min_alpha", DEFAULT_PARAMS[2])}
 	{
 	}

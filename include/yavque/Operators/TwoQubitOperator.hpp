@@ -15,16 +15,15 @@ class TwoQubitOperator : public Operator
 private:
 	Eigen::MatrixXcd op_;
 
-	const uint32_t n_qubits_;
-	const uint32_t i_;
-	const uint32_t j_;
+	uint32_t i_;
+	uint32_t j_;
 
 	void dagger_in_place_impl() override { op_.adjointInPlace(); }
 
 public:
 	explicit TwoQubitOperator(const Eigen::MatrixXcd& op, uint32_t n_qubits, uint32_t i,
 	                          uint32_t j, const std::string& name = {})
-		: Operator(1u << n_qubits, name), op_{op}, n_qubits_{n_qubits}, i_{i}, j_{j}
+		: Operator(1U << n_qubits, name), op_{op}, i_{i}, j_{j}
 	{
 		if((op.rows() != 4) || (op.cols() != 4))
 		{

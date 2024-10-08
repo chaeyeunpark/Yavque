@@ -7,9 +7,9 @@ yavque::value_and_grad(const Eigen::SparseMatrix<yavque::cx_double>& op,
 	/*
 	 * We use the notation in arXiv:2009.02823
 	 * */
-	Eigen::VectorXcd psi = *circuit.output();
+	const Eigen::VectorXcd psi = *circuit.output();
 
-	double value = real(yavque::cx_double(psi.adjoint() * op * psi));
+	const double value = real(yavque::cx_double(psi.adjoint() * op * psi));
 	Circuit lambda_circuit = circuit.dagger();
 
 	lambda_circuit.set_input(op * psi);
@@ -24,8 +24,8 @@ yavque::value_and_grad(const Eigen::SparseMatrix<yavque::cx_double>& op,
 			Eigen::VectorXcd right = *circuit.state_at(idx);
 			right = diff_op->log_deriv()->apply_right(right);
 
-			Eigen::VectorXcd left = *lambda_circuit.state_at(op_size - idx);
-			double deriv = 2.0 * real(yavque::cx_double(left.adjoint() * right));
+			const Eigen::VectorXcd left = *lambda_circuit.state_at(op_size - idx);
+			const double deriv = 2.0 * real(yavque::cx_double(left.adjoint() * right));
 			derivs.emplace_back(deriv);
 		}
 	}

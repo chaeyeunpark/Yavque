@@ -1,33 +1,30 @@
-#include <memory>
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
-#include <tbb/tbb.h>
-
-#include <Eigen/Dense>
-#include <Eigen/src/Eigenvalues/ComplexEigenSolver.h>
-#include <Eigen/src/QR/HouseholderQR.h>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
-
 #include "common.hpp"
 
 #include "yavque/Circuit.hpp"
 #include "yavque/operators.hpp"
 
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <catch2/catch_all.hpp>
+#include <tbb/tbb.h>
+
+#include <Eigen/Dense>
+#include <Eigen/src/Eigenvalues/ComplexEigenSolver.h>
+#include <Eigen/src/QR/HouseholderQR.h>
+
+#include <memory>
+#include <random>
+
 using namespace Eigen;
 
-tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
-
-TEST_CASE("test single qubit operator", "[single-qubit-operator]")
+TEST_CASE("test two qubit operator", "[two-qubit-operator]")
 {
 	using namespace yavque;
 	constexpr uint32_t N = 3;
-	constexpr uint32_t dim = 1u << N;
-	constexpr cx_double I(0, 1.0);
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	constexpr uint32_t dim = 1U << N;
+
+	std::mt19937_64 re{1557U};
 	std::uniform_int_distribution<uint32_t> index_dist(0, N - 1);
 
 	// test using sparse matrix construction

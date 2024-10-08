@@ -21,7 +21,7 @@ private:
 	std::vector<std::unique_ptr<Operator>> ops_;
 
 	// States evaluated from the left
-	mutable std::vector<std::shared_ptr<const Eigen::VectorXcd>> states_from_left_ = {};
+	mutable std::vector<std::shared_ptr<const Eigen::VectorXcd>> states_from_left_;
 	mutable uint32_t states_updated_to_ = 0;
 
 	void add_op_right(std::unique_ptr<Operator> op) { ops_.emplace_back(std::move(op)); }
@@ -166,6 +166,7 @@ public:
 		return *this;
 	}
 
+	// NOLINTNEXTLINE(cppcoreguidelines-rvalue-reference-param-not-moved)
 	Circuit& operator|=(Circuit&& b)
 	{
 		using std::begin;
@@ -227,7 +228,7 @@ public:
 		std::ostringstream ss;
 		for(uint32_t d = 0; d < ops_.size(); ++d)
 		{
-			ss << "layer" << d << ": [" << ops_[d]->desc() << "]" << std::endl;
+			ss << "layer" << d << ": [" << ops_[d]->desc() << "]\n";
 		}
 		return ss.str();
 	}

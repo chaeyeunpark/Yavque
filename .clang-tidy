@@ -1,0 +1,35 @@
+---
+Checks: "*,
+        -abseil-*,
+        -altera-*,
+        -android-*,
+        -fuchsia-*,
+        -google-*,
+        -llvm-*,
+        -llvmlibc-*,
+        -modernize-use-trailing-return-type,
+        -zircon-*,
+        -readability-static-accessed-through-instance,
+        -readability-avoid-const-params-in-decls,
+        -readability-identifier-length,
+        -misc-non-private-member-variables-in-classes,
+		-cppcoreguidelines-pro-bounds-pointer-arithmetic,
+        -cppcoreguidelines-non-private-member-variables-in-classes,
+        -bugprone-easily-swappable-parameters,
+        -clang-analyzer-*,
+        -misc-include-cleaner,
+        -cppcoreguidelines-avoid-magic-numbers,
+        -cert-dcl58-cpp,
+        -readability-redundant-member-init,
+        -readability-convert-member-functions-to-static,
+        -hicpp-member-init,
+        -cppcoreguidelines-pro-bounds-constant-array-index
+"
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+FormatStyle:     none
+CheckOptions:
+  - key:     readability-magic-numbers.IgnoredFloatingPointValues
+    value:   '1.0;2.0;4.0;1e-4;1e-5;1e-6;'
+  - key:     readability-magic-numbers.IgnoredIntegerValues
+    value:   '1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;'

@@ -1,10 +1,10 @@
 #include "example_utils.hpp"
 #include "yavque.hpp"
 
-#include "Basis/Basis1D.hpp"
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
-#include "Hamiltonians/TITFIsing.hpp"
+#include <edlib/Basis/Basis1D.hpp>
+#include <edlib/EDP/ConstructSparseMat.hpp>
+#include <edlib/EDP/LocalHamiltonian.hpp>
+#include <edlib/Hamiltonians/TITFIsing.hpp>
 
 #include <nlohmann/json.hpp>
 #include <tbb/global_control.h>

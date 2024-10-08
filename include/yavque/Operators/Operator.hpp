@@ -20,6 +20,7 @@ private:
 	std::string name_;
 
 protected:
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
 	explicit Operator(uint32_t dim, const std::string& name) : dim_{dim}, name_{name}
 	{
 		static Counter name_counter;
@@ -55,8 +56,8 @@ public:
 	/**
 	 * return Op * st
 	 */
-	[[nodiscard]] virtual Eigen::VectorXcd
-	apply_right(const Eigen::VectorXcd& st) const = 0;
+	[[nodiscard]] virtual Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const
+		= 0;
 
 	void dagger_in_place() { dagger_in_place_impl(); }
 

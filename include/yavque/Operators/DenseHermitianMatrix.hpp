@@ -12,7 +12,7 @@ namespace yavque
 class DenseHermitianMatrix
 {
 private:
-	const Eigen::MatrixXcd ham_;
+	Eigen::MatrixXcd ham_;
 
 	mutable bool diagonalized_;
 	mutable Eigen::VectorXd evals_;
@@ -26,7 +26,7 @@ private:
 			return;
 		}
 
-		Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(ham_);
+		const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(ham_);
 		evals_ = es.eigenvalues();
 		evecs_ = es.eigenvectors();
 		diagonalized_ = true;
@@ -88,7 +88,7 @@ public:
 			diagonalize();
 		}
 
-		Eigen::VectorXcd v = exp(x * evals_.array());
+		const Eigen::VectorXcd v = exp(x * evals_.array());
 		return evecs_ * v.asDiagonal() * evecs_.adjoint();
 	}
 };

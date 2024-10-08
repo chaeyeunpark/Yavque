@@ -1,41 +1,39 @@
-#include <memory>
-#define CATCH_CONFIG_MAIN
-#include <catch.hpp>
-#include <tbb/tbb.h>
-
-#include <Eigen/Dense>
-#include <Eigen/src/Eigenvalues/ComplexEigenSolver.h>
-#include <Eigen/src/QR/HouseholderQR.h>
-#include <random>
-
-#include "EDP/ConstructSparseMat.hpp"
-#include "EDP/LocalHamiltonian.hpp"
-
 #include "common.hpp"
 
 #include "yavque/Circuit.hpp"
 #include "yavque/operators.hpp"
 
-tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 2);
+#include "edlib/EDP/ConstructSparseMat.hpp"
+#include "edlib/EDP/LocalHamiltonian.hpp"
+
+#include <catch2/catch_all.hpp>
+#include <tbb/tbb.h>
+
+#include <Eigen/Dense>
+#include <Eigen/src/Eigenvalues/ComplexEigenSolver.h>
+#include <Eigen/src/QR/HouseholderQR.h>
+
+#include <memory>
+#include <random>
 
 Eigen::MatrixXcd matrix_log(const Eigen::MatrixXcd& m)
 {
-	Eigen::ComplexEigenSolver<Eigen::MatrixXcd> solver(m);
-	Eigen::MatrixXcd u = solver.eigenvectors();
+	const Eigen::ComplexEigenSolver<Eigen::MatrixXcd> solver(m);
+	const Eigen::MatrixXcd& u = solver.eigenvectors();
 
 	Eigen::VectorXcd d = solver.eigenvalues();
 	d.array() = d.array().log().eval();
 	return u * d.asDiagonal() * u.adjoint();
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 {
 	using namespace yavque;
-	constexpr uint32_t N = 10;
-	constexpr uint32_t dim = 1u << N;
+	constexpr uint32_t N = 10U;
+	constexpr uint32_t dim = 1U << N;
 	constexpr cx_double I(0, 1.0);
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	std::mt19937_64 re{1557U};
 	std::uniform_int_distribution<uint32_t> index_dist(0, N - 1);
 
 	// test using sparse matrix construction
@@ -76,16 +74,18 @@ TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 	}
 }
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 {
 	using namespace yavque;
 	constexpr uint32_t N = 10;
-	constexpr uint32_t dim = 1u << N;
-	constexpr cx_double I(0, 1.0);
-	std::random_device rd;
-	std::default_random_engine re{rd()};
+	constexpr uint32_t dim = 1U << N;
+
+	std::mt19937_64 re{1557U};
+	// NOLINTBEGIN(misc-const-correctness)
 	std::normal_distribution<double> ndist;
 	std::uniform_int_distribution<uint32_t> index_dist(0, N - 1);
+	// NOLINTEND(misc-const-correctness)
 
 	SECTION("test using pauli-x")
 	{
@@ -95,11 +95,11 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			auto m = SingleQubitHamEvol(std::make_shared<DenseHermitianMatrix>(pauli_x()),
 			                            N, idx);
 
-			double val = ndist(re);
+			const double val = ndist(re);
 			m.set_variable_value(val);
 
-			auto st = random_vector(dim, re);
-			Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(m.apply_right(st));
+			const auto st = random_vector(dim, re);
+			const Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(m.apply_right(st));
 
 			// from parameter shift rule
 			m.get_variable() += M_PI / 2;
@@ -119,11 +119,11 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			auto m = SingleQubitHamEvol(std::make_shared<DenseHermitianMatrix>(pauli_y()),
 			                            N, idx);
 
-			double val = ndist(re);
+			const double val = ndist(re);
 			m.set_variable_value(val);
 
-			auto st = random_vector(dim, re);
-			Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(m.apply_right(st));
+			const auto st = random_vector(dim, re);
+			const Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(m.apply_right(st));
 
 			// from parameter shift rule
 			m.get_variable() += M_PI / 2;
@@ -143,11 +143,11 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			auto m = SingleQubitHamEvol(std::make_shared<DenseHermitianMatrix>(pauli_z()),
 			                            N, idx);
 
-			double val = ndist(re);
+			const double val = ndist(re);
 			m.set_variable_value(val);
 
-			auto st = random_vector(dim, re);
-			Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(m.apply_right(st));
+			const auto st = random_vector(dim, re);
+			const Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(m.apply_right(st));
 
 			// from parameter shift rule
 			m.get_variable() += M_PI / 2;
@@ -179,16 +179,16 @@ TEST_CASE("test derivative of single qubit ham evol", "[single-qubit-ham-evol]")
 			auto m
 				= SingleQubitHamEvol(std::make_shared<DenseHermitianMatrix>(ham), N, idx);
 
-			double val = ndist(re);
+			const double val = ndist(re);
 			m.set_variable_value(val);
 
-			auto st = random_vector(dim, re);
-			Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(m.apply_right(st));
+			const auto st = random_vector(dim, re);
+			const Eigen::VectorXcd grad1 = m.log_deriv()->apply_right(m.apply_right(st));
 
-			// calc grad from parameter shift rule
+			// Compute the gradient from the parameter shift rule
 			Eigen::VectorXcd grad2;
 			{
-				double t = coeffs.norm();
+				const double t = coeffs.norm();
 				m.get_variable() += M_PI / 2 / t;
 				grad2 = m.apply_right(st);
 				m.get_variable() = val - M_PI / 2 / t;

@@ -2,7 +2,7 @@
 #include "example_utils.hpp"
 #include "yavque.hpp"
 
-#include <EDP/ConstructSparseMat.hpp>
+#include <edlib/EDP/ConstructSparseMat.hpp>
 
 #include <filesystem>
 #include <random>
