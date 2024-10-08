@@ -20,7 +20,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 	using namespace yavque;
 	constexpr std::complex<double> I(0., 1.);
 
-	// NOLINTNEXTLINT(misc-const-correctness)
+	// NOLINTNEXTLINE(misc-const-correctness)
 	std::uniform_real_distribution<double> urd(-M_PI, M_PI);
 	std::vector<int> indices;
 
