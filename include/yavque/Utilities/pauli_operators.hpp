@@ -11,5 +11,6 @@ Eigen::SparseMatrix<cx_double> pauli_y();
 Eigen::SparseMatrix<double> pauli_z();
 Eigen::SparseMatrix<double> pauli_xx();
 Eigen::SparseMatrix<double> pauli_yy();
+Eigen::SparseMatrix<double> pauli_xx_yy();
 Eigen::SparseMatrix<double> pauli_zz();
 } // namespace yavque

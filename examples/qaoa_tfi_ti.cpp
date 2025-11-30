@@ -24,7 +24,8 @@ template<typename Basis> Eigen::SparseMatrix<double> ti_zz(Basis&& basis)
 	TITFIsing<uint32_t> tfi(basis, -1.0, 0.0);
 	return edp::constructSparseMat<double>(
 		basis.getDim(),
-		[&tfi](uint32_t n) {
+		[&tfi](uint32_t n)
+		{
 			return tfi.getCol(n);
 		}); // NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
 }
@@ -34,7 +35,8 @@ template<typename Basis> Eigen::SparseMatrix<double> ti_x_all(Basis&& basis)
 	TITFIsing<uint32_t> tfi(basis, 0.0, -1.0);
 	return edp::constructSparseMat<double>(
 		basis.getDim(),
-		[&tfi](uint32_t n) {
+		[&tfi](uint32_t n)
+		{
 			return tfi.getCol(n);
 		}); // NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
 }
@@ -44,7 +46,8 @@ template<typename Basis> Eigen::SparseMatrix<double> tfi_ham(double h, Basis&& b
 	TITFIsing<uint32_t> tfi(basis, 1.0, h);
 	return edp::constructSparseMat<double>(
 		basis.getDim(),
-		[&tfi](uint32_t n) {
+		[&tfi](uint32_t n)
+		{
 			return tfi.getCol(n);
 		}); // NOLINT(clang-analyzer-core.uninitialized.UndefReturn)
 }

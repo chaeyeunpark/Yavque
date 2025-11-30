@@ -24,7 +24,9 @@ TEST_CASE("test random ZZ", "[random-zz]")
 
 	std::vector<uint32_t> sites;
 
-	for(uint32_t k = 0; k < N; ++k) {
+	sites.reserve(N);
+	for(uint32_t k = 0; k < N; ++k)
+	{
 		sites.push_back(k);
 	}
 
@@ -91,6 +93,8 @@ single_pauli(const uint32_t N, const uint32_t idx,
 Eigen::SparseMatrix<yavque::cx_double> identity(const uint32_t N)
 {
 	std::vector<Eigen::Triplet<yavque::cx_double>> triplets;
+
+	triplets.reserve(1U << N);
 	for(uint32_t n = 0; n < (1U << N); ++n)
 	{
 		triplets.emplace_back(n, n, 1.0);

@@ -294,7 +294,8 @@ TEST_CASE("test four qubit", "[tfi-fourqubit]")
 
 			circ.clear_evaluated();
 			const Eigen::VectorXcd output = *circ.output();
-			const Eigen::VectorXcd analytic = product_fourqubit(theta1, phi1, theta2, phi2);
+			const Eigen::VectorXcd analytic
+				= product_fourqubit(theta1, phi1, theta2, phi2);
 
 			REQUIRE((output - analytic).norm() < 1e-6);
 

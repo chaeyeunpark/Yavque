@@ -61,8 +61,10 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 	yavque::Circuit circuit1(N);
 	yavque::Circuit circuit2(N);
 
-	const uint32_t offset = [odd]() {
-		if(odd) {
+	const uint32_t offset = [odd]()
+	{
+		if(odd)
+		{
 			return 1U;
 		}
 		return 0U;
@@ -101,11 +103,13 @@ void test_twoqubit(const uint32_t N, RandomEngine& re,
 		VectorXcd ini = VectorXcd::Random(1U << N);
 		ini.normalize();
 
-		for(auto& p : circuit1.variables()) {
+		for(auto& p : circuit1.variables())
+		{
 			p = t;
 		}
 
-		for(auto& p : circuit2.variables()) {
+		for(auto& p : circuit2.variables())
+		{
 			p = t;
 		}
 
@@ -136,15 +140,18 @@ TEST_CASE("Random XYZ circuit", "[random-circuit]")
 		{
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_xx());
-			hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
+			hams.emplace_back(
+				edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_yy());
-			hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
+			hams.emplace_back(
+				edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 
 			ham_ct.clearTerms();
 			ham_ct.addTwoSiteTerm({i, j}, yavque::pauli_zz());
-			hams.emplace_back(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
+			hams.emplace_back(
+				edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 		}
 	}
 

@@ -8,16 +8,14 @@
 #include <catch2/catch_all.hpp>
 #include <tbb/tbb.h>
 
+#include <cstdlib>
 #include <random>
 #include <sstream>
-#include <cstdlib>
 
 Eigen::Matrix2cd hadamard()
 {
-	return Eigen::Matrix2cd{
-		{1.0 / std::numbers::sqrt2, 1.0 / std::numbers::sqrt2},
-		{1.0 / std::numbers::sqrt2, -1.0 / std::numbers::sqrt2}
-	};
+	return Eigen::Matrix2cd{{1.0 / std::numbers::sqrt2, 1.0 / std::numbers::sqrt2},
+	                        {1.0 / std::numbers::sqrt2, -1.0 / std::numbers::sqrt2}};
 }
 
 Eigen::Matrix4cd cnot()
@@ -34,15 +32,6 @@ Eigen::Matrix4cd cnot()
 	return m;
 }
 
-enum class Gate: uint8_t
-{
-	RotX = 0,
-	RotY = 1,
-	RotZ = 2, // rotations e^{-I \theta \sigma}
-	Hadamard = 3,
-	CNOT = 4
-};
-
 Eigen::SparseMatrix<double> tfi_ham(uint32_t N, double h)
 {
 	edp::LocalHamiltonian<double> lh(N, 2);
@@ -54,6 +43,15 @@ Eigen::SparseMatrix<double> tfi_ham(uint32_t N, double h)
 
 	return edp::constructSparseMat<double>(1U << N, lh);
 }
+
+enum class Gate : uint8_t
+{
+	RotX = 0,
+	RotY = 1,
+	RotZ = 2, // rotations e^{-I \theta \sigma}
+	Hadamard = 3,
+	CNOT = 4
+};
 
 TEST_CASE("Test gradients using a random circuit")
 {

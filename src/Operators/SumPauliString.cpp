@@ -8,7 +8,7 @@ bool commute(const std::map<uint32_t, Pauli>& p1, const std::map<uint32_t, Pauli
 	for(auto iter : p1)
 	{
 		const uint32_t key = iter.first;
-		if(p2.find(key) != p2.end())
+		if(p2.contains(key))
 		{
 			intersection.push_back(key);
 		}

@@ -26,7 +26,10 @@ Checks: "*,
         -hicpp-member-init,
         -cert-msc32-c,
         -cert-msc51-cpp,
-        -readability-magic-numbers
+        -readability-magic-numbers,
+        -readability-math-missing-parentheses,
+        -misc-use-internal-linkage,
+        -boost-*
 "
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'
