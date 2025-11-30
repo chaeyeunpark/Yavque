@@ -24,6 +24,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 	std::uniform_real_distribution<double> urd(-M_PI, M_PI);
 	std::vector<int> indices;
 
+	indices.reserve(N);
 	for(uint32_t n = 0; n < N; n++)
 	{
 		indices.push_back(static_cast<int>(n));
@@ -66,7 +67,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 
 		for(uint32_t n = 0; n < depth; ++n)
 		{
-			const Eigen::VectorXcd der1 = -I*hams[n].apply_right(circ_output);
+			const Eigen::VectorXcd der1 = -I * hams[n].apply_right(circ_output);
 			const Eigen::VectorXcd der2 = *variables[n].grad();
 
 			REQUIRE((der1 - der2).norm() < 1e-6);
@@ -212,17 +213,20 @@ qaoa_shared_var(const uint32_t N, const uint32_t depth)
 
 	for(uint32_t p = 0; p < depth; ++p)
 	{
-		for(uint32_t i = 0; i < N; i += 2) {
+		for(uint32_t i = 0; i < N; i += 2)
+		{
 			// add zz even
 			circ.add_op_right<yavque::HamEvol>(ham_zzs[i], variables[3UL * p]);
 		}
 
-		for(uint32_t i = 1; i < N; i += 2) {
+		for(uint32_t i = 1; i < N; i += 2)
+		{
 			// add zz odd
 			circ.add_op_right<yavque::HamEvol>(ham_zzs[i], variables[3UL * p + 1U]);
 		}
 
-		for(uint32_t i = 0; i < N; ++i) {
+		for(uint32_t i = 0; i < N; ++i)
+		{
 			circ.add_op_right<yavque::HamEvol>(ham_xs[i], variables[3UL * p + 2U]);
 		}
 	}

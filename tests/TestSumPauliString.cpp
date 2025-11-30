@@ -80,7 +80,8 @@ TEST_CASE("test CompressedPauliString", "[pauli-string]")
 
 	const std::array<char, 3> pauli_names = {'X', 'Y', 'Z'};
 
-	for(uint32_t k = 0; k < N; ++k) {
+	for(uint32_t k = 0; k < N; ++k)
+	{
 		sites.push_back(k);
 	}
 
@@ -152,7 +153,8 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]")
 		return Pauli('X' + uid(re));
 	};
 
-	for(uint32_t k = 0; k < N; ++k) {
+	for(uint32_t k = 0; k < N; ++k)
+	{
 		sites.push_back(k);
 	}
 
@@ -170,16 +172,15 @@ TEST_CASE("test SumPauliString", "[sum-pauli-string]")
 			std::vector<uint32_t> indices(sites.begin(), sites.begin() + string_len);
 
 			std::vector<Pauli> pstring(string_len);
-			std::generate(begin(pstring), end(pstring), gen);
+			std::ranges::generate(pstring, gen);
 
 			indices_v.push_back(indices);
 			pstring_v.push_back(pstring);
 
 			std::map<uint32_t, Pauli> pstr;
-			std::transform(indices.begin(), indices.end(), pstring.begin(),
-			               std::inserter(pstr, pstr.end()),
-			               [](const auto& aa, const auto& bb)
-			               { return std::make_pair(aa, bb); });
+			std::ranges::transform(indices, pstring, std::inserter(pstr, pstr.end()),
+			                       [](const auto& aa, const auto& bb)
+			                       { return std::make_pair(aa, bb); });
 
 			sps += pstr;
 		}

@@ -23,7 +23,8 @@ Checks: "*,
         -readability-redundant-member-init,
         -readability-convert-member-functions-to-static,
         -hicpp-member-init,
-        -cppcoreguidelines-pro-bounds-constant-array-index
+        -cppcoreguidelines-pro-bounds-constant-array-index,
+        -boost-*,
 "
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*'

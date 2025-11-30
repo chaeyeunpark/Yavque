@@ -7,6 +7,8 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/get_blas_version.cmake")
 
 ############################################################
 #                  Setup Dependencies
@@ -26,30 +28,22 @@ set_target_properties(edlib PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${e
 target_link_libraries(yavque_dependency INTERFACE EDLIB::edlib)
 
 # Load json
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
 FetchContent_MakeAvailable(json)
 target_link_libraries(yavque_dependency INTERFACE nlohmann_json::nlohmann_json)
 
 # Load eigen
 find_package(Eigen3 3.4 REQUIRED NO_MODULE)
 
-# Setup BLAS
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-	message(STATUS "Use Intel Compiler with natural mkl support")
-	target_compile_options(yavque_dependency INTERFACE "-mkl=parallel -tbb")
-	target_link_libraries(yavque_dependency INTERFACE tbb stdc++ pthread m dl)
-	target_compile_options(yavque_dependency INTERFACE "-DEIGEN_USE_MKL_ALL") # For Eigen
-else ()
-    message(STATUS "For non Intel compiler, system BLAS will be used.")
-    find_package(BLAS REQUIRED)
+# Load BLAS
+message(STATUS "Finding BLAS")
+find_package(BLAS REQUIRED)
+get_blas_version(BLAS_VERSION)
 
-    message(STATUS "Using BLAS library with ${BLAS_LIBRARIES}.\n"
-        "To use another BLAS implementation, set BLA_VENDOR variable in CMake.")
+target_link_libraries(yavque_dependency INTERFACE BLAS::BLAS)
 
-	target_link_libraries(yavque_dependency INTERFACE "${BLAS_LIBRARIES}")
-	target_link_options(yavque_dependency INTERFACE "${BLAS_LINKER_FLAGS}")
-	target_compile_options(yavque_dependency INTERFACE "-DEIGEN_USE_BLAS") # For Eigen
-endif()
+message(STATUS "Using BLAS library with ${BLAS_VERSION}."
+    "To use another BLAS implementation, set BLA_VENDOR variable in CMake.")
 
 # Build executables
 option(YAVQUE_BUILD_TESTS "Build tests" OFF)
@@ -64,7 +58,7 @@ endif()
 
 if(ENABLE_CLANG_TIDY)
     if(NOT DEFINED CLANG_TIDY_BINARY)
-        set(CLANG_TIDY_BINARY clang-tidy-18)
+        set(CLANG_TIDY_BINARY clang-tidy-20)
     endif()
     message(STATUS "Using CLANG_TIDY_BINARY=${CLANG_TIDY_BINARY}")
     set(CMAKE_CXX_CLANG_TIDY ${CLANG_TIDY_BINARY};

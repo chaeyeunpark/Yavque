@@ -97,9 +97,8 @@ namespace detail
 			{
 				const auto& pauli_string = pauli_strings_[n];
 				std::vector<uint32_t> indices;
-				std::transform(pauli_string.cbegin(), pauli_string.cend(),
-				               std::back_inserter(indices),
-				               [](const auto& p) { return p.first; });
+				std::ranges::transform(pauli_string, std::back_inserter(indices),
+				                       [](const auto& p) { return p.first; });
 				res += cps_[n]->apply(indices, vec);
 			}
 			return res;
@@ -122,9 +121,8 @@ namespace detail
 			{
 				const auto& pauli_string = pauli_strings_[n];
 				std::vector<uint32_t> indices;
-				std::transform(pauli_string.cbegin(), pauli_string.cend(),
-				               std::back_inserter(indices),
-				               [](const auto& p) { return p.first; });
+				std::ranges::transform(pauli_string, std::back_inserter(indices),
+				                       [](const auto& p) { return p.first; });
 				res = cps_[n]->apply_exp(t, indices, res);
 			}
 			return res;

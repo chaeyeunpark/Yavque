@@ -31,8 +31,8 @@ apply_kronecker(uint32_t N, const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynami
 template<typename RandomEngine>
 std::pair<uint32_t, uint32_t> random_connection(const int N, RandomEngine& re)
 {
-	// Somehow clang-tidy wants random distributions to be const, which is impossible since operator() of those
-	// structures is non-const. Ignore them until fixed.
+	// Somehow clang-tidy wants random distributions to be const, which is impossible
+	// since operator() of those structures is non-const. Ignore them until fixed.
 	// NOLINTBEGIN(misc-const-correctness)
 	std::uniform_int_distribution<uint32_t> uid1(0, N - 1);
 	std::uniform_int_distribution<uint32_t> uid2(0, N - 2);
@@ -41,7 +41,8 @@ std::pair<uint32_t, uint32_t> random_connection(const int N, RandomEngine& re)
 	auto r1 = uid1(re);
 	auto r2 = uid2(re);
 
-	if(r2 < r1) {
+	if(r2 < r1)
+	{
 		return std::make_pair(r1, r2);
 	}
 	return std::make_pair(r1, r2 + 1);

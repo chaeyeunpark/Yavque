@@ -5,9 +5,9 @@ FILE_ARR=( $("${PROJECT_SOURCE_DIR}/bin/cpp_files.py" --include-examples --inclu
 
 if [[ "$1" == "--check" ]]; then
 	echo "Check format"
-	clang-format-18 --dry-run -Werror -i ${FILE_ARR[@]/%/}
+	clang-format-20 --dry-run -Werror -i ${FILE_ARR[@]/%/}
 	exit $?
 else
 	echo "Formatiing ${FILE_ARR[@]}"
-	clang-format-18 -i ${FILE_ARR[@]/%/}
+	clang-format-20 -i ${FILE_ARR[@]/%/}
 fi

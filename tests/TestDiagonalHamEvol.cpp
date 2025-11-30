@@ -24,7 +24,8 @@ TEST_CASE("test random diagonal", "[random-diagonal]")
 	// NOLINTNEXTLINE(misc-const-correctness)
 	std::normal_distribution<double> nd{};
 
-	Eigen::VectorXd ham = Eigen::VectorXd::Random(1U << N); // we need a seperate function for generating this
+	Eigen::VectorXd ham = Eigen::VectorXd::Random(
+		1U << N); // we need a seperate function for generating this
 	const yavque::DiagonalOperator diag_op(ham);
 	yavque::DiagonalHamEvol diag_ham_evol(diag_op);
 

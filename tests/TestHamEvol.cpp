@@ -31,8 +31,8 @@ void test_single_qubit(const uint32_t N, const Eigen::SparseMatrix<double>& m,
 		ham_ct.addOneSiteTerm(i, m);
 	}
 
-	auto ham
-		= yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
+	auto ham = yavque::Hamiltonian(
+		edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 	auto hamEvol = yavque::HamEvol(ham);
 	auto var = hamEvol.get_variable();
 
@@ -105,8 +105,8 @@ TEST_CASE("Test basic operations", "[basic]")
 		ham_ct.addOneSiteTerm(i, yavque::pauli_x());
 	}
 
-	auto ham
-		= yavque::Hamiltonian(edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
+	auto ham = yavque::Hamiltonian(
+		edp::constructSparseMat<yavque::cx_double>(1U << N, ham_ct));
 	auto hamEvol = HamEvol(ham);
 
 	auto copied = hamEvol.clone();
