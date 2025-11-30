@@ -13,22 +13,27 @@ namespace detail
 		Eigen::SparseMatrix<cx_double> ham_;
 
 		mutable bool diagonalized_;
+		mutable tbb::mutex diagonalize_mutex_;
 		mutable Eigen::VectorXd evals_{};
 		mutable Eigen::MatrixXcd evecs_{};
 
 		void diagonalize() const
 		{
-			// add mutex
-			if(diagonalized_)
+			if(!diagonalized_)
 			{
-				return;
+				diagonalize_mutex_.lock();
+				if(diagonalized_) {
+					diagonalize_mutex_.unlock();
+					return;
+				}
+				const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(
+					Eigen::MatrixXcd{ham_});
+				evals_ = es.eigenvalues();
+				evecs_ = es.eigenvectors();
+				diagonalized_ = true;
+				diagonalize_mutex_.unlock();
 			}
 
-			const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(
-				Eigen::MatrixXcd{ham_});
-			evals_ = es.eigenvalues();
-			evecs_ = es.eigenvectors();
-			diagonalized_ = true;
 		}
 
 	public:
