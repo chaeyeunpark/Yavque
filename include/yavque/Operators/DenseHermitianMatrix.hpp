@@ -1,10 +1,12 @@
 #pragma once
 
+#include "../utils.hpp"
+#include "Operator.hpp"
+
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
-#include "../utils.hpp"
-#include "Operator.hpp"
+#include <tbb/mutex.h>
 
 namespace yavque
 {
@@ -15,21 +17,25 @@ private:
 	Eigen::MatrixXcd ham_;
 
 	mutable bool diagonalized_;
+	mutable tbb::mutex diagonalize_mutex_;
 	mutable Eigen::VectorXd evals_;
 	mutable Eigen::MatrixXcd evecs_;
 
 	void diagonalize() const
 	{
-		// Add mutex (future)
-		if(diagonalized_)
+		if(!diagonalized_)
 		{
-			return;
+			diagonalize_mutex_.lock();
+			if(diagonalized_) {
+				diagonalize_mutex_.unlock();
+				return;
+			}
+			const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(ham_);
+			evals_ = es.eigenvalues();
+			evecs_ = es.eigenvectors();
+			diagonalized_ = true;
+			diagonalize_mutex_.unlock();
 		}
-
-		const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(ham_);
-		evals_ = es.eigenvalues();
-		evecs_ = es.eigenvectors();
-		diagonalized_ = true;
 	}
 
 public:

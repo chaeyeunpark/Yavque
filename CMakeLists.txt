@@ -28,7 +28,11 @@ set_target_properties(edlib PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${e
 target_link_libraries(yavque_dependency INTERFACE EDLIB::edlib)
 
 # Load json
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+FetchContent_Declare(
+    json
+    URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+    DOWNLOAD_EXTRACT_TIMESTAMP 1
+)
 FetchContent_MakeAvailable(json)
 target_link_libraries(yavque_dependency INTERFACE nlohmann_json::nlohmann_json)
 
