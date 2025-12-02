@@ -4,6 +4,19 @@
 
 #include "yavque/utils.hpp"
 
+template<typename T>
+struct remove_complex {
+	using type = T;
+};
+
+template<typename T>
+struct remove_complex<std::complex<T>> {
+	using type = T;	
+};
+
+template<typename T>
+using remove_complex_t = typename remove_complex<T>::type;
+
 inline Eigen::VectorXcd product_state(uint32_t n, const Eigen::VectorXcd& s)
 {
 	Eigen::VectorXcd res(1);
