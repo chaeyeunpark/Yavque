@@ -72,4 +72,13 @@ Eigen::SparseMatrix<double> pauli_zz()
 	res.makeCompressed();
 	return res;
 }
+
+Eigen::SparseMatrix<double> pauli_xx_yy_zz()
+{
+	std::vector<Eigen::Triplet<double>> t{{0, 0, 1.0}, {1,1,-1.0}, {2, 1, 2.0}, {1, 2, 2.0}, {2,2, -1.0},{3,3,1.0}};
+	Eigen::SparseMatrix<double> res(4, 4);
+	res.setFromTriplets(t.begin(), t.end());
+	return res;
+}
+
 } // namespace yavque

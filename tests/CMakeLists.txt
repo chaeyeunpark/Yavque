@@ -28,7 +28,8 @@ add_executable(runner TestBackwardGrad.cpp
                       TestSumPauliString.cpp
                       TestSumPauliStringHamEvol.cpp
                       TestTFI.cpp
-                      TestTwoQubitOperator.cpp)
+                      TestTwoQubitOperator.cpp
+                      TestPauliOperators.cpp)
 
 target_link_libraries(runner PRIVATE yavque Eigen3::Eigen Catch2::Catch2WithMain EDLIB::edlib)
 
