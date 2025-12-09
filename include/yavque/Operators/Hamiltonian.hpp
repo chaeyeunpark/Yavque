@@ -48,7 +48,7 @@ namespace detail
 		 * this function does no check the given diagonalized eigenvalues and eigenvectors
 		 * are correct.
 		 */
-		explicit HamiltonianImpl(const Eigen::SparseMatrix<cx_double>& ham, const Eigen::VectorXd& evals, const Eige::VectorXcd& eves)
+		explicit HamiltonianImpl(const Eigen::SparseMatrix<cx_double>& ham, const Eigen::VectorXd& evals, const Eigen::VectorXcd& evecs)
 			: ham_{ham}, diagonalized_{true}, evals_{evals}, evecs_{evecs} {
 		}
 
