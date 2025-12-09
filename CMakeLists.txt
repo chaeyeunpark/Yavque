@@ -45,8 +45,8 @@ find_package(BLAS REQUIRED)
 get_blas_version(BLAS_VERSION)
 
 if(BLAS_VERSION MATCHES "MKL")
-    message(STATUS "Use MKL. Set EIGEN_USE_BLAS=1 for Eigen.")
-    target_compile_options(yavque_dependency INTERFACE "-D EIGEN_USE_BLAS")
+    message(STATUS "Use MKL. Set EIGEN_USE_MKL_ALL=1 for Eigen.")
+    target_compile_options(yavque_dependency INTERFACE "-D EIGEN_USE_MKL_ALL")
 endif()
 
 target_link_libraries(yavque_dependency INTERFACE BLAS::BLAS)
