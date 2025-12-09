@@ -43,6 +43,15 @@ namespace detail
 			diagonalized_ = false;
 		}
 
+		/*
+		 * Create HamiltonianImpl from the diagonalized Hamiltonians. Be aware that 
+		 * this function does no check the given diagonalized eigenvalues and eigenvectors
+		 * are correct.
+		 */
+		explicit HamiltonianImpl(const Eigen::SparseMatrix<cx_double>& ham, const Eigen::VectorXd& evals, const Eige::VectorXcd& eves)
+			: ham_{ham}, diagonalized_{true}, evals_{evals}, evecs_{evecs} {
+		}
+
 		[[nodiscard]] const Eigen::SparseMatrix<cx_double>& get_ham() const&
 		{
 			return ham_;
