@@ -15,6 +15,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/get_blas_version.cmake")
 ############################################################
 add_library(yavque_dependency INTERFACE)
 
+set(EDLIB_ENABLE_ARPACK_SOLVER OFF)
 # Load edlib
 include(FetchContent)
 FetchContent_Declare(
@@ -47,6 +48,9 @@ get_blas_version(BLAS_VERSION)
 if(BLAS_VERSION MATCHES "MKL")
     message(STATUS "Use MKL. Set EIGEN_USE_MKL_ALL=1 for Eigen.")
     target_compile_options(yavque_dependency INTERFACE "-D EIGEN_USE_MKL_ALL")
+else()
+    message(STATUS "Use BLAS=${BLAS_VERSION}. Set EIGEN_USE_BLAS=1 for Eigen.")
+    target_compile_options(yavque_dependency INTERFACE "-D EIGEN_USE_BLAS")
 endif()
 
 target_link_libraries(yavque_dependency INTERFACE BLAS::BLAS)

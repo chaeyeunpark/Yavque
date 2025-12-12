@@ -21,29 +21,28 @@ private:
 	mutable Eigen::VectorXd evals_;
 	mutable Eigen::MatrixXcd evecs_;
 
-	void diagonalize() const
-	{
-		if(!diagonalized_)
-		{
-			diagonalize_mutex_.lock();
-			if(diagonalized_) {
-				diagonalize_mutex_.unlock();
-				return;
-			}
-			const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(ham_);
-			evals_ = es.eigenvalues();
-			evecs_ = es.eigenvectors();
-			diagonalized_ = true;
-			diagonalize_mutex_.unlock();
-		}
-	}
-
 public:
 	explicit DenseHermitianMatrix(Eigen::MatrixXcd ham) : ham_{std::move(ham)}
 	{
 		assert(ham_.rows() == ham_.cols()); // check diagonal
 		diagonalized_ = false;
 	}
+
+	void diagonalize() const
+	{
+		if(!diagonalized_)
+		{
+			tbb::mutex::scoped_lock lock(diagonalize_mutex_);
+			if(diagonalized_) {
+				return;
+			}
+			const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(ham_);
+			evals_ = es.eigenvalues();
+			evecs_ = es.eigenvectors();
+			diagonalized_ = true;
+		}
+	}
+
 
 	[[nodiscard]] uint32_t dim() const { return ham_.rows(); }
 
