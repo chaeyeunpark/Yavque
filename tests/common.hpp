@@ -1,8 +1,10 @@
 #pragma once
+#include "yavque/utils.hpp"
+
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
 
-#include "yavque/utils.hpp"
+#include <random>
 
 template<typename T>
 struct remove_complex {

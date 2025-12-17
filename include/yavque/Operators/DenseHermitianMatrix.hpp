@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 
-#include <tbb/mutex.h>
+#include <omp.h>
 
 namespace yavque
 {
@@ -17,7 +17,7 @@ private:
 	Eigen::MatrixXcd ham_;
 
 	mutable bool diagonalized_;
-	mutable tbb::mutex diagonalize_mutex_;
+	mutable omp_lock_t diagonalize_mutex_;
 	mutable Eigen::VectorXd evals_;
 	mutable Eigen::MatrixXcd evecs_;
 
@@ -25,14 +25,20 @@ public:
 	explicit DenseHermitianMatrix(Eigen::MatrixXcd ham) : ham_{std::move(ham)}
 	{
 		assert(ham_.rows() == ham_.cols()); // check diagonal
+		omp_init_lock(&diagonalize_mutex_);
 		diagonalized_ = false;
+	}
+
+	~DenseHermitianMatrix() {
+		omp_destroy_lock(&diagonalize_mutex_);
 	}
 
 	void diagonalize() const
 	{
+		omp_set_lock(&diagonalize_mutex_);
 		if(!diagonalized_)
 		{
-			tbb::mutex::scoped_lock lock(diagonalize_mutex_);
+			omp_unset_lock(&diagonalize_mutex_);
 			if(diagonalized_) {
 				return;
 			}
@@ -40,6 +46,7 @@ public:
 			evals_ = es.eigenvalues();
 			evecs_ = es.eigenvectors();
 			diagonalized_ = true;
+			omp_unset_lock(&diagonalize_mutex_);
 		}
 	}
 

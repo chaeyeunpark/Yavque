@@ -3,8 +3,8 @@
 #include "yavque/Operators/SumLocalHamEvol.hpp"
 #include "yavque/utils.hpp"
 
-#include "edlib/EDP/ConstructSparseMat.hpp"
-#include "edlib/EDP/LocalHamiltonian.hpp"
+#include "yavque/EDP/ConstructSparseMat.hpp"
+#include "yavque/EDP/LocalHamiltonian.hpp"
 
 #include <Eigen/Dense>
 #include <catch2/catch_all.hpp>

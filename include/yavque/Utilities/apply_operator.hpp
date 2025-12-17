@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <Eigen/Dense>
-#include <tbb/tbb.h>
 
 namespace yavque
 {
@@ -33,17 +32,14 @@ apply_single_qubit(const Eigen::VectorXcd& vec,
 
 	if(vec.size() > MIN_PARALLEL_DIM)
 	{
-		tbb::parallel_for(tbb::blocked_range<std::size_t>(0, vec.size()),
-		                  [&](const tbb::blocked_range<std::size_t>& r)
-		                  {
-							  for(uint32_t n = r.begin(); n != r.end(); ++n)
-							  {
-								  const uint32_t k = (n >> pos) & 1U;
-								  const uint32_t i0 = n & (~(1U << pos));
-								  const uint32_t i1 = n | (1U << pos);
-								  res(n) = m(k, 0) * vec(i0) + m(k, 1) * vec(i1);
-							  }
-						  });
+#pragma omp parallel for schedule(static, 8)
+		  for(uint32_t n = 0; n != vec.size(); ++n)
+		  {
+			  const uint32_t k = (n >> pos) & 1U;
+			  const uint32_t i0 = n & (~(1U << pos));
+			  const uint32_t i1 = n | (1U << pos);
+			  res(n) = m(k, 0) * vec(i0) + m(k, 1) * vec(i1);
+		  }
 	}
 	else
 	{
@@ -69,22 +65,17 @@ apply_two_qubit(const Eigen::VectorXcd& vec,
 	Eigen::VectorXcd res(vec.size());
 	if(vec.size() > MIN_PARALLEL_DIM)
 	{
-		tbb::parallel_for(
-			tbb::blocked_range<std::size_t>(0, vec.size()),
-			[&](const tbb::blocked_range<std::size_t>& r)
-			{
-				for(uint32_t n = r.begin(); n != r.end(); ++n)
-				{
-					const uint32_t k
-						= (((n >> pos[1]) & 1U) << 1U) | ((n >> pos[0]) & 1U);
-					const uint32_t i0 = unset(unset(n, pos[0]), pos[1]); // 0b00
-					const uint32_t i1 = unset(set(n, pos[0]), pos[1]); // 0b01
-					const uint32_t i2 = set(unset(n, pos[0]), pos[1]); // 0b10
-					const uint32_t i3 = set(set(n, pos[0]), pos[1]); // 0b11
-					res(n) = m(k, 0b00) * vec(i0) + m(k, 0b01) * vec(i1)
-				             + m(k, 0b10) * vec(i2) + m(k, 0b11) * vec(i3);
-				}
-			});
+#pragma omp parallel for schedule(static, 8)
+		for(uint32_t n = 0; n != vec.size(); ++n)
+		{
+			const uint32_t k = (((n >> pos[1]) & 1U) << 1U) | ((n >> pos[0]) & 1U);
+			const uint32_t i0 = unset(unset(n, pos[0]), pos[1]); // 0b00
+			const uint32_t i1 = unset(set(n, pos[0]), pos[1]); // 0b01
+			const uint32_t i2 = set(unset(n, pos[0]), pos[1]); // 0b10
+			const uint32_t i3 = set(set(n, pos[0]), pos[1]); // 0b11
+			res(n) = m(k, 0b00) * vec(i0) + m(k, 0b01) * vec(i1)
+					 + m(k, 0b10) * vec(i2) + m(k, 0b11) * vec(i3);
+		}
 	}
 	else
 	{
@@ -114,39 +105,35 @@ apply_three_qubit(const Eigen::VectorXcd& vec,
 
 	if(vec.size() > MIN_PARALLEL_DIM)
 	{
-		tbb::parallel_for(
-			tbb::blocked_range<std::size_t>(0, vec.size()),
-			[&](const tbb::blocked_range<std::size_t>& r)
-			{
-				for(uint32_t n = r.begin(); n != r.end(); ++n)
-				{
-					const uint32_t k = (((n >> pos[2]) & 1U) << 2U)
-				                       | (((n >> pos[1]) & 1U) << 1U)
-				                       | ((n >> pos[0]) & 1U);
-					const uint32_t i0
-						= unset(unset(unset(n, pos[0]), pos[1]), pos[2]); // 0b000
-					const uint32_t i1
-						= unset(unset(set(n, pos[0]), pos[1]), pos[2]); // 0b001
-					const uint32_t i2
-						= unset(set(unset(n, pos[0]), pos[1]), pos[2]); // 0b010
-					const uint32_t i3
-						= unset(set(set(n, pos[0]), pos[1]), pos[2]); // 0b011
-					const uint32_t i4
-						= set(unset(unset(n, pos[0]), pos[1]), pos[2]); // 0b100
-					const uint32_t i5
-						= set(unset(set(n, pos[0]), pos[1]), pos[2]); // 0b101
-					const uint32_t i6
-						= set(set(unset(n, pos[0]), pos[1]), pos[2]); // 0b110
-					const uint32_t i7 = set(set(set(n, pos[0]), pos[1]), pos[2]); // 0b111
+#pragma omp parallel for schedule(static, 8)
+		for(uint32_t n = 0; n != vec.size(); ++n)
+		{
+			const uint32_t k = (((n >> pos[2]) & 1U) << 2U)
+							   | (((n >> pos[1]) & 1U) << 1U)
+							   | ((n >> pos[0]) & 1U);
+			const uint32_t i0
+				= unset(unset(unset(n, pos[0]), pos[1]), pos[2]); // 0b000
+			const uint32_t i1
+				= unset(unset(set(n, pos[0]), pos[1]), pos[2]); // 0b001
+			const uint32_t i2
+				= unset(set(unset(n, pos[0]), pos[1]), pos[2]); // 0b010
+			const uint32_t i3
+				= unset(set(set(n, pos[0]), pos[1]), pos[2]); // 0b011
+			const uint32_t i4
+				= set(unset(unset(n, pos[0]), pos[1]), pos[2]); // 0b100
+			const uint32_t i5
+				= set(unset(set(n, pos[0]), pos[1]), pos[2]); // 0b101
+			const uint32_t i6
+				= set(set(unset(n, pos[0]), pos[1]), pos[2]); // 0b110
+			const uint32_t i7 = set(set(set(n, pos[0]), pos[1]), pos[2]); // 0b111
 
-					// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
-					res(n) = m(k, 0b000) * vec(i0) + m(k, 0b001) * vec(i1)
-				             + m(k, 0b010) * vec(i2) + m(k, 0b011) * vec(i3)
-				             + m(k, 0b100) * vec(i4) + m(k, 0b101) * vec(i5)
-				             + m(k, 0b110) * vec(i6) + m(k, 0b111) * vec(i7);
-					// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
-				}
-			});
+			// NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers)
+			res(n) = m(k, 0b000) * vec(i0) + m(k, 0b001) * vec(i1)
+					 + m(k, 0b010) * vec(i2) + m(k, 0b011) * vec(i3)
+					 + m(k, 0b100) * vec(i4) + m(k, 0b101) * vec(i5)
+					 + m(k, 0b110) * vec(i6) + m(k, 0b111) * vec(i7);
+			// NOLINTEND(cppcoreguidelines-avoid-magic-numbers)
+		}
 	}
 	else
 	{

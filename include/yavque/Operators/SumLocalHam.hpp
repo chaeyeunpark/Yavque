@@ -1,11 +1,9 @@
 #pragma once
 
-#include <edlib/EDP/ConstructSparseMat.hpp>
-#include <edlib/EDP/LocalHamiltonian.hpp>
-
-#include "Operator.hpp"
-
+#include "../EDP/ConstructSparseMat.hpp"
+#include "../EDP/LocalHamiltonian.hpp"
 #include "../utils.hpp"
+#include "Operator.hpp"
 
 namespace yavque
 {

@@ -3,6 +3,8 @@
 #include "../utils.hpp"
 #include "Operator.hpp"
 
+#include <omp.h>
+
 namespace yavque
 {
 namespace detail
@@ -13,7 +15,7 @@ namespace detail
 		Eigen::SparseMatrix<cx_double> ham_;
 
 		mutable bool diagonalized_;
-		mutable tbb::mutex diagonalize_mutex_;
+		mutable omp_lock_t diagonalize_mutex_;
 		mutable Eigen::VectorXd evals_{};
 		mutable Eigen::MatrixXcd evecs_{};
 
@@ -21,6 +23,7 @@ namespace detail
 		explicit HamiltonianImpl(const Eigen::SparseMatrix<cx_double>& ham) : ham_{ham}
 		{
 			assert(ham_.rows() == ham_.cols()); // check diagonal
+			omp_init_lock(&diagonalize_mutex_);
 			diagonalized_ = false;
 		}
 
@@ -31,14 +34,20 @@ namespace detail
 		 */
 		explicit HamiltonianImpl(const Eigen::SparseMatrix<cx_double>& ham, const Eigen::VectorXd& evals, const Eigen::MatrixXcd& evecs)
 			: ham_{ham}, diagonalized_{true}, evals_{evals}, evecs_{evecs} {
+			omp_init_lock(&diagonalize_mutex_);
+		}
+
+		~HamiltonianImpl() {
+			omp_destroy_lock(&diagonalize_mutex_);
 		}
 
 		void diagonalize() const
 		{
 			if(!diagonalized_)
 			{
-				tbb::mutex::scoped_lock lock(diagonalize_mutex_);
+				omp_set_lock(&diagonalize_mutex_);
 				if(diagonalized_) {
+					omp_unset_lock(&diagonalize_mutex_);
 					return;
 				}
 				const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(
@@ -46,6 +55,7 @@ namespace detail
 				evals_ = es.eigenvalues();
 				evecs_ = es.eigenvectors();
 				diagonalized_ = true;
+				omp_unset_lock(&diagonalize_mutex_);
 			}
 		}
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.20)
 
 project(yavque)
 
@@ -15,24 +15,17 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/get_blas_version.cmake")
 ############################################################
 add_library(yavque_dependency INTERFACE)
 
-set(EDLIB_ENABLE_ARPACK_SOLVER OFF)
+find_package(OpenMP REQUIRED)
+target_link_libraries(yavque_dependency INTERFACE OpenMP::OpenMP_CXX)
+
 # Load edlib
 include(FetchContent)
-FetchContent_Declare(
-    edlib
-    GIT_REPOSITORY https://github.com/chaeyeunpark/ExactDiagonalization.git
-    GIT_TAG        master
-)
-FetchContent_MakeAvailable(edlib)
-get_target_property(edlib_IID edlib INTERFACE_INCLUDE_DIRECTORIES)
-set_target_properties(edlib PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${edlib_IID}")
-target_link_libraries(yavque_dependency INTERFACE EDLIB::edlib)
+cmake_policy(SET CMP0135 OLD)
 
 # Load json
 FetchContent_Declare(
     json
     URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
-    DOWNLOAD_EXTRACT_TIMESTAMP 1
 )
 FetchContent_MakeAvailable(json)
 target_link_libraries(yavque_dependency INTERFACE nlohmann_json::nlohmann_json)
