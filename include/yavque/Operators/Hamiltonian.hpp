@@ -17,25 +17,6 @@ namespace detail
 		mutable Eigen::VectorXd evals_{};
 		mutable Eigen::MatrixXcd evecs_{};
 
-		void diagonalize() const
-		{
-			if(!diagonalized_)
-			{
-				diagonalize_mutex_.lock();
-				if(diagonalized_) {
-					diagonalize_mutex_.unlock();
-					return;
-				}
-				const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(
-					Eigen::MatrixXcd{ham_});
-				evals_ = es.eigenvalues();
-				evecs_ = es.eigenvectors();
-				diagonalized_ = true;
-				diagonalize_mutex_.unlock();
-			}
-
-		}
-
 	public:
 		explicit HamiltonianImpl(const Eigen::SparseMatrix<cx_double>& ham) : ham_{ham}
 		{
@@ -51,6 +32,23 @@ namespace detail
 		explicit HamiltonianImpl(const Eigen::SparseMatrix<cx_double>& ham, const Eigen::VectorXd& evals, const Eigen::MatrixXcd& evecs)
 			: ham_{ham}, diagonalized_{true}, evals_{evals}, evecs_{evecs} {
 		}
+
+		void diagonalize() const
+		{
+			if(!diagonalized_)
+			{
+				tbb::mutex::scoped_lock lock(diagonalize_mutex_);
+				if(diagonalized_) {
+					return;
+				}
+				const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> es(
+					Eigen::MatrixXcd{ham_});
+				evals_ = es.eigenvalues();
+				evecs_ = es.eigenvectors();
+				diagonalized_ = true;
+			}
+		}
+
 
 		[[nodiscard]] const Eigen::SparseMatrix<cx_double>& get_ham() const&
 		{

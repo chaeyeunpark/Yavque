@@ -15,6 +15,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/get_blas_version.cmake")
 ############################################################
 add_library(yavque_dependency INTERFACE)
 
+set(EDLIB_ENABLE_ARPACK_SOLVER OFF)
 # Load edlib
 include(FetchContent)
 FetchContent_Declare(
