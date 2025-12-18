@@ -11,6 +11,7 @@
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
 
+#include <complex>
 #include <memory>
 
 namespace yavque
@@ -54,16 +55,14 @@ public:
 
 	[[nodiscard]] std::unique_ptr<Operator> log_deriv() const override
 	{
-		constexpr std::complex<double> I(0., 1.0);
 		const std::string op_name
 			= std::string("derivative of ") + name(); // change to fmt
-		const cx_double constant = conjugate_ ? I : -I;
+		const cx_double constant = conjugate_ ? std::complex<double>(0.0, 1.0) : std::complex<double>(0.0, -1.0);
 		return std::make_unique<Hamiltonian>(ham_, op_name, constant);
 	}
 
 	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
-		constexpr std::complex<double> I(0., 1.0);
 		Eigen::VectorXcd res = ham_->evecs().adjoint() * st;
 		const double t = [&]()
 		{
@@ -73,7 +72,7 @@ public:
 			}
 			return var_.value();
 		}();
-		res.array() *= exp(-I * ham_->evals().array() * t);
+		res.array() *= exp(ham_->evals().array() * std::complex<double>{0.0, -t});
 		return ham_->evecs() * res;
 	}
 

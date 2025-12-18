@@ -21,7 +21,7 @@ void test_single_qubit(const uint32_t N, const Eigen::SparseMatrix<double>& m,
 	using std::sin;
 	using std::sqrt;
 
-	constexpr yavque::cx_double I(0., 1.);
+	constexpr yavque::cx_double imag(0., 1.);
 	// NOLINTNEXTLINE(misc-const-correctness)
 	std::normal_distribution<double> nd{};
 
@@ -44,7 +44,7 @@ void test_single_qubit(const uint32_t N, const Eigen::SparseMatrix<double>& m,
 		var = t;
 		const VectorXcd out_test = hamEvol * ini;
 
-		const MatrixXcd mevol = (cos(t) * MatrixXcd::Identity(2, 2) - I * sin(t) * m);
+		const MatrixXcd mevol = (cos(t) * MatrixXcd::Identity(2, 2) - imag * sin(t) * m);
 		const VectorXcd out = apply_kronecker(N, mevol, ini);
 
 		REQUIRE((out - out_test).norm() < 1e-6);
@@ -60,7 +60,7 @@ void test_single_qubit(const uint32_t N, const Eigen::SparseMatrix<double>& m,
 		var = t;
 		const VectorXcd out_test = hamEvol * ini;
 
-		const MatrixXcd mevol = (cos(t) * MatrixXcd::Identity(2, 2) + I * sin(t) * m);
+		const MatrixXcd mevol = (cos(t) * MatrixXcd::Identity(2, 2) + imag * sin(t) * m);
 		const VectorXcd out = apply_kronecker(N, mevol, ini);
 
 		REQUIRE((out - out_test).norm() < 1e-6);

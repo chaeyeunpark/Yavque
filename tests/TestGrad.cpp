@@ -16,7 +16,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
                     const Eigen::SparseMatrix<double>& op, RandomEngine& re)
 {
 	using namespace yavque;
-	constexpr std::complex<double> I(0., 1.);
+	constexpr std::complex<double> imag(0., 1.);
 
 	// NOLINTNEXTLINE(misc-const-correctness)
 	std::uniform_real_distribution<double> urd(-M_PI, M_PI);
@@ -65,7 +65,7 @@ void test_commuting(const uint32_t N, const uint32_t depth,
 
 		for(uint32_t n = 0; n < depth; ++n)
 		{
-			const Eigen::VectorXcd der1 = -I * hams[n].apply_right(circ_output);
+			const Eigen::VectorXcd der1 = -imag * hams[n].apply_right(circ_output);
 			const Eigen::VectorXcd der2 = *variables[n].grad();
 
 			REQUIRE((der1 - der2).norm() < 1e-6);

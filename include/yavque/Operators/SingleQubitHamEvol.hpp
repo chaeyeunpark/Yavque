@@ -55,8 +55,7 @@ public:
 
 	[[nodiscard]] std::unique_ptr<Operator> log_deriv() const override
 	{
-		constexpr std::complex<double> I(0., 1.0);
-		const cx_double constant = conjugate_ ? I : -I;
+		const cx_double constant = conjugate_ ? std::complex<double>{0.0, 1.0} : std::complex<double>{0.0, -1.0};
 
 		std::ostringstream os;
 		os << "derivative of (" << name() << ")";
@@ -66,9 +65,8 @@ public:
 
 	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
-		constexpr std::complex<double> I(0., 1.0);
 		assert(dim() == st.size());
-		cx_double x = -I * var_.value();
+		cx_double x = std::complex<double>{0.0, -var_.value()};
 		if(conjugate_)
 		{
 			x = -x;

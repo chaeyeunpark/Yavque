@@ -44,12 +44,12 @@ VectorXcd eval_using_ham(VectorXcd ini,
 {
 	assert(confs.size() == ts.size());
 
-	constexpr yavque::cx_double I(0., 1.);
+	constexpr yavque::cx_double imag(0., 1.);
 
 	for(uint32_t p = 0; p < confs.size(); ++p)
 	{
 		const double t = ts[p];
-		ini = cos(t) * ini - I * sin(t) * pauli_strs[confs[p]].apply_right(ini);
+		ini = cos(t) * ini - imag * sin(t) * pauli_strs[confs[p]].apply_right(ini);
 	}
 
 	return ini;

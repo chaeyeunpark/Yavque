@@ -52,21 +52,19 @@ public:
 
 	[[nodiscard]] std::unique_ptr<Operator> log_deriv() const override
 	{
-		constexpr std::complex<double> I(0., 1.0);
 		const std::string op_name
 			= std::string("derivative of ") + name(); // change to fmt
-		const cx_double constant = conjugate_ ? I : -I;
+		const cx_double constant = conjugate_ ? std::complex<double>{0.0, 1.0} : std::complex<double>{0.0, -1.0};
 		return std::make_unique<SumLocalHam>(ham_, op_name, constant);
 	}
 
 	[[nodiscard]] Eigen::VectorXcd apply_right(const Eigen::VectorXcd& st) const override
 	{
-		constexpr std::complex<double> I(0., 1.0);
 		Eigen::VectorXcd res = st;
 		const Eigen::MatrixXcd m = ham_->get_local_ham();
 
 		const double t = conjugate_ ? -var_.value() : var_.value();
-		const Eigen::MatrixXcd expm = ham_->local_ham_exp(-I * t);
+		const Eigen::MatrixXcd expm = ham_->local_ham_exp(std::complex<double>{0.0, -t});
 
 		for(uint32_t k = 0; k < ham_->num_qubits(); ++k)
 		{

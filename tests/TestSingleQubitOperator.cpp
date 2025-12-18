@@ -31,7 +31,7 @@ TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 	using namespace yavque;
 	constexpr uint32_t N = 10U;
 	constexpr uint32_t dim = 1U << N;
-	constexpr cx_double I(0, 1.0);
+	constexpr cx_double imag(0, 1.0);
 	std::mt19937_64 re{1557U};
 	std::uniform_int_distribution<uint32_t> index_dist(0, N - 1);
 
@@ -62,7 +62,7 @@ TEST_CASE("test single qubit operator", "[single-qubit-operator]")
 		auto m1 = SingleQubitOperator(op, N, idx);
 
 		auto m2 = SingleQubitHamEvol(
-			std::make_shared<DenseHermitianMatrix>(I * matrix_log(op)), N, idx);
+			std::make_shared<DenseHermitianMatrix>(imag * matrix_log(op)), N, idx);
 		m2.set_variable_value(1.0);
 
 		auto st = random_vector(dim, re);

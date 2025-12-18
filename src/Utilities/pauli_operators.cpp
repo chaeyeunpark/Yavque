@@ -14,8 +14,8 @@ Eigen::SparseMatrix<double> pauli_x()
 }
 Eigen::SparseMatrix<cx_double> pauli_y()
 {
-	constexpr cx_double I(0., 1.);
-	std::vector<Eigen::Triplet<cx_double>> t{{1, 0, I}, {0, 1, -I}};
+	constexpr cx_double imag(0., 1.);
+	std::vector<Eigen::Triplet<cx_double>> t{{1, 0, imag}, {0, 1, -imag}};
 	Eigen::SparseMatrix<cx_double> res(2, 2);
 	res.setFromTriplets(t.begin(), t.end());
 	return res;

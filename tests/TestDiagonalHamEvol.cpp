@@ -18,7 +18,7 @@
 TEST_CASE("test random diagonal", "[random-diagonal]")
 {
 	constexpr uint32_t N = 8;
-	constexpr yavque::cx_double I(0., 1.);
+	constexpr yavque::cx_double imag(0., 1.);
 	std::mt19937_64 re{1557U};
 
 	// NOLINTNEXTLINE(misc-const-correctness)
@@ -38,12 +38,12 @@ TEST_CASE("test random diagonal", "[random-diagonal]")
 		diag_ham_evol.set_variable_value(t);
 
 		const Eigen::VectorXcd out1 = diag_ham_evol.apply_right(vec);
-		const Eigen::VectorXcd out2 = exp(-I * ham.array() * t) * vec.array();
+		const Eigen::VectorXcd out2 = exp(-imag * ham.array() * t) * vec.array();
 
 		REQUIRE((out1 - out2).norm() < 1e-6);
 
 		const Eigen::VectorXcd grad1 = diag_ham_evol.log_deriv()->apply_right(out1);
-		const Eigen::VectorXcd grad2 = -I * ham.cwiseProduct(out1);
+		const Eigen::VectorXcd grad2 = -imag * ham.cwiseProduct(out1);
 		REQUIRE((grad1 - grad2).norm() < 1e-6);
 	}
 
@@ -57,12 +57,12 @@ TEST_CASE("test random diagonal", "[random-diagonal]")
 		diag_ham_evol.set_variable_value(t);
 
 		const Eigen::VectorXcd out1 = diag_ham_evol.apply_right(vec);
-		const Eigen::VectorXcd out2 = exp(I * ham.array() * t) * vec.array();
+		const Eigen::VectorXcd out2 = exp(ham.array() * std::complex<double>{0.0, t}) * vec.array();
 
 		REQUIRE((out1 - out2).norm() < 1e-6);
 
 		const Eigen::VectorXcd grad1 = diag_ham_evol.log_deriv()->apply_right(out1);
-		const Eigen::VectorXcd grad2 = I * ham.cwiseProduct(out1);
+		const Eigen::VectorXcd grad2 = imag * ham.cwiseProduct(out1);
 		REQUIRE((grad1 - grad2).norm() < 1e-6);
 	}
 }

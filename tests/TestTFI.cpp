@@ -77,22 +77,22 @@ auto construct_bare_tfi(const uint32_t N)
 Eigen::VectorXcd analytic_twoqubit(double theta, double phi)
 {
 	Eigen::VectorXcd res(4);
-	constexpr yavque::cx_double I(0., 1.);
+	constexpr yavque::cx_double imag(0., 1.);
 
-	res(0) = cos(2 * phi) * exp(-I * theta) - I * sin(2 * phi) * exp(I * theta);
-	res(1) = cos(2 * phi) * exp(I * theta) - I * sin(2 * phi) * exp(-I * theta);
-	res(2) = cos(2 * phi) * exp(I * theta) - I * sin(2 * phi) * exp(-I * theta);
-	res(3) = cos(2 * phi) * exp(-I * theta) - I * sin(2 * phi) * exp(I * theta);
+	res(0) = cos(2 * phi) * exp(-imag * theta) - imag * sin(2 * phi) * exp(imag * theta);
+	res(1) = cos(2 * phi) * exp(imag * theta) - imag * sin(2 * phi) * exp(-imag * theta);
+	res(2) = cos(2 * phi) * exp(imag * theta) - imag * sin(2 * phi) * exp(-imag * theta);
+	res(3) = cos(2 * phi) * exp(-imag * theta) - imag * sin(2 * phi) * exp(imag * theta);
 
 	return res / 2;
 }
 
 Eigen::MatrixXcd rot_x(double phi)
 {
-	constexpr yavque::cx_double I(0., 1.);
+	constexpr yavque::cx_double imag(0., 1.);
 	Eigen::MatrixXcd rot_x(2, 2);
 
-	rot_x << cos(phi), -I * sin(phi), -I * sin(phi), cos(phi);
+	rot_x << cos(phi), -imag * sin(phi), -imag * sin(phi), cos(phi);
 
 	return rot_x;
 }
@@ -109,7 +109,7 @@ Eigen::MatrixXcd kron_n(const Eigen::MatrixXcd& m, uint32_t n)
 
 Eigen::VectorXcd product_fourqubit(double theta1, double phi1, double theta2, double phi2)
 {
-	constexpr yavque::cx_double I(0., 1.);
+	constexpr yavque::cx_double imag(0., 1.);
 
 	Eigen::VectorXd zz(16);
 	zz << 4, 0, 0, 0, 0, -4, 0, 0, 0, 0, -4, 0, 0, 0, 0, 4;
@@ -117,9 +117,9 @@ Eigen::VectorXcd product_fourqubit(double theta1, double phi1, double theta2, do
 	Eigen::VectorXcd v = Eigen::VectorXcd::Ones(16);
 	v /= 4.0;
 
-	v.array() *= (-I * theta1 * zz.array()).exp();
+	v.array() *= (-imag * theta1 * zz.array()).exp();
 	v = kron_n(rot_x(phi1), 4) * v;
-	v.array() *= (-I * theta2 * zz.array()).exp();
+	v.array() *= (-imag * theta2 * zz.array()).exp();
 	v = kron_n(rot_x(phi2), 4) * v;
 
 	return v;

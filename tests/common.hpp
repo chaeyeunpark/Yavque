@@ -66,7 +66,6 @@ std::pair<uint32_t, uint32_t> random_connection(const int N, RandomEngine& re)
 template<typename RandomEngine>
 Eigen::MatrixXcd random_unitary(uint32_t dim, RandomEngine& re)
 {
-	constexpr yavque::cx_double I(0.0, 1.0);
 	// This cannot be const, but clang-tidy wants. Just ignore it at this moment.
 	// NOLINTNEXTLINE(misc-const-correctness)
 	std::normal_distribution<double> ndist{};
@@ -76,7 +75,7 @@ Eigen::MatrixXcd random_unitary(uint32_t dim, RandomEngine& re)
 	{
 		for(uint32_t j = 0; j < dim; ++j)
 		{
-			m(i, j) = ndist(re) + I * ndist(re);
+			m(i, j) = std::complex<double>{ndist(re), ndist(re)};
 		}
 	}
 	const Eigen::HouseholderQR<Eigen::MatrixXcd> qr(m);
@@ -86,14 +85,13 @@ Eigen::MatrixXcd random_unitary(uint32_t dim, RandomEngine& re)
 template<typename RandomEngine>
 Eigen::VectorXcd random_vector(uint32_t dim, RandomEngine& re)
 {
-	constexpr yavque::cx_double I(0.0, 1.0);
 	// NOLINTNEXTLINE(misc-const-correctness)
 	std::normal_distribution<double> ndist{};
 
 	Eigen::VectorXcd res(dim);
 	for(uint32_t k = 0; k < dim; ++k)
 	{
-		res(k) = ndist(re) + I * ndist(re);
+		res(k) = std::complex<double>{ndist(re), ndist(re)};
 	}
 	res.normalize();
 	return res;
