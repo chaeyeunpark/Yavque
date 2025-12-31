@@ -23,8 +23,8 @@ auto constructMat(size_t dim, ColFunc&& colFunc) -> Eigen::Matrix<T, Eigen::Dyna
     return res;
 }
 
-template<typename T, class ColFunc>
-auto constructSparseMat(size_t dim, ColFunc&& colFunc) -> Eigen::SparseMatrix<T>
+template<typename T, Eigen::StorageOptions storageOption = Eigen::ColMajor, class ColFunc>
+auto constructSparseMat(size_t dim, ColFunc&& colFunc) -> Eigen::SparseMatrix<T, storageOption>
 {
     using TripletT = Eigen::Triplet<T>;
     std::vector<TripletT> tripletList;
@@ -48,8 +48,8 @@ auto constructSparseMat(size_t dim, ColFunc&& colFunc) -> Eigen::SparseMatrix<T>
  *
  * @param basis Sorted container contains subspace configurations
  */
-template<typename T, typename ColFunc, typename RandomIterable>
-auto constructSubspaceMat(ColFunc&& colFunc, RandomIterable&& basis) -> Eigen::SparseMatrix<T>
+template<typename T, Eigen::StorageOptions storageOption = Eigen::ColMajor, typename ColFunc, typename RandomIterable>
+auto constructSubspaceMat(ColFunc&& colFunc, RandomIterable&& basis) -> Eigen::SparseMatrix<T, storageOption>
 {
     const size_t n = basis.size();
 
