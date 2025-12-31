@@ -167,6 +167,10 @@ public:
 		return (rhs.p_ == p_);
 	}
 
+	void diagonalize() const {
+		p_->diagonalize();
+	}
+
 	void dagger_in_place_impl() override { constant_ = std::conj(constant_); }
 };
 
