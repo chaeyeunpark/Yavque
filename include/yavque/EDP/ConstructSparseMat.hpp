@@ -38,7 +38,7 @@ auto constructSparseMat(size_t dim, ColFunc&& colFunc) -> Eigen::SparseMatrix<T,
         }
     }
 
-    Eigen::SparseMatrix<T> res(dim, dim);
+    Eigen::SparseMatrix<T, storageOption> res(dim, dim);
     res.setFromTriplets(tripletList.begin(), tripletList.end());
     return res;
 }
@@ -71,7 +71,7 @@ auto constructSubspaceMat(ColFunc&& colFunc, RandomIterable&& basis) -> Eigen::S
         }
     }
 
-    Eigen::SparseMatrix<T> res(n, n);
+    Eigen::SparseMatrix<T, storageOption> res(n, n);
     res.setFromTriplets(tripletList.begin(), tripletList.end());
     return res;
 }
